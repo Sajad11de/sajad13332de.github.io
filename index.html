@@ -444,7 +444,7 @@ function CartDrawer({ open, onClose, items, onQtyChange, onRemove }){
               <span>الإجمالي</span>
               <span>{currency(total)}</span>
             </div>
-            <button className="checkout-btn">إتمام الشراء</button>
+         <button className="checkout-btn" onClick={onCheckout}>إتمام الشراء</button>. </button>
           </div>
         )}
       </div>

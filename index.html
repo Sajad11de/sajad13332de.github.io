@@ -465,6 +465,7 @@ function App(){
   }, []);
 
   const addToCart = (product) => {
+   const sendToWhatsApp = () => { let message = 'تفاصيل السلة:\n'; object.values(cart).foreach(item => { message += item.name + ': ' + item.qty + ' × ' + item.price + '$\n'; }); window.open('https://wa.me/9647869367775?text=' + encodeuricomponent(message), '_blank'); };
     setCart(prev => {
       const existing = prev[product.id];
       const qty = existing ? existing.qty + 1 : 1;
@@ -539,6 +540,7 @@ function App(){
         onClose={() => setDrawerOpen(false)}
         items={cartItems}
         onQtyChange={changeQty}
+        onCheckout={sendToWhatsApp}.
         onRemove={(id) => changeQty(id, 0)}
       />
     </React.Fragment>

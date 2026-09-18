@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>لمسة — متجر مستحضرات العناية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Reem+Kufi:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
+<style>
+  :root{
+    --cream:#FAF5F0;
+    --cream-2:#F2E9E1;
+    --plum:#3E2634;
+    --plum-2:#5A3A4C;
+    --rose:#C98A9B;
+    --rose-dark:#B06B7E;
+    --sage:#8FA37E;
+    --ink:#2B2320;
+    --paper:#FFFFFF;
+    --line:#E7DCD2;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'Cairo',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  #root{min-height:100vh;}
+
+  .display{
+    font-family:'Reem Kufi', 'Cairo', sans-serif;
+    font-weight:400;
+  }
+
+  /* ===== NAV ===== */
+  .nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(250,245,240,0.92);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-inner{
+    max-width:1180px; margin:0 auto;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 24px;
+  }
+  .brand{
+    font-family:'Reem Kufi', sans-serif;
+    font-size:26px; color:var(--plum); letter-spacing:0.5px;
+    cursor:pointer; user-select:none;
+    display:flex; align-items:center; gap:8px;
+  }
+  .brand-dot{width:8px;height:8px;border-radius:50%;background:var(--rose);}
+  .nav-links{
+    display:flex; gap:28px; list-style:none; margin:0; padding:0;
+  }
+  .nav-links a{
+    color:var(--plum); text-decoration:none; font-size:15px; font-weight:600;
+    cursor:pointer; position:relative; padding-bottom:4px;
+    transition:color .2s ease;
+  }
+  .nav-links a:hover{color:var(--rose-dark);}
+  .nav-links a::after{
+    content:''; position:absolute; right:0; bottom:0; width:0; height:2px;
+    background:var(--rose); transition:width .25s ease;
+  }
+  .nav-links a:hover::after{width:100%;}
+  .cart-btn{
+    display:flex; align-items:center; gap:8px;
+    background:var(--plum); color:var(--cream);
+    border:none; border-radius:999px; padding:10px 18px;
+    font-family:'Cairo',sans-serif; font-weight:700; font-size:14px;
+    cursor:pointer; transition:transform .15s ease, background .2s ease;
+  }
+  .cart-btn:hover{background:var(--plum-2); transform:translateY(-1px);}
+  .cart-count{
+    background:var(--rose); color:var(--plum); border-radius:50%;
+    width:20px; height:20px; display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:800;
+  }
+  .nav-toggle{display:none; background:none; border:none; font-size:24px; color:var(--plum); cursor:pointer;}
+
+  /* ===== HERO ===== */
+  .hero{
+    max-width:1180px; margin:0 auto;
+    padding:72px 24px 56px;
+    display:grid; grid-template-columns:1.1fr 0.9fr; gap:48px; align-items:center;
+  }
+  .hero-eyebrow{
+    color:var(--rose-dark); font-weight:700; font-size:14px; margin-bottom:14px;
+  }
+  .hero h1{
+    font-family:'Reem Kufi', sans-serif; font-weight:400;
+    font-size:clamp(34px, 5vw, 56px); line-height:1.25; color:var(--plum);
+    margin:0 0 20px;
+  }
+  .hero p{
+    font-size:17px; line-height:1.9; color:#5b4d47; max-width:46ch; margin:0 0 28px;
+  }
+  .hero-actions{display:flex; gap:14px; flex-wrap:wrap;}
+  .btn-primary{
+    background:var(--rose); color:#fff; border:none; border-radius:10px;
+    padding:14px 26px; font-family:'Cairo',sans-serif; font-weight:700; font-size:15px;
+    cursor:pointer; transition:background .2s ease, transform .15s ease;
+  }
+  .btn-primary:hover{background:var(--rose-dark); transform:translateY(-1px);}
+  .btn-ghost{
+    background:transparent; color:var(--plum); border:1.5px solid var(--plum);
+    border-radius:10px; padding:14px 26px; font-family:'Cairo',sans-serif; font-weight:700; font-size:15px;
+    cursor:pointer; transition:all .2s ease;
+  }
+  .btn-ghost:hover{background:var(--plum); color:#fff;}
+  .hero-visual{
+    position:relative; height:380px; border-radius:24px;
+    background:linear-gradient(155deg, var(--cream-2) 0%, #EADFD3 55%, var(--rose) 140%);
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+  }
+  .hero-visual::before{
+    content:'✦'; position:absolute; font-size:220px; color:rgba(255,255,255,0.45);
+    font-family:serif; top:-40px; right:-30px;
+  }
+  .hero-jar{
+    width:150px; height:170px; background:var(--paper); border-radius:20px 20px 34px 34px;
+    box-shadow:0 30px 60px -20px rgba(62,38,52,0.35); position:relative; z-index:2;
+  }
+  .hero-jar::before{
+    content:''; position:absolute; top:-18px; left:50%; transform:translateX(-50%);
+    width:96px; height:26px; background:var(--sage); border-radius:10px;
+  }
+  .hero-jar::after{
+    content:'لمسة'; position:absolute; bottom:22px; left:0; right:0; text-align:center;
+    font-family:'Reem Kufi',sans-serif; color:var(--plum); font-size:20px;
+  }
+
+  /* ===== CATEGORY QUICK NAV ===== */
+  .cat-strip{
+    max-width:1180px; margin:0 auto; padding:0 24px 40px;
+    display:flex; gap:12px; flex-wrap:wrap;
+  }
+  .cat-chip{
+    border:1.5px solid var(--line); background:var(--paper); color:var(--plum);
+    padding:9px 18px; border-radius:999px; font-size:14px; font-weight:600;
+    cursor:pointer; transition:all .2s ease;
+  }
+  .cat-chip.active, .cat-chip:hover{
+    background:var(--plum); border-color:var(--plum); color:var(--cream);
+  }
+
+  /* ===== SECTIONS ===== */
+  .section{
+    max-width:1180px; margin:0 auto; padding:54px 24px;
+    border-top:1px solid var(--line);
+  }
+  .section-head{
+    display:flex; align-items:baseline; justify-content:space-between;
+    margin-bottom:30px; gap:20px; flex-wrap:wrap;
+  }
+  .section-head h2{
+    font-family:'Reem Kufi', sans-serif; font-weight:400;
+    font-size:32px; color:var(--plum); margin:0;
+    display:flex; align-items:center; gap:12px;
+  }
+  .section-tag{
+    width:10px; height:10px; border-radius:3px; display:inline-block;
+  }
+  .section-desc{color:#7a6b64; font-size:14.5px; max-width:52ch; margin:6px 0 0;}
+  .section-count{color:#a3948d; font-size:14px; font-weight:600; white-space:nowrap;}
+
+  .grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr));
+    gap:22px;
+  }
+
+  .card{
+    background:var(--paper); border-radius:16px; overflow:hidden;
+    border:1px solid var(--line);
+    display:flex; flex-direction:column;
+    transition:transform .22s ease, box-shadow .22s ease;
+  }
+  .card:hover{
+    transform:translateY(-5px);
+    box-shadow:0 18px 34px -18px rgba(62,38,52,0.3);
+  }
+  .card-media{
+    height:170px; position:relative;
+    display:flex; align-items:center; justify-content:center;
+    font-size:40px;
+  }
+  .card-body{padding:16px 16px 18px; display:flex; flex-direction:column; gap:8px; flex:1;}
+  .card-name{font-weight:700; font-size:15.5px; color:var(--plum); margin:0;}
+  .card-desc{font-size:13px; color:#8b7c74; line-height:1.6; margin:0; min-height:36px;}
+  .card-foot{
+    margin-top:auto; display:flex; align-items:center; justify-content:space-between; gap:10px;
+  }
+  .card-price{font-weight:800; color:var(--ink); font-size:15px;}
+  .add-btn{
+    border:none; background:var(--cream-2); color:var(--plum);
+    border-radius:9px; padding:9px 14px; font-weight:700; font-size:13px;
+    cursor:pointer; transition:background .2s ease, color .2s ease;
+    display:flex; align-items:center; gap:6px;
+  }
+  .add-btn:hover{background:var(--rose); color:#fff;}
+  .add-btn.added{background:var(--sage); color:#fff;}
+
+  /* ===== CART DRAWER ===== */
+  .overlay{
+    position:fixed; inset:0; background:rgba(43,35,32,0.4);
+    z-index:90; opacity:0; pointer-events:none; transition:opacity .25s ease;
+  }
+  .overlay.open{opacity:1; pointer-events:auto;}
+  .drawer{
+    position:fixed; top:0; bottom:0; left:0; width:min(380px, 92vw);
+    background:var(--cream); z-index:91;
+    transform:translateX(-100%); transition:transform .3s ease;
+    display:flex; flex-direction:column;
+    box-shadow:20px 0 50px rgba(0,0,0,0.15);
+  }
+  .drawer.open{transform:translateX(0);}
+  .drawer-head{
+    padding:22px 22px 16px; border-bottom:1px solid var(--line);
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .drawer-head h3{font-family:'Reem Kufi',sans-serif; font-weight:400; color:var(--plum); font-size:22px; margin:0;}
+  .drawer-close{background:none; border:none; font-size:22px; color:var(--plum); cursor:pointer;}
+  .drawer-list{flex:1; overflow-y:auto; padding:16px 22px;}
+  .drawer-item{
+    display:flex; gap:12px; padding:14px 0; border-bottom:1px solid var(--line);
+    align-items:center;
+  }
+  .drawer-item-icon{
+    width:52px; height:52px; border-radius:10px; background:var(--cream-2);
+    display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;
+  }
+  .drawer-item-info{flex:1;}
+  .drawer-item-info .name{font-weight:700; font-size:14px; color:var(--plum);}
+  .drawer-item-info .meta{font-size:12.5px; color:#9a8c84; margin-top:2px;}
+  .qty-controls{display:flex; align-items:center; gap:8px;}
+  .qty-btn{
+    width:24px; height:24px; border-radius:6px; border:1px solid var(--line);
+    background:#fff; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center;
+    color:var(--plum);
+  }
+  .empty-cart{
+    text-align:center; color:#a3948d; padding:60px 20px; font-size:14px;
+  }
+  .drawer-foot{
+    padding:18px 22px 24px; border-top:1px solid var(--line);
+  }
+  .drawer-total{
+    display:flex; justify-content:space-between; font-weight:800; color:var(--plum);
+    font-size:17px; margin-bottom:14px;
+  }
+  .checkout-btn{
+    width:100%; background:var(--plum); color:var(--cream); border:none;
+    border-radius:10px; padding:14px; font-weight:700; font-size:15px; cursor:pointer;
+    transition:background .2s ease;
+  }
+  .checkout-btn:hover{background:var(--plum-2);}
+
+  .footer{
+    text-align:center; padding:40px 24px 50px; color:#a3948d; font-size:13px;
+  }
+
+  @media (max-width:820px){
+    .hero{grid-template-columns:1fr; padding-top:40px;}
+    .hero-visual{height:260px; order:-1;}
+    .nav-links{
+      position:fixed; top:64px; right:0; left:0; background:var(--cream);
+      flex-direction:column; padding:18px 24px; gap:16px;
+      border-bottom:1px solid var(--line);
+      transform:translateY(-130%); transition:transform .25s ease;
+      z-index:49;
+    }
+    .nav-links.open{transform:translateY(0);}
+    .nav-toggle{display:block;}
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useMemo, useRef, useEffect } = React;
+
+const CATEGORIES = [
+  { id: "cleansers", name: "غسولات", color: "#C98A9B", icon: "🫧",
+    desc: "لتنظيف عميق ولطيف يومي يحافظ على توازن البشرة." },
+  { id: "creams", name: "كريمات", color: "#8FA37E", icon: "🧴",
+    desc: "تركيبات غنية للترطيب وإصلاح البشرة." },
+  { id: "serums", name: "سيروم", color: "#B08968", icon: "💧",
+    desc: "تركيزات فعّالة تستهدف مشاكل البشرة بدقة." },
+  { id: "moisturizers", name: "مرطبات", color: "#7C9CB5", icon: "🌿",
+    desc: "حماية ورطوبة تدوم طوال اليوم." },
+  { id: "masks", name: "ماسكات", color: "#A97C8E", icon: "✨",
+    desc: "عناية مكثفة أسبوعية لإشراقة فورية." },
+];
+
+const PRODUCTS = [
+  { id:1, cat:"cleansers", name:"غسول الورد المهدئ", price:14, desc:"لطيف على البشرة الحساسة" },
+  { id:2, cat:"cleansers", name:"غسول الفحم المنقي", price:16, desc:"لتنظيف عميق ومسام صافية" },
+  { id:3, cat:"cleansers", name:"غسول الشاي الأخضر", price:13, desc:"مضاد للأكسدة ومنعش" },
+  { id:4, cat:"cleansers", name:"غسول الحليب الكلاسيكي", price:12, desc:"تنظيف يومي ناعم" },
+  { id:5, cat:"cleansers", name:"غسول اللافندر الليلي", price:15, desc:"يهدئ البشرة قبل النوم" },
+
+  { id:6, cat:"creams", name:"كريم الشيا المكثف", price:22, desc:"ترطيب عميق للبشرة الجافة" },
+  { id:7, cat:"creams", name:"كريم الليل المجدد", price:26, desc:"يعمل أثناء النوم لبشرة نضرة" },
+  { id:8, cat:"creams", name:"كريم العين المضيء", price:19, desc:"يقلل الانتفاخ والهالات" },
+  { id:9, cat:"creams", name:"كريم الفيتامين سي", price:24, desc:"لإشراقة موحدة اللون" },
+  { id:10, cat:"creams", name:"كريم الزبدة الغنية", price:21, desc:"حاجز حماية للبشرة الجافة جداً" },
+
+  { id:11, cat:"serums", name:"سيروم الهيالورونيك", price:28, desc:"ترطيب مكثف وامتلاء فوري" },
+  { id:12, cat:"serums", name:"سيروم فيتامين سي", price:30, desc:"يفتح ويوحد لون البشرة" },
+  { id:13, cat:"serums", name:"سيروم النياسيناميد", price:27, desc:"يقلل المسام ويهدئ الاحمرار" },
+  { id:14, cat:"serums", name:"سيروم الريتينول اللطيف", price:32, desc:"مضاد للشيخوخة تركيبة تدريجية" },
+
+  { id:15, cat:"moisturizers", name:"مرطب الألوفيرا اليومي", price:18, desc:"خفيف وسريع الامتصاص" },
+  { id:16, cat:"moisturizers", name:"مرطب SPF 30", price:23, desc:"حماية من الشمس وترطيب معاً" },
+  { id:17, cat:"moisturizers", name:"مرطب العكبري المغذي", price:20, desc:"للبشرة المختلطة والدهنية" },
+  { id:18, cat:"moisturizers", name:"مرطب الجل المنعش", price:17, desc:"مثالي للأجواء الحارة" },
+
+  { id:19, cat:"masks", name:"ماسك الطين الأخضر", price:15, desc:"يمتص الزيوت الزائدة أسبوعياً" },
+  { id:20, cat:"masks", name:"ماسك الكولاجين الورقي", price:9, desc:"انتعاش فوري خلال 15 دقيقة" },
+  { id:21, cat:"masks", name:"ماسك العسل والشوفان", price:14, desc:"تغذية وتهدئة للبشرة الحساسة" },
+];
+
+function currency(n){ return n + " د.أ"; }
+
+function Nav({ cartCount, onCartClick, onNavClick }){
+  const [open, setOpen] = useState(false);
+  const handleClick = (id) => { setOpen(false); onNavClick(id); };
+  return (
+    <div className="nav">
+      <div className="nav-inner">
+        <div className="brand" onClick={() => handleClick("top")}>
+          <span className="brand-dot"></span> لمسة
+        </div>
+        <ul className={"nav-links" + (open ? " open" : "")}>
+          {CATEGORIES.map(c => (
+            <li key={c.id}><a onClick={() => handleClick(c.id)}>{c.name}</a></li>
+          ))}
+        </ul>
+        <div style={{display:"flex", alignItems:"center", gap:10}}>
+          <button className="cart-btn" onClick={onCartClick}>
+            السلة
+            {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
+          </button>
+          <button className="nav-toggle" onClick={() => setOpen(o=>!o)}>☰</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProductCard({ product, category, onAdd, justAdded }){
+  return (
+    <div className="card">
+      <div className="card-media" style={{background: category.color + "22"}}>
+        <span>{category.icon}</span>
+      </div>
+      <div className="card-body">
+        <p className="card-name">{product.name}</p>
+        <p className="card-desc">{product.desc}</p>
+        <div className="card-foot">
+          <span className="card-price">{currency(product.price)}</span>
+          <button
+            className={"add-btn" + (justAdded ? " added" : "")}
+            onClick={() => onAdd(product)}
+          >
+            {justAdded ? "✓ أُضيف" : "+ أضف للسلة"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CategorySection({ category, products, onAdd, justAddedId }){
+  return (
+    <div className="section" id={category.id}>
+      <div className="section-head">
+        <div>
+          <h2>
+            <span className="section-tag" style={{background: category.color}}></span>
+            {category.name}
+          </h2>
+          <p className="section-desc">{category.desc}</p>
+        </div>
+        <span className="section-count">{products.length} منتج</span>
+      </div>
+      <div className="grid">
+        {products.map(p => (
+          <ProductCard
+            key={p.id}
+            product={p}
+            category={category}
+            onAdd={onAdd}
+            justAdded={justAddedId === p.id}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CartDrawer({ open, onClose, items, onQtyChange, onRemove }){
+  const total = items.reduce((sum, it) => sum + it.price * it.qty, 0);
+  return (
+    <React.Fragment>
+      <div className={"overlay" + (open ? " open" : "")} onClick={onClose}></div>
+      <div className={"drawer" + (open ? " open" : "")}>
+        <div className="drawer-head">
+          <h3>سلة التسوق</h3>
+          <button className="drawer-close" onClick={onClose}>✕</button>
+        </div>
+        <div className="drawer-list">
+          {items.length === 0 && (
+            <div className="empty-cart">السلة فارغة — أضف منتجاً لتبدأ التسوق</div>
+          )}
+          {items.map(it => (
+            <div className="drawer-item" key={it.id}>
+              <div className="drawer-item-icon">{it.icon}</div>
+              <div className="drawer-item-info">
+                <div className="name">{it.name}</div>
+                <div className="meta">{currency(it.price)}</div>
+              </div>
+              <div className="qty-controls">
+                <button className="qty-btn" onClick={() => onQtyChange(it.id, it.qty - 1)}>−</button>
+                <span>{it.qty}</span>
+                <button className="qty-btn" onClick={() => onQtyChange(it.id, it.qty + 1)}>+</button>
+              </div>
+            </div>
+          ))}
+        </div>
+        {items.length > 0 && (
+          <div className="drawer-foot">
+            <div className="drawer-total">
+              <span>الإجمالي</span>
+              <span>{currency(total)}</span>
+            </div>
+            <button className="checkout-btn">إتمام الشراء</button>
+          </div>
+        )}
+      </div>
+    </React.Fragment>
+  );
+}
+
+function App(){
+  const [cart, setCart] = useState({});
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [justAddedId, setJustAddedId] = useState(null);
+  const flashTimer = useRef(null);
+
+  const catById = useMemo(() => {
+    const m = {};
+    CATEGORIES.forEach(c => m[c.id] = c);
+    return m;
+  }, []);
+
+  const addToCart = (product) => {
+    setCart(prev => {
+      const existing = prev[product.id];
+      const qty = existing ? existing.qty + 1 : 1;
+      return { ...prev, [product.id]: { ...product, qty, icon: catById[product.cat].icon } };
+    });
+    setJustAddedId(product.id);
+    if (flashTimer.current) clearTimeout(flashTimer.current);
+    flashTimer.current = setTimeout(() => setJustAddedId(null), 900);
+  };
+
+  const changeQty = (id, qty) => {
+    setCart(prev => {
+      if (qty <= 0) {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      }
+      return { ...prev, [id]: { ...prev[id], qty } };
+    });
+  };
+
+  const cartItems = Object.values(cart);
+  const cartCount = cartItems.reduce((s, it) => s + it.qty, 0);
+
+  const scrollTo = (id) => {
+    if (id === "top") { window.scrollTo({ top: 0, behavior: "smooth" }); return; }
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  return (
+    <React.Fragment>
+      <Nav cartCount={cartCount} onCartClick={() => setDrawerOpen(true)} onNavClick={scrollTo} />
+
+      <div className="hero">
+        <div>
+          <div className="hero-eyebrow">عناية يومية بالبشرة</div>
+          <h1 className="display">جمالك يبدأ بروتين بسيط، يُصنع بعناية</h1>
+          <p>مجموعة مختارة من الغسولات والكريمات والسيرومات، مصممة لتناسب كل نوع بشرة — بمكونات واضحة ونتائج نلمسها.</p>
+          <div className="hero-actions">
+            <button className="btn-primary" onClick={() => scrollTo("cleansers")}>تسوقي الآن</button>
+            <button className="btn-ghost" onClick={() => scrollTo("serums")}>اكتشفي السيروم</button>
+          </div>
+        </div>
+        <div className="hero-visual">
+          <div className="hero-jar"></div>
+        </div>
+      </div>
+
+      <div className="cat-strip">
+        {CATEGORIES.map(c => (
+          <button key={c.id} className="cat-chip" onClick={() => scrollTo(c.id)}>
+            {c.icon} {c.name}
+          </button>
+        ))}
+      </div>
+
+      {CATEGORIES.map(cat => (
+        <CategorySection
+          key={cat.id}
+          category={cat}
+          products={PRODUCTS.filter(p => p.cat === cat.id)}
+          onAdd={addToCart}
+          justAddedId={justAddedId}
+        />
+      ))}
+
+      <div className="footer">لمسة © 2026 — جميع الحقوق محفوظة</div>
+
+      <CartDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        items={cartItems}
+        onQtyChange={changeQty}
+        onRemove={(id) => changeQty(id, 0)}
+      />
+    </React.Fragment>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

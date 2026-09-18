@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>لمسة — متجر سجاد محمد العناية</title>
+<title>لمسة — متجر العناية بالبشرة</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Reem+Kufi:wght@400;500;700&display=swap" rel="stylesheet">
@@ -409,7 +409,9 @@ function CategorySection({ category, products, onAdd, justAddedId }){
   );
 }
 
-function CartDrawer({ open, onClose, items, onQtyChange, onRemove }){
+/* FIX: added `onCheckout` to the destructured props — it was missing,
+   which meant the checkout button's onClick handler was always undefined. */
+function CartDrawer({ open, onClose, items, onQtyChange, onRemove, onCheckout }){
   const total = items.reduce((sum, it) => sum + it.price * it.qty, 0);
   return (
     <React.Fragment>
@@ -444,7 +446,7 @@ function CartDrawer({ open, onClose, items, onQtyChange, onRemove }){
               <span>الإجمالي</span>
               <span>{currency(total)}</span>
             </div>
-         <button className="checkout-btn" onClick={onCheckout}>إتمام الشراء</button>
+            <button className="checkout-btn" onClick={onCheckout}>إتمام الشراء</button>
           </div>
         )}
       </div>
@@ -465,7 +467,6 @@ function App(){
   }, []);
 
   const addToCart = (product) => {
-   const sendToWhatsApp = () => { let message = 'تفاصيل السلة:\n'; object.values(cart).foreach(item => { message += item.name + ': ' + item.qty + ' × ' + item.price + '$\n'; }); window.open('https://wa.me/9647869367775?text=' + encodeuricomponent(message), '_blank'); };
     setCart(prev => {
       const existing = prev[product.id];
       const qty = existing ? existing.qty + 1 : 1;
@@ -485,6 +486,22 @@ function App(){
       }
       return { ...prev, [id]: { ...prev[id], qty } };
     });
+  };
+
+  /* FIX: this function was previously defined *inside* addToCart, so it
+     never existed in App's scope and calling it threw "sendToWhatsApp is
+     not defined". It also used object/foreach/encodeuricomponent instead
+     of the correctly-capitalized Object/forEach/encodeURIComponent. */
+  const sendToWhatsApp = () => {
+    const items = Object.values(cart);
+    if (items.length === 0) return;
+    let message = "تفاصيل الطلب:\n";
+    items.forEach(item => {
+      message += item.name + ": " + item.qty + " × " + currency(item.price) + "\n";
+    });
+    const total = items.reduce((sum, it) => sum + it.price * it.qty, 0);
+    message += "الإجمالي: " + currency(total);
+    window.open("https://wa.me/9647869367775?text=" + encodeURIComponent(message), "_blank");
   };
 
   const cartItems = Object.values(cart);
@@ -540,7 +557,7 @@ function App(){
         onClose={() => setDrawerOpen(false)}
         items={cartItems}
         onQtyChange={changeQty}
-        onCheckout={sendToWhatsApp}.
+        onCheckout={sendToWhatsApp}
         onRemove={(id) => changeQty(id, 0)}
       />
     </React.Fragment>

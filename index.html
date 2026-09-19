@@ -465,6 +465,7 @@ function CartDrawer({ open, onClose, items, onQtyChange, onRemove, onCheckout })
               <span>الإجمالي</span>
               <span>{currency(total)}</span>
             </div>
+            <div className="delivery-info"> <label>المحافظة:</label> <select id="governorate"> <option value="بغداد">بغداد</option> <option value="البصرة">البصرة</option> <option value="نينوى">نينوى</option> <option value="أربيل">أربيل</option> <option value="السليمانية">السليمانية</option> <option value="دهوك">دهوك</option> <option value="كركوك">كركوك</option> <option value="النجف">النجف</option> <option value="كربلاء">كربلاء</option> <option value="بابل">بابل</option> <option value="المثنى">المثنى</option> <option value="الديوانية">الديوانية</option> <option value="واسط">واسط</option> <option value="ديالى">ديالى</option> <option value="الأنبار">الأنبار</option> <option value="صلاح الدين">صلاح الدين</option> <option value="ميسان">ميسان</option> <option value="ذي قار">ذي قار</option> </select> </div> <input type="tel" id="phone" placeholder="رقم الهاتف" /> <input type="text" id="area" placeholder="المنطقة" /> <p>التوصيل: 5000 دينار</p>
             <button className="checkout-btn" onClick={onCheckout}>إتمام الشراء</button>
           </div>
         )}

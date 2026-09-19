@@ -10,26 +10,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
-<script  // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-apiKey: "AIzaSyD9zEK5n6N1HcUr84xHUJqqrwCx2uRd-8E",
-authDomain: "dr-zanab.firebaseapp.com",
-projectId: "dr-zanab",
-storageBucket: "dr-zanab.firebasestorage.app",
-messagingSenderId: "24928073316",
-appId: "1:24928073316:web:29e0812d20e71514f05171",
-measurementId: "G-BZTL6FEZJZ"
-};
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);</script>
-  <style>
+<style>
   :root{
     --cream:#FAF5F0;
     --cream-2:#F2E9E1;
@@ -287,6 +268,16 @@ const analytics = getAnalytics(app);</script>
     text-align:center; padding:40px 24px 50px; color:#a3948d; font-size:13px;
   }
 
+  .page-head{
+    max-width:1180px; margin:0 auto; padding:28px 24px 0;
+  }
+  .back-btn{
+    background:var(--paper); color:var(--plum); border:1.5px solid var(--line);
+    border-radius:999px; padding:9px 20px; font-family:'Cairo',sans-serif;
+    font-weight:700; font-size:14px; cursor:pointer; transition:all .2s ease;
+  }
+  .back-btn:hover{background:var(--plum); border-color:var(--plum); color:var(--cream);}
+
   @media (max-width:820px){
     .hero{grid-template-columns:1fr; padding-top:40px;}
     .hero-visual{height:260px; order:-1;}
@@ -322,34 +313,36 @@ const CATEGORIES = [
 ];
 
 const PRODUCTS = [
-  { id:1, cat:"cleansers", name:"غسول الورد المهدئ", price:14, desc:"لطيف على البشرة الحساسة" },
-  { id:2, cat:"cleansers", name:"غسول الفحم المنقي", price:16, desc:"لتنظيف عميق ومسام صافية" },
-  { id:3, cat:"cleansers", name:"غسول الشاي الأخضر", price:13, desc:"مضاد للأكسدة ومنعش" },
-  { id:4, cat:"cleansers", name:"غسول الحليب الكلاسيكي", price:12, desc:"تنظيف يومي ناعم" },
-  { id:5, cat:"cleansers", name:"غسول اللافندر الليلي", price:15, desc:"يهدئ البشرة قبل النوم" },
+  { id:1, cat:"cleansers", name:"غسول الورد المهدئ", price:14000, desc:"لطيف على البشرة الحساسة" },
+  { id:2, cat:"cleansers", name:"غسول الفحم المنقي", price:16000, desc:"لتنظيف عميق ومسام صافية" },
+  { id:3, cat:"cleansers", name:"غسول الشاي الأخضر", price:13000, desc:"مضاد للأكسدة ومنعش" },
+  { id:4, cat:"cleansers", name:"غسول الحليب الكلاسيكي", price:12000, desc:"تنظيف يومي ناعم" },
+  { id:5, cat:"cleansers", name:"غسول اللافندر الليلي", price:15000, desc:"يهدئ البشرة قبل النوم" },
 
-  { id:6, cat:"creams", name:"كريم الشيا المكثف", price:22, desc:"ترطيب عميق للبشرة الجافة" },
-  { id:7, cat:"creams", name:"كريم الليل المجدد", price:26, desc:"يعمل أثناء النوم لبشرة نضرة" },
-  { id:8, cat:"creams", name:"كريم العين المضيء", price:19, desc:"يقلل الانتفاخ والهالات" },
-  { id:9, cat:"creams", name:"كريم الفيتامين سي", price:24, desc:"لإشراقة موحدة اللون" },
-  { id:10, cat:"creams", name:"كريم الزبدة الغنية", price:21, desc:"حاجز حماية للبشرة الجافة جداً" },
+  { id:6, cat:"creams", name:"كريم الشيا المكثف", price:22000, desc:"ترطيب عميق للبشرة الجافة" },
+  { id:7, cat:"creams", name:"كريم الليل المجدد", price:26000, desc:"يعمل أثناء النوم لبشرة نضرة" },
+  { id:8, cat:"creams", name:"كريم العين المضيء", price:19000, desc:"يقلل الانتفاخ والهالات" },
+  { id:9, cat:"creams", name:"كريم الفيتامين سي", price:24000, desc:"لإشراقة موحدة اللون" },
+  { id:10, cat:"creams", name:"كريم الزبدة الغنية", price:21000, desc:"حاجز حماية للبشرة الجافة جداً" },
 
-  { id:11, cat:"serums", name:"سيروم الهيالورونيك", price:28, desc:"ترطيب مكثف وامتلاء فوري" },
-  { id:12, cat:"serums", name:"سيروم فيتامين سي", price:30, desc:"يفتح ويوحد لون البشرة" },
-  { id:13, cat:"serums", name:"سيروم النياسيناميد", price:27, desc:"يقلل المسام ويهدئ الاحمرار" },
-  { id:14, cat:"serums", name:"سيروم الريتينول اللطيف", price:32, desc:"مضاد للشيخوخة تركيبة تدريجية" },
+  { id:11, cat:"serums", name:"سيروم الهيالورونيك", price:28000, desc:"ترطيب مكثف وامتلاء فوري" },
+  { id:12, cat:"serums", name:"سيروم فيتامين سي", price:30000, desc:"يفتح ويوحد لون البشرة" },
+  { id:13, cat:"serums", name:"سيروم النياسيناميد", price:27000, desc:"يقلل المسام ويهدئ الاحمرار" },
+  { id:14, cat:"serums", name:"سيروم الريتينول اللطيف", price:32000, desc:"مضاد للشيخوخة تركيبة تدريجية" },
 
-  { id:15, cat:"moisturizers", name:"مرطب الألوفيرا اليومي", price:18, desc:"خفيف وسريع الامتصاص" },
-  { id:16, cat:"moisturizers", name:"مرطب SPF 30", price:23, desc:"حماية من الشمس وترطيب معاً" },
-  { id:17, cat:"moisturizers", name:"مرطب العكبري المغذي", price:20, desc:"للبشرة المختلطة والدهنية" },
-  { id:18, cat:"moisturizers", name:"مرطب الجل المنعش", price:17, desc:"مثالي للأجواء الحارة" },
+  { id:15, cat:"moisturizers", name:"مرطب الألوفيرا اليومي", price:18000, desc:"خفيف وسريع الامتصاص" },
+  { id:16, cat:"moisturizers", name:"مرطب SPF 30", price:23000, desc:"حماية من الشمس وترطيب معاً" },
+  { id:17, cat:"moisturizers", name:"مرطب العكبري المغذي", price:20000, desc:"للبشرة المختلطة والدهنية" },
+  { id:18, cat:"moisturizers", name:"مرطب الجل المنعش", price:17000, desc:"مثالي للأجواء الحارة" },
 
-  { id:19, cat:"masks", name:"ماسك الطين الأخضر", price:15, desc:"يمتص الزيوت الزائدة أسبوعياً" },
-  { id:20, cat:"masks", name:"ماسك الكولاجين الورقي", price:9, desc:"انتعاش فوري خلال 15 دقيقة" },
-  { id:21, cat:"masks", name:"ماسك العسل والشوفان", price:14, desc:"تغذية وتهدئة للبشرة الحساسة" },
+  { id:19, cat:"masks", name:"ماسك الطين الأخضر", price:15000, desc:"يمتص الزيوت الزائدة أسبوعياً" },
+  { id:20, cat:"masks", name:"ماسك الكولاجين الورقي", price:9000, desc:"انتعاش فوري خلال 15 دقيقة" },
+  { id:21, cat:"masks", name:"ماسك العسل والشوفان", price:14000, desc:"تغذية وتهدئة للبشرة الحساسة" },
 ];
 
-function currency(n){ return n + "IQD"; }
+function currency(n){ return n.toLocaleString("en-US") + " IQD"; }
+const DELIVERY_FEE = 5000;
+const GOVERNORATES = ["بغداد","البصرة","نينوى","أربيل","السليمانية","دهوك","كركوك","النجف","كربلاء","بابل","المثنى","الديوانية","واسط","ديالى","الأنبار","صلاح الدين","ميسان","ذي قار"];
 
 function Nav({ cartCount, onCartClick, onNavClick }){
   const [open, setOpen] = useState(false);
@@ -431,7 +424,23 @@ function CategorySection({ category, products, onAdd, justAddedId }){
 /* FIX: added `onCheckout` to the destructured props — it was missing,
    which meant the checkout button's onClick handler was always undefined. */
 function CartDrawer({ open, onClose, items, onQtyChange, onRemove, onCheckout }){
-  const total = items.reduce((sum, it) => sum + it.price * it.qty, 0);
+  const [governorate, setGovernorate] = useState(GOVERNORATES[0]);
+  const [phone, setPhone] = useState("");
+  const [area, setArea] = useState("");
+  const [error, setError] = useState("");
+
+  const subtotal = items.reduce((sum, it) => sum + it.price * it.qty, 0);
+  const total = subtotal + (items.length > 0 ? DELIVERY_FEE : 0);
+
+  const handleCheckoutClick = () => {
+    if (!phone.trim() || !area.trim()) {
+      setError("يرجى إدخال رقم الهاتف والمنطقة قبل إتمام الشراء");
+      return;
+    }
+    setError("");
+    onCheckout({ governorate, phone: phone.trim(), area: area.trim(), deliveryFee: DELIVERY_FEE, subtotal, total });
+  };
+
   return (
     <React.Fragment>
       <div className={"overlay" + (open ? " open" : "")} onClick={onClose}></div>
@@ -461,12 +470,55 @@ function CartDrawer({ open, onClose, items, onQtyChange, onRemove, onCheckout })
         </div>
         {items.length > 0 && (
           <div className="drawer-foot">
-            <div className="drawer-total">
-              <span>الإجمالي</span>
-              <span>{currency(total)}</span>
+            <div className="delivery-info" style={{display:"flex", flexDirection:"column", gap:10, marginBottom:14}}>
+              <label style={{fontSize:13, fontWeight:700, color:"var(--plum)"}}>
+                المحافظة
+                <select
+                  value={governorate}
+                  onChange={(e) => setGovernorate(e.target.value)}
+                  style={{width:"100%", marginTop:4, padding:"8px 10px", borderRadius:8, border:"1px solid var(--line)", fontFamily:"inherit"}}
+                >
+                  {GOVERNORATES.map(g => <option key={g} value={g}>{g}</option>)}
+                </select>
+              </label>
+              <div style={{position:"relative"}}>
+                <input
+                  type="tel"
+                  placeholder="رقم الهاتف"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  style={{width:"100%", padding:"10px 34px 10px 12px", borderRadius:8, border: "1px solid " + (phone.trim() === "" ? "var(--rose-dark)" : "var(--line)"), fontFamily:"inherit", fontSize:14}}
+                />
+                {phone.trim() === "" && (
+                  <span style={{position:"absolute", top:"50%", left:10, transform:"translateY(-50%)", color:"var(--rose-dark)", fontWeight:800}}>!</span>
+                )}
+              </div>
+              <div style={{position:"relative"}}>
+                <input
+                  type="text"
+                  placeholder="المنطقة"
+                  value={area}
+                  onChange={(e) => setArea(e.target.value)}
+                  style={{width:"100%", padding:"10px 34px 10px 12px", borderRadius:8, border: "1px solid " + (area.trim() === "" ? "var(--rose-dark)" : "var(--line)"), fontFamily:"inherit", fontSize:14}}
+                />
+                {area.trim() === "" && (
+                  <span style={{position:"absolute", top:"50%", left:10, transform:"translateY(-50%)", color:"var(--rose-dark)", fontWeight:800}}>!</span>
+                )}
+              </div>
+              {error && <p style={{color:"var(--rose-dark)", fontSize:12.5, margin:0}}>{error}</p>}
             </div>
-            <div className="delivery-info"> <label>المحافظة:</label> <select id="governorate"> <option value="بغداد">بغداد</option> <option value="البصرة">البصرة</option> <option value="نينوى">نينوى</option> <option value="أربيل">أربيل</option> <option value="السليمانية">السليمانية</option> <option value="دهوك">دهوك</option> <option value="كركوك">كركوك</option> <option value="النجف">النجف</option> <option value="كربلاء">كربلاء</option> <option value="بابل">بابل</option> <option value="المثنى">المثنى</option> <option value="الديوانية">الديوانية</option> <option value="واسط">واسط</option> <option value="ديالى">ديالى</option> <option value="الأنبار">الأنبار</option> <option value="صلاح الدين">صلاح الدين</option> <option value="ميسان">ميسان</option> <option value="ذي قار">ذي قار</option> </select> </div> <input type="tel" id="phone" placeholder="رقم الهاتف" /> <input type="text" id="area" placeholder="المنطقة" /> <p>التوصيل: 5000 دينار</p>
-            <button className="checkout-btn" onClick={onCheckout}>إتمام الشراء</button>
+            <div className="drawer-total" style={{flexDirection:"column", gap:4, alignItems:"stretch"}}>
+              <div style={{display:"flex", justifyContent:"space-between", fontWeight:600, fontSize:14}}>
+                <span>المجموع الفرعي</span><span>{currency(subtotal)}</span>
+              </div>
+              <div style={{display:"flex", justifyContent:"space-between", fontWeight:600, fontSize:14}}>
+                <span>التوصيل</span><span>{currency(DELIVERY_FEE)}</span>
+              </div>
+              <div style={{display:"flex", justifyContent:"space-between", fontWeight:800, fontSize:17, marginTop:4}}>
+                <span>الإجمالي</span><span>{currency(total)}</span>
+              </div>
+            </div>
+            <button className="checkout-btn" onClick={handleCheckoutClick} style={{marginTop:14}}>إتمام الشراء</button>
           </div>
         )}
       </div>
@@ -512,63 +564,79 @@ function App(){
      never existed in App's scope and calling it threw "sendToWhatsApp is
      not defined". It also used object/foreach/encodeuricomponent instead
      of the correctly-capitalized Object/forEach/encodeURIComponent. */
-  const sendToWhatsApp = () => {
+  const sendToWhatsApp = (delivery) => {
     const items = Object.values(cart);
     if (items.length === 0) return;
     let message = "تفاصيل الطلب:\n";
     items.forEach(item => {
       message += item.name + ": " + item.qty + " × " + currency(item.price) + "\n";
     });
-    const total = items.reduce((sum, it) => sum + it.price * it.qty, 0);
-    message += "الإجمالي: " + currency(total);
+    message += "\nالمجموع الفرعي: " + currency(delivery.subtotal);
+    message += "\nالتوصيل: " + currency(delivery.deliveryFee);
+    message += "\nالإجمالي: " + currency(delivery.total);
+    message += "\n\nالمحافظة: " + delivery.governorate;
+    message += "\nالمنطقة: " + delivery.area;
+    message += "\nرقم الهاتف: " + delivery.phone;
     window.open("https://wa.me/9647869367775?text=" + encodeURIComponent(message), "_blank");
   };
 
   const cartItems = Object.values(cart);
   const cartCount = cartItems.reduce((s, it) => s + it.qty, 0);
 
-  const scrollTo = (id) => {
-    if (id === "top") { window.scrollTo({ top: 0, behavior: "smooth" }); return; }
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  const [activePage, setActivePage] = useState(null); // null = الصفحة الرئيسية، أو معرّف القسم
+
+  const goTo = (id) => {
+    window.scrollTo({ top: 0, behavior: "auto" });
+    if (id === "top") { setActivePage(null); return; }
+    setActivePage(id);
   };
 
   return (
     <React.Fragment>
-      <Nav cartCount={cartCount} onCartClick={() => setDrawerOpen(true)} onNavClick={scrollTo} />
+      <Nav cartCount={cartCount} onCartClick={() => setDrawerOpen(true)} onNavClick={goTo} />
 
-      <div className="hero">
-        <div>
-          <div className="hero-eyebrow">عناية يومية بالبشرة</div>
-          <h1 className="display">جمالك يبدأ بروتين بسيط، يُصنع بعناية</h1>
-          <p>مجموعة مختارة من الغسولات والكريمات والسيرومات، مصممة لتناسب كل نوع بشرة — بمكونات واضحة ونتائج نلمسها.</p>
-          <div className="hero-actions">
-            <button className="btn-primary" onClick={() => scrollTo("cleansers")}>تسوقي الآن</button>
-            <button className="btn-ghost" onClick={() => scrollTo("serums")}>اكتشفي السيروم</button>
+      {activePage === null ? (
+        <React.Fragment>
+          <div className="hero">
+            <div>
+              <div className="hero-eyebrow">عناية يومية بالبشرة</div>
+              <h1 className="display">جمالك يبدأ بروتين بسيط، يُصنع بعناية</h1>
+              <p>مجموعة مختارة من الغسولات والكريمات والسيرومات، مصممة لتناسب كل نوع بشرة — بمكونات واضحة ونتائج نلمسها.</p>
+              <div className="hero-actions">
+                <button className="btn-primary" onClick={() => goTo("cleansers")}>تسوقي الآن</button>
+                <button className="btn-ghost" onClick={() => goTo("serums")}>اكتشفي السيروم</button>
+              </div>
+            </div>
+            <div className="hero-visual">
+              <div className="hero-jar"></div>
+            </div>
           </div>
-        </div>
-        <div className="hero-visual">
-          <div className="hero-jar"></div>
-        </div>
-      </div>
 
-      <div className="cat-strip">
-        {CATEGORIES.map(c => (
-          <button key={c.id} className="cat-chip" onClick={() => scrollTo(c.id)}>
-            {c.icon} {c.name}
-          </button>
+          <div className="cat-strip">
+            {CATEGORIES.map(c => (
+              <button key={c.id} className="cat-chip" onClick={() => goTo(c.id)}>
+                {c.icon} {c.name}
+              </button>
+            ))}
+          </div>
+        </React.Fragment>
+      ) : (
+        <div className="page-head">
+          <button className="back-btn" onClick={() => goTo("top")}>→ الرئيسية</button>
+        </div>
+      )}
+
+      {CATEGORIES
+        .filter(cat => activePage === null || activePage === cat.id)
+        .map(cat => (
+          <CategorySection
+            key={cat.id}
+            category={cat}
+            products={PRODUCTS.filter(p => p.cat === cat.id)}
+            onAdd={addToCart}
+            justAddedId={justAddedId}
+          />
         ))}
-      </div>
-
-      {CATEGORIES.map(cat => (
-        <CategorySection
-          key={cat.id}
-          category={cat}
-          products={PRODUCTS.filter(p => p.cat === cat.id)}
-          onAdd={addToCart}
-          justAddedId={justAddedId}
-        />
-      ))}
 
       <div className="footer">لمسة © 2026 — جميع الحقوق محفوظة</div>
 

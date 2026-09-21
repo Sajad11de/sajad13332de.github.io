@@ -234,10 +234,10 @@
   .card-foot{
     margin-top:auto; display:flex; flex-direction:column; align-items:stretch; gap:8px;
   }
-  .card-price{font-weight:800; color:var(--ink); font-size:13px;}
+  .card-price{font-weight:800; color:var(--ink); font-size:13px; display:flex; align-items:baseline; gap:6px;}
   .card-price-old{
     font-weight:600; color:#a3948d; text-decoration:line-through;
-    font-size:11px; margin-inline-end:5px;
+    font-size:11px;
   }
   .add-btn{
     border:none; background:var(--cream-2); color:var(--plum);
@@ -557,8 +557,8 @@ function ProductCard({ product, category, onAdd, justAdded }){
         {outOfStock && <p className="stock-badge stock-out">نفدت الكمية</p>}
         <div className="card-foot">
           <span className="card-price">
-            {hasDiscount && <span className="card-price-old">{currency(product.price)}</span>}
-            {currency(priceNow)}
+            {hasDiscount && <span className="card-price-old" dir="ltr">{currency(product.price)}</span>}
+            <span dir="ltr">{currency(priceNow)}</span>
           </span>
           <button
             className={"add-btn" + (justAdded ? " added" : "") + (outOfStock ? " disabled" : "")}
@@ -919,7 +919,7 @@ function AdminPage({ categories, onBack }){
                 : <div className="admin-item-thumb admin-item-thumb-empty">{category ? category.icon : "🧴"}</div>}
               <div className="admin-item-info">
                 <strong>{p.name}</strong>
-                <span className="admin-item-price">
+                <span className="admin-item-price" dir="ltr">
                   {p.price != null ? p.price.toLocaleString("en-US") + " IQD" : ""}
                   {Number(p.discount) > 0 && <span style={{color:"var(--rose-dark)"}}> (خصم {p.discount}% ← {finalPrice(p).toLocaleString("en-US")} IQD)</span>}
                 </span>
@@ -980,6 +980,17 @@ function Store(){
     CATEGORIES.forEach(c => m[c.id] = c);
     return m;
   }, []);
+
+  // منتج واحد على الأقل من كل قسم متوفر، لعرض تشكيلة متنوعة في الصفحة الرئيسية
+  const mixedProducts = useMemo(() => {
+    const seen = {};
+    const picks = [];
+    CATEGORIES.forEach(c => {
+      const match = products.find(p => p.cat === c.id && !seen[p.id]);
+      if (match) { picks.push(match); seen[match.id] = true; }
+    });
+    return picks;
+  }, [products]);
 
   const addToCart = (product) => {
     const isTracked = product.stock !== null && product.stock !== undefined;
@@ -1098,6 +1109,31 @@ function Store(){
               ))}
             </div>
           </div>
+
+          {mixedProducts.length > 0 && (
+            <div className="section">
+              <div className="section-head">
+                <div>
+                  <h2>
+                    <span className="section-tag" style={{background: "var(--rose)"}}></span>
+                    تشكيلة متنوعة
+                  </h2>
+                  <p className="section-desc">لمحة سريعة من كل أقسام المتجر في مكان واحد.</p>
+                </div>
+              </div>
+              <div className="grid">
+                {mixedProducts.map(p => (
+                  <ProductCard
+                    key={p.id}
+                    product={p}
+                    category={catById[p.cat]}
+                    onAdd={addToCart}
+                    justAdded={justAddedId === p.id}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </React.Fragment>
       ) : (
         <div className="page-head">

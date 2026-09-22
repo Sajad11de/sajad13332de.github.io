@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>  دكتورا زينب — متجر العناية بالبشرة</title>
+<title>لمسة — متجر العناية بالبشرة</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Reem+Kufi:wght@400;500;700&display=swap" rel="stylesheet">
@@ -12,6 +12,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
 <style>
   :root{
     --cream:#FAF5F0;
@@ -286,7 +287,9 @@
   .drawer-item-icon{
     width:52px; height:52px; border-radius:10px; background:var(--cream-2);
     display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;
+    overflow:hidden;
   }
+  .drawer-item-icon img{width:100%; height:100%; object-fit:cover;}
   .drawer-item-info{flex:1;}
   .drawer-item-info .name{font-weight:700; font-size:14px; color:var(--plum);}
   .drawer-item-info .meta{font-size:12.5px; color:#9a8c84; margin-top:2px;}
@@ -433,7 +436,7 @@
 <div id="root"></div>
 
 <script type="text/babel" data-presets="react">
-const { useState, useMemo, useRef, useEffect } = React;
+const { useState, useMemo, useRef, useEffect, useCallback } = React;
 
 // ===== تهيئة Firebase =====
 const firebaseConfig = {
@@ -447,6 +450,7 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const storage = firebase.storage();
 
 const CATEGORIES = [
   { id: "cleansers", name: "غسولات", color: "#C98A9B", icon: "🫧",
@@ -534,7 +538,7 @@ function Nav({ cartCount, onCartClick, onNavClick }){
   );
 }
 
-function ProductCard({ product, category, onAdd, justAdded }){
+const ProductCard = React.memo(function ProductCard({ product, category, onAdd, justAdded }){
   const discount = Number(product.discount) || 0;
   const hasDiscount = discount > 0;
   const priceNow = finalPrice(product);
@@ -547,7 +551,7 @@ function ProductCard({ product, category, onAdd, justAdded }){
       <div className="card-media" style={{background: category.color + "22"}}>
         {hasDiscount && <span className="discount-badge">خصم {discount}%</span>}
         {product.imageUrl
-          ? <img src={product.imageUrl} alt={product.name} onError={(e) => { e.target.style.display = "none"; }} />
+          ? <img src={product.imageUrl} alt={product.name} loading="lazy" decoding="async" onError={(e) => { e.target.style.display = "none"; }} />
           : <span>{category.icon}</span>}
       </div>
       <div className="card-body">
@@ -572,9 +576,14 @@ function ProductCard({ product, category, onAdd, justAdded }){
       </div>
     </div>
   );
-}
+});
 
 function CategorySection({ category, products, onAdd, justAddedId }){
+  const PAGE_SIZE = 8;
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const visibleProducts = products.slice(0, visibleCount);
+  const hasMore = products.length > visibleCount;
+
   return (
     <div className="section" id={category.id}>
       <div className="section-head">
@@ -590,17 +599,26 @@ function CategorySection({ category, products, onAdd, justAddedId }){
       {products.length === 0 ? (
         <p style={{color:"#a3948d", fontSize:14}}>لا توجد منتجات في هذا القسم حالياً.</p>
       ) : (
-        <div className="grid">
-          {products.map(p => (
-            <ProductCard
-              key={p.id}
-              product={p}
-              category={category}
-              onAdd={onAdd}
-              justAdded={justAddedId === p.id}
-            />
-          ))}
-        </div>
+        <React.Fragment>
+          <div className="grid">
+            {visibleProducts.map(p => (
+              <ProductCard
+                key={p.id}
+                product={p}
+                category={category}
+                onAdd={onAdd}
+                justAdded={justAddedId === p.id}
+              />
+            ))}
+          </div>
+          {hasMore && (
+            <div style={{textAlign:"center", marginTop:24}}>
+              <button className="btn-ghost" onClick={() => setVisibleCount(v => v + PAGE_SIZE)}>
+                عرض المزيد ({products.length - visibleCount} متبقٍ)
+              </button>
+            </div>
+          )}
+        </React.Fragment>
       )}
     </div>
   );
@@ -640,7 +658,12 @@ function CartDrawer({ open, onClose, items, onQtyChange, onRemove, onCheckout })
           )}
           {items.map(it => (
             <div className="drawer-item" key={it.id}>
-              <div className="drawer-item-icon">{it.icon}</div>
+              <div className="drawer-item-icon">
+                {it.imageUrl
+                  ? <img src={it.imageUrl} alt={it.name} loading="lazy" decoding="async" onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "flex"; }} />
+                  : null}
+                <span style={{display: it.imageUrl ? "none" : "flex"}}>{it.icon}</span>
+              </div>
               <div className="drawer-item-info">
                 <div className="name">{it.name}</div>
                 <div className="meta">{currency(it.price)}</div>
@@ -753,6 +776,8 @@ function AdminPage({ categories, onBack }){
   const [loaded, setLoaded] = useState(false);
   const [name, setName] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
   const [price, setPrice] = useState("");
   const [discount, setDiscount] = useState("");
   const [stock, setStock] = useState("");
@@ -777,7 +802,28 @@ function AdminPage({ categories, onBack }){
     return () => unsub();
   }, []);
 
-  const resetForm = () => { setName(""); setImageUrl(""); setPrice(""); setDiscount(""); setStock(""); setDesc(""); };
+  const resetForm = () => { setName(""); setImageUrl(""); setUploadError(""); setPrice(""); setDiscount(""); setStock(""); setDesc(""); };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    e.target.value = ""; // للسماح باختيار نفس الملف مرة أخرى لاحقاً
+    if (!file) return;
+    setUploadError("");
+    setUploading(true);
+    try {
+      const path = "products/" + Date.now() + "_" + file.name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+      const ref = storage.ref().child(path);
+      await ref.put(file);
+      const url = await ref.getDownloadURL();
+      setImageUrl(url);
+    } catch (error) {
+      setUploadError(
+        "❌ تعذر رفع الصورة: " + error.message +
+        " — تأكدي أن Firebase Storage مفعّل على خطة Blaze في مشروعك."
+      );
+    }
+    setUploading(false);
+  };
 
   const handleAdd = async (e) => {
     e.preventDefault();
@@ -860,12 +906,32 @@ function AdminPage({ categories, onBack }){
           <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="مثال: غسول الورد المهدئ" />
         </label>
         <label>
-          رابط صورة المنتج (اختياري)
-          <input type="url" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://example.com/image.jpg" />
+          صورة المنتج
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileUpload}
+            disabled={uploading}
+          />
         </label>
-        {imageUrl.trim() !== "" && (
-          <img src={imageUrl} alt="معاينة" className="admin-image-preview" onError={(e) => { e.target.style.display = "none"; }} />
+        {uploading && <p style={{fontSize:12.5, color:"var(--plum)", margin:0}}>⏳ جاري رفع الصورة...</p>}
+        {uploadError && <p style={{fontSize:12.5, color:"var(--rose-dark)", margin:0}}>{uploadError}</p>}
+        {imageUrl.trim() !== "" && !uploading && (
+          <div style={{display:"flex", flexDirection:"column", gap:6}}>
+            <img src={imageUrl} alt="معاينة" className="admin-image-preview" loading="lazy" decoding="async" onError={(e) => { e.target.style.display = "none"; }} />
+            <button type="button" className="btn-ghost" onClick={() => setImageUrl("")} style={{alignSelf:"flex-start", fontSize:12}}>إزالة الصورة</button>
+          </div>
         )}
+        <details>
+          <summary style={{fontSize:12.5, color:"#a3948d", cursor:"pointer"}}>أو الصقي رابط صورة مباشر بدلاً من الرفع</summary>
+          <input
+            type="url"
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            placeholder="https://example.com/image.jpg"
+            style={{marginTop:8, width:"100%", padding:"10px 12px", borderRadius:8, border:"1px solid var(--line)", fontFamily:"inherit", fontSize:14}}
+          />
+        </details>
         <label>
           السعر (بالدينار العراقي)
           <input type="number" min="0" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="مثال: 15000" />
@@ -893,7 +959,7 @@ function AdminPage({ categories, onBack }){
             {categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
           </select>
         </label>
-        <button type="submit" className="btn-primary" disabled={saving}>
+        <button type="submit" className="btn-primary" disabled={saving || uploading}>
           {saving ? "جاري الحفظ..." : "إضافة المنتج"}
         </button>
         {status && <p className={"admin-status" + (status.startsWith("✅") ? " success" : status.startsWith("⚠️") ? "" : " error")}>{status}</p>}
@@ -915,7 +981,7 @@ function AdminPage({ categories, onBack }){
           return (
             <div className="admin-item" key={p.id}>
               {p.imageUrl
-                ? <img src={p.imageUrl} alt={p.name} className="admin-item-thumb" onError={(e) => { e.target.style.display = "none"; }} />
+                ? <img src={p.imageUrl} alt={p.name} className="admin-item-thumb" loading="lazy" decoding="async" onError={(e) => { e.target.style.display = "none"; }} />
                 : <div className="admin-item-thumb admin-item-thumb-empty">{category ? category.icon : "🧴"}</div>}
               <div className="admin-item-info">
                 <strong>{p.name}</strong>
@@ -992,7 +1058,7 @@ function Store(){
     return picks;
   }, [products]);
 
-  const addToCart = (product) => {
+  const addToCart = useCallback((product) => {
     const isTracked = product.stock !== null && product.stock !== undefined;
     const stock = isTracked ? Number(product.stock) : Infinity;
     if (isTracked && stock <= 0) return;
@@ -1011,9 +1077,9 @@ function Store(){
     setJustAddedId(product.id);
     if (flashTimer.current) clearTimeout(flashTimer.current);
     flashTimer.current = setTimeout(() => setJustAddedId(null), 900);
-  };
+  }, [catById]);
 
-  const changeQty = (id, qty) => {
+  const changeQty = useCallback((id, qty) => {
     setCart(prev => {
       if (qty <= 0) {
         const next = { ...prev };
@@ -1028,7 +1094,7 @@ function Store(){
       }
       return { ...prev, [id]: { ...prev[id], qty } };
     });
-  };
+  }, []);
 
   /* FIX: this function was previously defined *inside* addToCart, so it
      never existed in App's scope and calling it threw "sendToWhatsApp is

@@ -94,52 +94,17 @@
   .hero{
     max-width:1180px; margin:0 auto;
     padding:72px 24px 56px;
-    display:grid; grid-template-columns:1.1fr 0.9fr; gap:48px; align-items:center;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; gap:24px;
   }
-  .hero-eyebrow{
-    color:var(--rose-dark); font-weight:700; font-size:14px; margin-bottom:14px;
+  .hero-logo{
+    width:160px; height:160px; object-fit:contain;
+    border-radius:24px;
   }
-  .hero h1{
+  .hero-brand{
     font-family:'Reem Kufi', sans-serif; font-weight:400;
-    font-size:clamp(34px, 5vw, 56px); line-height:1.25; color:var(--plum);
-    margin:0 0 20px;
-  }
-  .hero p{
-    font-size:17px; line-height:1.9; color:#5b4d47; max-width:46ch; margin:0 0 28px;
-  }
-  .hero-actions{display:flex; gap:14px; flex-wrap:wrap;}
-  .btn-primary{
-    background:var(--rose); color:#fff; border:none; border-radius:10px;
-    padding:14px 26px; font-family:'Cairo',sans-serif; font-weight:700; font-size:15px;
-    cursor:pointer; transition:background .2s ease, transform .15s ease;
-  }
-  .btn-primary:hover{background:var(--rose-dark); transform:translateY(-1px);}
-  .btn-ghost{
-    background:transparent; color:var(--plum); border:1.5px solid var(--plum);
-    border-radius:10px; padding:14px 26px; font-family:'Cairo',sans-serif; font-weight:700; font-size:15px;
-    cursor:pointer; transition:all .2s ease;
-  }
-  .btn-ghost:hover{background:var(--plum); color:#fff;}
-  .hero-visual{
-    position:relative; height:380px; border-radius:24px;
-    background:linear-gradient(155deg, var(--cream-2) 0%, #EADFD3 55%, var(--rose) 140%);
-    display:flex; align-items:center; justify-content:center; overflow:hidden;
-  }
-  .hero-visual::before{
-    content:'✦'; position:absolute; font-size:220px; color:rgba(255,255,255,0.45);
-    font-family:serif; top:-40px; right:-30px;
-  }
-  .hero-jar{
-    width:150px; height:170px; background:var(--paper); border-radius:20px 20px 34px 34px;
-    box-shadow:0 30px 60px -20px rgba(62,38,52,0.35); position:relative; z-index:2;
-  }
-  .hero-jar::before{
-    content:''; position:absolute; top:-18px; left:50%; transform:translateX(-50%);
-    width:96px; height:26px; background:var(--sage); border-radius:10px;
-  }
-  .hero-jar::after{
-    content:'لمسة'; position:absolute; bottom:22px; left:0; right:0; text-align:center;
-    font-family:'Reem Kufi',sans-serif; color:var(--plum); font-size:20px;
+    font-size:clamp(40px, 7vw, 72px); line-height:1.3; color:var(--plum);
+    margin:0;
   }
 
   /* ===== CATEGORY QUICK NAV ===== */
@@ -418,8 +383,7 @@
   .delete-btn:hover{background:var(--rose-dark); color:#fff;}
 
   @media (max-width:820px){
-    .hero{grid-template-columns:1fr; padding-top:40px;}
-    .hero-visual{height:260px; order:-1;}
+    .hero{padding-top:40px;}
     .nav-links{
       position:fixed; top:64px; right:0; left:0; background:var(--cream);
       flex-direction:column; padding:18px 24px; gap:16px;
@@ -431,6 +395,7 @@
     .nav-toggle{display:block;}
   }
 </style>
+<base target="_blank">
 </head>
 <body>
 <div id="root"></div>
@@ -450,6 +415,7 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+
 const storage = firebase.storage();
 
 const CATEGORIES = [
@@ -552,7 +518,9 @@ const ProductCard = React.memo(function ProductCard({ product, category, onAdd, 
         {hasDiscount && <span className="discount-badge">خصم {discount}%</span>}
         {product.imageUrl
           ? <img src={product.imageUrl} alt={product.name} loading="lazy" decoding="async" onError={(e) => { e.target.style.display = "none"; }} />
-          : <span>{category.icon}</span>}
+          : category.imageUrl
+            ? <img src={category.imageUrl} alt={category.name} loading="lazy" decoding="async" onError={(e) => { e.target.style.display = "none"; }} />
+            : <span>{category.icon}</span>}
       </div>
       <div className="card-body">
         <p className="card-name">{product.name}</p>
@@ -776,8 +744,6 @@ function AdminPage({ categories, onBack }){
   const [loaded, setLoaded] = useState(false);
   const [name, setName] = useState("");
   const [imageUrl, setImageUrl] = useState("");
-  const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState("");
   const [price, setPrice] = useState("");
   const [discount, setDiscount] = useState("");
   const [stock, setStock] = useState("");
@@ -786,6 +752,46 @@ function AdminPage({ categories, onBack }){
   const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
   const [stockEdits, setStockEdits] = useState({});
+  const [logoUrl, setLogoUrl] = useState("");
+  const [logoStatus, setLogoStatus] = useState("");
+  const [savingLogo, setSavingLogo] = useState(false);
+  const [catImageEdits, setCatImageEdits] = useState({});
+  const [catImageStatus, setCatImageStatus] = useState("");
+
+  useEffect(() => {
+    db.collection("settings").doc("store").get().then(doc => {
+      if (doc.exists && doc.data().logoUrl) setLogoUrl(doc.data().logoUrl);
+    }).catch(error => console.error("فشل جلب الشعار:", error));
+    db.collection("categories").get().then(snapshot => {
+      const map = {};
+      snapshot.docs.forEach(d => { map[d.id] = d.data().imageUrl || ""; });
+      setCatImageEdits(map);
+    }).catch(error => console.error("فشل جلب صور التصنيفات:", error));
+  }, []);
+
+  const handleSaveLogo = async (e) => {
+    e.preventDefault();
+    setSavingLogo(true);
+    setLogoStatus("");
+    try {
+      await db.collection("settings").doc("store").set({ logoUrl: logoUrl.trim() }, { merge: true });
+      setLogoStatus("✅ تم حفظ الشعار، سيظهر في الموقع فوراً");
+    } catch (error) {
+      setLogoStatus("❌ فشل الحفظ: " + error.message);
+    }
+    setSavingLogo(false);
+  };
+
+  const handleSaveCategoryImage = async (catId) => {
+    const url = (catImageEdits[catId] || "").trim();
+    try {
+      await db.collection("categories").doc(catId).set({ imageUrl: url }, { merge: true });
+      setCatImageStatus("✅ تم حفظ صورة التصنيف");
+      setTimeout(() => setCatImageStatus(""), 3000);
+    } catch (error) {
+      setCatImageStatus("❌ فشل الحفظ: " + error.message);
+    }
+  };
 
   useEffect(() => {
     const unsub = db.collection("products").onSnapshot(
@@ -802,28 +808,7 @@ function AdminPage({ categories, onBack }){
     return () => unsub();
   }, []);
 
-  const resetForm = () => { setName(""); setImageUrl(""); setUploadError(""); setPrice(""); setDiscount(""); setStock(""); setDesc(""); };
-
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    e.target.value = ""; // للسماح باختيار نفس الملف مرة أخرى لاحقاً
-    if (!file) return;
-    setUploadError("");
-    setUploading(true);
-    try {
-      const path = "products/" + Date.now() + "_" + file.name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
-      const ref = storage.ref().child(path);
-      await ref.put(file);
-      const url = await ref.getDownloadURL();
-      setImageUrl(url);
-    } catch (error) {
-      setUploadError(
-        "❌ تعذر رفع الصورة: " + error.message +
-        " — تأكدي أن Firebase Storage مفعّل على خطة Blaze في مشروعك."
-      );
-    }
-    setUploading(false);
-  };
+  const resetForm = () => { setName(""); setImageUrl(""); setPrice(""); setDiscount(""); setStock(""); setDesc(""); };
 
   const handleAdd = async (e) => {
     e.preventDefault();
@@ -899,6 +884,52 @@ function AdminPage({ categories, onBack }){
         <button className="back-btn" onClick={onBack}>→ العودة للمتجر</button>
       </div>
 
+      <form className="admin-form" onSubmit={handleSaveLogo}>
+        <h3>شعار المتجر</h3>
+        <label>
+          رابط الشعار (URL)
+          <input type="url" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} placeholder="https://example.com/logo.png" />
+        </label>
+        {logoUrl.trim() !== "" && (
+          <div style={{display:"flex", flexDirection:"column", gap:6}}>
+            <img src={logoUrl} alt="معاينة الشعار" className="admin-image-preview" style={{objectFit:"contain", background:"var(--cream-2)"}} loading="lazy" decoding="async" onError={(e) => { e.target.style.display = "none"; }} />
+            <button type="button" className="btn-ghost" onClick={() => setLogoUrl("")} style={{alignSelf:"flex-start", fontSize:12}}>إزالة الشعار</button>
+          </div>
+        )}
+        <button type="submit" className="btn-primary" disabled={savingLogo}>
+          {savingLogo ? "جاري الحفظ..." : "حفظ الشعار"}
+        </button>
+        {logoStatus && <p className={"admin-status" + (logoStatus.startsWith("✅") ? " success" : " error")}>{logoStatus}</p>}
+      </form>
+
+      <div className="admin-form">
+        <h3>صور التصنيفات</h3>
+        <p style={{margin:0, fontSize:12.5, color:"#a3948d"}}>أضيفي رابط صورة لكل قسم — تظهر الصورة بدل الأيقونة في الموقع.</p>
+        {categories.map(c => (
+          <div key={c.id} style={{display:"flex", flexDirection:"column", gap:8, padding:"10px 0", borderBottom:"1px solid var(--line)"}}>
+            <div style={{display:"flex", alignItems:"center", gap:10}}>
+              <span style={{width:40, height:40, borderRadius:10, background: c.color + "26", display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, overflow:"hidden", flexShrink:0}}>
+                {(catImageEdits[c.id] || "").trim() !== ""
+                  ? <img src={catImageEdits[c.id]} alt={c.name} loading="lazy" decoding="async" style={{width:"100%", height:"100%", objectFit:"cover"}} onError={(e) => { e.target.style.display = "none"; }} />
+                  : c.icon}
+              </span>
+              <strong style={{color:"var(--plum)", fontSize:14}}>{c.name}</strong>
+            </div>
+            <div style={{display:"flex", gap:8}}>
+              <input
+                type="url"
+                value={catImageEdits[c.id] || ""}
+                onChange={(e) => setCatImageEdits(prev => ({ ...prev, [c.id]: e.target.value }))}
+                placeholder={"رابط صورة قسم " + c.name}
+                style={{flex:1, padding:"10px 12px", borderRadius:8, border:"1px solid var(--line)", fontFamily:"inherit", fontSize:13}}
+              />
+              <button type="button" className="btn-ghost" onClick={() => handleSaveCategoryImage(c.id)} style={{flexShrink:0, fontSize:12.5, padding:"10px 16px"}}>حفظ</button>
+            </div>
+          </div>
+        ))}
+        {catImageStatus && <p className={"admin-status" + (catImageStatus.startsWith("✅") ? " success" : " error")}>{catImageStatus}</p>}
+      </div>
+
       <form className="admin-form" onSubmit={handleAdd}>
         <h3>إضافة منتج جديد</h3>
         <label>
@@ -906,33 +937,21 @@ function AdminPage({ categories, onBack }){
           <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="مثال: غسول الورد المهدئ" />
         </label>
         <label>
-          صورة المنتج
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileUpload}
-            disabled={uploading}
-          />
-        </label>
-        {uploading && <p style={{fontSize:12.5, color:"var(--plum)", margin:0}}>⏳ جاري رفع الصورة...</p>}
-        {uploadError && <p style={{fontSize:12.5, color:"var(--rose-dark)", margin:0}}>{uploadError}</p>}
-        {imageUrl.trim() !== "" && !uploading && (
-          <div style={{display:"flex", flexDirection:"column", gap:6}}>
-            <img src={imageUrl} alt="معاينة" className="admin-image-preview" loading="lazy" decoding="async" onError={(e) => { e.target.style.display = "none"; }} />
-            <button type="button" className="btn-ghost" onClick={() => setImageUrl("")} style={{alignSelf:"flex-start", fontSize:12}}>إزالة الصورة</button>
-          </div>
-        )}
-        <details>
-          <summary style={{fontSize:12.5, color:"#a3948d", cursor:"pointer"}}>أو الصقي رابط صورة مباشر بدلاً من الرفع</summary>
+          رابط صورة المنتج (URL)
           <input
             type="url"
             value={imageUrl}
             onChange={(e) => setImageUrl(e.target.value)}
             placeholder="https://example.com/image.jpg"
-            style={{marginTop:8, width:"100%", padding:"10px 12px", borderRadius:8, border:"1px solid var(--line)", fontFamily:"inherit", fontSize:14}}
           />
-        </details>
-        <label>
+        </label>
+        {imageUrl.trim() !== "" && (
+          <div style={{display:"flex", flexDirection:"column", gap:6}}>
+            <img src={imageUrl} alt="معاينة" className="admin-image-preview" loading="lazy" decoding="async" onError={(e) => { e.target.style.display = "none"; }} />
+            <button type="button" className="btn-ghost" onClick={() => setImageUrl("")} style={{alignSelf:"flex-start", fontSize:12}}>إزالة الصورة</button>
+          </div>
+        )}
+                <label>
           السعر (بالدينار العراقي)
           <input type="number" min="0" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="مثال: 15000" />
         </label>
@@ -959,7 +978,7 @@ function AdminPage({ categories, onBack }){
             {categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
           </select>
         </label>
-        <button type="submit" className="btn-primary" disabled={saving || uploading}>
+        <button type="submit" className="btn-primary" disabled={saving}>
           {saving ? "جاري الحفظ..." : "إضافة المنتج"}
         </button>
         {status && <p className={"admin-status" + (status.startsWith("✅") ? " success" : status.startsWith("⚠️") ? "" : " error")}>{status}</p>}
@@ -1027,6 +1046,29 @@ function Store(){
   const [products, setProducts] = useState([]);
   const [productsLoaded, setProductsLoaded] = useState(false);
 
+  const [logoUrl, setLogoUrl] = useState("");
+  const [catImages, setCatImages] = useState({});
+
+  useEffect(() => {
+    const unsub = db.collection("settings").doc("store").onSnapshot(
+      (doc) => { if (doc.exists) setLogoUrl(doc.data().logoUrl || ""); },
+      (error) => console.error("فشل جلب الشعار:", error)
+    );
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    const unsub = db.collection("categories").onSnapshot(
+      (snapshot) => {
+        const map = {};
+        snapshot.docs.forEach(d => { map[d.id] = d.data().imageUrl || ""; });
+        setCatImages(map);
+      },
+      (error) => console.error("فشل جلب صور التصنيفات:", error)
+    );
+    return () => unsub();
+  }, []);
+
   useEffect(() => {
     const unsub = db.collection("products").onSnapshot(
       (snapshot) => {
@@ -1043,9 +1085,9 @@ function Store(){
 
   const catById = useMemo(() => {
     const m = {};
-    CATEGORIES.forEach(c => m[c.id] = c);
+    CATEGORIES.forEach(c => m[c.id] = { ...c, imageUrl: catImages[c.id] || "" });
     return m;
-  }, []);
+  }, [catImages]);
 
   // منتج واحد على الأقل من كل قسم متوفر، لعرض تشكيلة متنوعة في الصفحة الرئيسية
   const mixedProducts = useMemo(() => {
@@ -1147,19 +1189,11 @@ function Store(){
 
       {activePage === null ? (
         <React.Fragment>
-          <div className="hero">
-            <div>
-              <div className="hero-eyebrow">عناية يومية بالبشرة</div>
-              <h1 className="display">جمالك يبدأ بروتين بسيط، يُصنع بعناية</h1>
-              <p>مجموعة مختارة من الغسولات والكريمات والسيرومات، مصممة لتناسب كل نوع بشرة — بمكونات واضحة ونتائج نلمسها.</p>
-              <div className="hero-actions">
-                <button className="btn-primary" onClick={() => goTo("cleansers")}>تسوقي الآن</button>
-                <button className="btn-ghost" onClick={() => goTo("serums")}>اكتشفي السيروم</button>
-              </div>
-            </div>
-            <div className="hero-visual">
-              <div className="hero-jar"></div>
-            </div>
+          <div className="hero hero-centered">
+            {logoUrl.trim() !== "" && (
+              <img className="hero-logo" src={logoUrl} alt="شعار كوزمتك اثار" onError={(e) => { e.target.style.display = "none"; }} />
+            )}
+            <h1 className="display hero-brand">كوزمتك اثار</h1>
           </div>
 
           <div className="cat-strip-wrap">
@@ -1169,7 +1203,11 @@ function Store(){
             <div className="cat-strip">
               {CATEGORIES.map(c => (
                 <button key={c.id} className="cat-tile" onClick={() => goTo(c.id)}>
-                  <span className="cat-tile-icon" style={{background: c.color + "26"}}>{c.icon}</span>
+                  <span className="cat-tile-icon" style={{background: c.color + "26"}}>
+                    {catById[c.id] && catById[c.id].imageUrl
+                      ? <img src={catById[c.id].imageUrl} alt={c.name} loading="lazy" decoding="async" style={{width:"100%", height:"100%", objectFit:"cover", borderRadius:18}} onError={(e) => { e.target.style.display = "none"; }} />
+                      : c.icon}
+                  </span>
                   <span className="cat-tile-label">{c.name}</span>
                 </button>
               ))}

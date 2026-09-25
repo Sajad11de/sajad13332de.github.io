@@ -460,8 +460,9 @@
                 <i class="fa-solid fa-circle-check"></i>
             </div>
             <h4 id="alert-title" class="text-lg font-black text-stone-900 mb-2">تنبيه</h4>
-            <p id="alert-message" class="text-stone-600 text-sm mb-6">رسالة...</p>
-            <button onclick="closeCustomAlert()" class="w-full bg-stone-900 hover:bg-stone-800 text-white py-3 rounded-xl font-bold">حسناً</button>
+            <p id="alert-message" class="text-stone-600 text-sm mb-4">رسالة...</p>
+            <div id="alert-steps" class="hidden text-right bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-4 space-y-2"></div>
+            <button id="alert-confirm-btn" onclick="closeCustomAlert()" class="w-full bg-stone-900 hover:bg-stone-800 text-white py-3 rounded-xl font-bold">حسناً</button>
         </div>
     </div>
 
@@ -910,14 +911,19 @@
                 } catch (e2) { copied = false; }
             }
 
+            const openInstagram = () => window.open(`https://ig.me/m/hj8.7s`, '_blank');
+
+            if (!copied) {
+                showCustomAlert('تعذر النسخ التلقائي', 'انسخي تفاصيل السلة يدوياً وأرسليها عبر انستكرام.', true, { onConfirm: openInstagram });
+                return;
+            }
+
             showCustomAlert(
-                copied ? 'تم نسخ تفاصيل الطلب' : 'تنبيه',
-                copied
-                    ? 'راح تنفتح صفحة الدردشة بانستكرام — اضغطي "لصق" بمربع الكتابة وأرسلي الطلب.'
-                    : 'تعذر النسخ التلقائي، انسخي تفاصيل السلة يدوياً وأرسليها عبر انستكرام.',
-                !copied
+                'تم نسخ تفاصيل الطلب',
+                '',
+                false,
+                { warn: 'اضغطي لصق داخل المحادثة وأرسليه.', confirmText: 'فهمت، افتح انستكرام', onConfirm: openInstagram }
             );
-            window.open(`https://ig.me/m/hj8.7s`, '_blank');
         }
 
         /* ================= التصنيفات الفرعية ================= */
@@ -1190,18 +1196,55 @@
             showCustomAlert('نجاح', 'تم تحديث الشعار.', false);
         }
 
-        function showCustomAlert(title, message, isError) {
+        let alertConfirmAction = null;
+
+        // options: { steps: [نص1, نص2, ...], confirmText: 'حسناً', onConfirm: fn }
+        function showCustomAlert(title, message, isError, options) {
+            options = options || {};
             $('alert-title').textContent = title;
             $('alert-message').textContent = message;
+            $('alert-message').classList.toggle('hidden', !message);
+
+            const stepsBox = $('alert-steps');
+            if (options.warn) {
+                stepsBox.innerHTML = `
+                    <div class="flex items-center gap-2.5 text-sm text-amber-900 font-black">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-500 text-lg shrink-0"></i>
+                        <span>${esc(options.warn)}</span>
+                    </div>`;
+                stepsBox.classList.remove('hidden');
+            } else if (Array.isArray(options.steps) && options.steps.length) {
+                stepsBox.innerHTML = options.steps.map((t, i) =>
+                    `<div class="flex items-start gap-2 text-sm text-amber-900 font-bold">
+                        <span class="shrink-0 w-5 h-5 rounded-full bg-amber-500 text-white text-[11px] flex items-center justify-center">${i + 1}</span>
+                        <span>${esc(t)}</span>
+                    </div>`
+                ).join('');
+                stepsBox.classList.remove('hidden');
+            } else {
+                stepsBox.classList.add('hidden');
+                stepsBox.innerHTML = '';
+            }
+
             const icon = $('alert-icon');
             icon.className = isError
                 ? 'w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl'
                 : 'w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl';
             icon.innerHTML = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
+
+            $('alert-confirm-btn').textContent = options.confirmText || 'حسناً';
+            alertConfirmAction = typeof options.onConfirm === 'function' ? options.onConfirm : null;
+
             $('custom-alert-modal').classList.remove('hidden');
             syncScrollLock();
         }
-        function closeCustomAlert() { $('custom-alert-modal').classList.add('hidden'); syncScrollLock(); }
+        function closeCustomAlert() {
+            $('custom-alert-modal').classList.add('hidden');
+            syncScrollLock();
+            const action = alertConfirmAction;
+            alertConfirmAction = null;
+            if (action) action();
+        }
 
         /* ================= فايربيس (يتحمل بالخلفية) ================= */
         function markReady(key) {

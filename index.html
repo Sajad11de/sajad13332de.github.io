@@ -240,14 +240,9 @@
                     <span>الإجمالي الكلي النهائي:</span>
                     <span id="cart-total-price" class="text-pink-700 text-xl">0 د.ع</span>
                 </div>
-                <div class="grid grid-cols-2 gap-2 mt-2">
-                    <button onclick="checkoutViaWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all duration-200 active:scale-95 shadow-lg shadow-emerald-600/20">
-                        <i class="fa-brands fa-whatsapp text-xl"></i> واتساب
-                    </button>
-                    <button onclick="checkoutViaInstagram()" class="w-full text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all duration-200 active:scale-95 shadow-lg" style="background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)">
-                        <i class="fa-brands fa-instagram text-xl"></i> انستكرام
-                    </button>
-                </div>
+                <button onclick="checkoutViaWhatsApp()" class="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all duration-200 active:scale-95 shadow-lg shadow-emerald-600/20">
+                    <i class="fa-brands fa-whatsapp text-xl"></i> إتمام الطلب عبر واتساب
+                </button>
             </div>
         </div>
     </div>
@@ -885,45 +880,6 @@
             const text = buildOrderText(false);
             if (!text) return;
             window.open(`https://wa.me/9647869367775?text=${encodeURIComponent(text)}`, '_blank');
-        }
-
-        // انستكرام ما يدعم فتح محادثة بنص جاهز، فننسخ تفاصيل الطلب للحافظة تلقائياً
-        // ونفتح صفحة الدردشة المباشرة مع المتجر حتى تضغط الزبونة "لصق" وترسل
-        async function checkoutViaInstagram() {
-            const text = buildOrderText(true);
-            if (!text) return;
-
-            let copied = false;
-            try {
-                await navigator.clipboard.writeText(text);
-                copied = true;
-            } catch (e) {
-                try {
-                    const ta = document.createElement('textarea');
-                    ta.value = text;
-                    ta.style.position = 'fixed';
-                    ta.style.opacity = '0';
-                    document.body.appendChild(ta);
-                    ta.focus();
-                    ta.select();
-                    copied = document.execCommand('copy');
-                    document.body.removeChild(ta);
-                } catch (e2) { copied = false; }
-            }
-
-            const openInstagram = () => window.open(`https://ig.me/m/hj8.7s`, '_blank');
-
-            if (!copied) {
-                showCustomAlert('تعذر النسخ التلقائي', 'انسخي تفاصيل السلة يدوياً وأرسليها عبر انستكرام.', true, { onConfirm: openInstagram });
-                return;
-            }
-
-            showCustomAlert(
-                'تم نسخ تفاصيل الطلب',
-                '',
-                false,
-                { warn: 'اضغطي لصق داخل المحادثة وأرسليه.', confirmText: 'فهمت، افتح انستكرام', onConfirm: openInstagram }
-            );
         }
 
         /* ================= التصنيفات الفرعية ================= */

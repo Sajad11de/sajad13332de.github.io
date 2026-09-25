@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>متجر كماليات آثار - عالم العناية والتجميل</title>
+    <title>متجر كوزمتك اثار / الجمعية - عالم العناية والتجميل</title>
 
     <!-- تسريع الاتصال بالخدمات الخارجية -->
     <link rel="preconnect" href="https://cdn.tailwindcss.com">
@@ -92,10 +92,10 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             <div id="store-logo-container" class="flex items-center gap-3 cursor-pointer select-none transition-all duration-200 active:scale-95" onclick="goToHome()" title="انقر مرتين للوصول للوحة التحكم">
                 <div class="w-12 h-12 rounded-2xl bg-pink-100 flex items-center justify-center overflow-hidden border border-pink-200 shadow-sm">
-                    <img id="store-logo-img" width="48" height="48" decoding="async" onerror="imgErr(this,'logo')" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23fce7f3'/><text x='50%' y='55%' font-family='Arial' font-weight='bold' font-size='28' fill='%23db2777' text-anchor='middle' dominant-baseline='middle'>آثار</text></svg>" alt="شعار كماليات آثار" class="w-full h-full object-cover">
+                    <img id="store-logo-img" width="48" height="48" decoding="async" onerror="imgErr(this,'logo')" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23fce7f3'/><text x='50%' y='55%' font-family='Arial' font-weight='bold' font-size='28' fill='%23db2777' text-anchor='middle' dominant-baseline='middle'>آثار</text></svg>" alt="شعار كوزمتك اثار / الجمعية" class="w-full h-full object-cover">
                 </div>
                 <div>
-                    <h1 class="text-xl font-black text-stone-900 tracking-tight">كماليات آثار</h1>
+                    <h1 class="text-xl font-black text-stone-900 tracking-tight">كوزمتك اثار / الجمعية</h1>
                     <p class="text-xs text-pink-600 font-semibold">عالم العناية والتجميل الأصلي</p>
                 </div>
             </div>
@@ -165,9 +165,9 @@
 
     <footer class="bg-white border-t border-pink-100 mt-16 py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h3 class="text-lg font-black text-stone-900">كماليات آثار</h3>
+            <h3 class="text-lg font-black text-stone-900">كوزمتك اثار / الجمعية</h3>
             <p class="text-stone-500 text-sm mt-1">وجهتك الأولى لكل ما تحتاجه العناية والجمال الرائع.</p>
-            <p class="text-xs text-stone-400 mt-4">&copy; 2026 جميع الحقوق محفوظة لمتجر كماليات آثار.</p>
+            <p class="text-xs text-stone-400 mt-4">&copy; 2026 جميع الحقوق محفوظة لمتجر كوزمتك اثار / الجمعية.</p>
         </div>
     </footer>
 
@@ -212,7 +212,17 @@
                                 <option value="أربيل" data-fee="5000">أربيل (5,000 د.ع)</option>
                                 <option value="النجف" data-fee="5000">النجف (5,000 د.ع)</option>
                                 <option value="كربلاء" data-fee="5000">كربلاء (5,000 د.ع)</option>
-                                <option value="أخرى" data-fee="5000">باقي المحافظات (5,000 د.ع)</option>
+                                <option value="الأنبار" data-fee="5000">الأنبار (5,000 د.ع)</option>
+                                <option value="ديالى" data-fee="5000">ديالى (5,000 د.ع)</option>
+                                <option value="واسط" data-fee="5000">واسط (5,000 د.ع)</option>
+                                <option value="ميسان" data-fee="5000">ميسان (5,000 د.ع)</option>
+                                <option value="ذي قار" data-fee="5000">ذي قار (5,000 د.ع)</option>
+                                <option value="المثنى" data-fee="5000">المثنى (5,000 د.ع)</option>
+                                <option value="القادسية" data-fee="5000">القادسية (5,000 د.ع)</option>
+                                <option value="صلاح الدين" data-fee="5000">صلاح الدين (5,000 د.ع)</option>
+                                <option value="كركوك" data-fee="5000">كركوك (5,000 د.ع)</option>
+                                <option value="دهوك" data-fee="5000">دهوك (5,000 د.ع)</option>
+                                <option value="السليمانية" data-fee="5000">السليمانية (5,000 د.ع)</option>
                             </select>
                         </div>
                         <div>
@@ -240,9 +250,14 @@
                     <span>الإجمالي الكلي النهائي:</span>
                     <span id="cart-total-price" class="text-pink-700 text-xl">0 د.ع</span>
                 </div>
-                <button onclick="checkoutViaWhatsApp()" class="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all duration-200 active:scale-95 shadow-lg shadow-emerald-600/20">
-                    <i class="fa-brands fa-whatsapp text-xl"></i> إتمام الطلب عبر واتساب
-                </button>
+                <div class="grid grid-cols-2 gap-2 mt-2">
+                    <button onclick="checkoutViaWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all duration-200 active:scale-95 shadow-lg shadow-emerald-600/20">
+                        <i class="fa-brands fa-whatsapp text-xl"></i> واتساب
+                    </button>
+                    <button onclick="checkoutViaInstagram()" class="w-full text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all duration-200 active:scale-95 shadow-lg" style="background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);box-shadow:0 10px 15px -3px rgba(188,24,136,.25)">
+                        <i class="fa-brands fa-instagram text-xl"></i> انستكرام
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -272,7 +287,7 @@
             <div class="p-5 border-b border-stone-200 flex items-center justify-between bg-stone-900 text-white">
                 <div class="flex items-center gap-3">
                     <i class="fa-solid fa-sliders text-pink-400 text-xl"></i>
-                    <h3 class="text-lg font-black">لوحة تحكم كماليات آثار</h3>
+                    <h3 class="text-lg font-black">لوحة تحكم كوزمتك اثار / الجمعية</h3>
                 </div>
                 <button onclick="closeAdminDashboard()" class="w-9 h-9 bg-stone-800 hover:bg-stone-700 text-white rounded-full flex items-center justify-center">
                     <i class="fa-solid fa-xmark"></i>
@@ -494,7 +509,7 @@
         const defaultLogo = makeSvg('آثار', 100, 28);
         const svgProd1 = makeSvg('سيروم فيتامين C');
         const svgProd2 = makeSvg('أحمر شفاه مات');
-        const svgFallback = makeSvg('كماليات آثار');
+        const svgFallback = makeSvg('كوزمتك اثار / الجمعية');
 
         function imgErr(img, kind) {
             img.onerror = null;
@@ -869,7 +884,7 @@
             const total = Math.max(0, subtotal + getShippingFee() - discount);
 
             const b = plain ? '' : '*';
-            let text = `${b}🛍️ طلب جديد من كماليات آثار${b}\n\n${b}👤 الزبون:${b} ${name}\n${b}📞 الهاتف:${b} ${phone}\n${b}📍 العنوان:${b} ${prov} - ${area}\n\n${b}🛒 المنتجات:${b}\n`;
+            let text = `${b}🛍️ طلب جديد من كوزمتك اثار / الجمعية${b}\n\n${b}👤 الزبون:${b} ${name}\n${b}📞 الهاتف:${b} ${phone}\n${b}📍 العنوان:${b} ${prov} - ${area}\n\n${b}🛒 المنتجات:${b}\n`;
             cart.forEach((i) => { text += `▪️ ${i.name} (العدد: ${i.quantity}) - ${(i.price * i.quantity).toLocaleString()} د.ع\n`; });
             if (discount > 0) text += `\n${b}🏷️ الخصم (${storeDiscount.title}):${b} -${discount.toLocaleString()} د.ع`;
             text += `\n${b}💰 الإجمالي الكلي:${b} ${total.toLocaleString()} د.ع`;
@@ -879,7 +894,44 @@
         function checkoutViaWhatsApp() {
             const text = buildOrderText(false);
             if (!text) return;
-            window.open(`https://wa.me/9647869367775?text=${encodeURIComponent(text)}`, '_blank');
+            window.open(`https://wa.me/9647724700027?text=${encodeURIComponent(text)}`, '_blank');
+        }
+
+        // ينسخ نص الطلب للحافظة (Clipboard)، مع بديل احتياطي للمتصفحات القديمة
+        function copyTextToClipboard(text) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                return navigator.clipboard.writeText(text);
+            }
+            return new Promise((resolve, reject) => {
+                try {
+                    const ta = document.createElement('textarea');
+                    ta.value = text;
+                    ta.style.position = 'fixed';
+                    ta.style.opacity = '0';
+                    document.body.appendChild(ta);
+                    ta.focus();
+                    ta.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(ta);
+                    resolve();
+                } catch (err) { reject(err); }
+            });
+        }
+
+        // إتمام الطلب عبر انستكرام: ينسخ تفاصيل الطلب وينبّه الزبونة بضرورة لصقها داخل المحادثة قبل فتح انستكرام
+        const INSTAGRAM_USERNAME = 'athar_cosmetic';
+        function checkoutViaInstagram() {
+            const text = buildOrderText(true);
+            if (!text) return;
+            copyTextToClipboard(text).then(() => {
+                showCustomAlert('تم نسخ تفاصيل الطلب ✅', '', false, {
+                    warn: 'مهم جداً: تم نسخ تفاصيل طلبك تلقائياً، يجب لصقه (Paste) داخل محادثة الانستكرام بعد فتحها حتى يصل الطلب بشكل صحيح.',
+                    confirmText: 'فتح الانستكرام الآن',
+                    onConfirm: () => window.open(`https://ig.me/m/${INSTAGRAM_USERNAME}`, '_blank')
+                });
+            }).catch(() => {
+                showCustomAlert('تنبيه', `تعذر نسخ الطلب تلقائياً. يرجى مراسلتنا مباشرة على انستكرام ${INSTAGRAM_USERNAME}@ وكتابة طلبك يدوياً.`, true);
+            });
         }
 
         /* ================= التصنيفات الفرعية ================= */

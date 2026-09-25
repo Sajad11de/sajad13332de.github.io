@@ -1,1268 +1,1248 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>لمسة — متجر العناية بالبشرة</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Reem+Kufi:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-<style>
-  :root{
-    --cream:#FAF5F0;
-    --cream-2:#F2E9E1;
-    --plum:#3E2634;
-    --plum-2:#5A3A4C;
-    --rose:#C98A9B;
-    --rose-dark:#B06B7E;
-    --sage:#8FA37E;
-    --ink:#2B2320;
-    --paper:#FFFFFF;
-    --line:#E7DCD2;
-  }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
-  body{
-    background:var(--cream);
-    color:var(--ink);
-    font-family:'Cairo',sans-serif;
-    -webkit-font-smoothing:antialiased;
-    overflow-x:hidden;
-  }
-  #root{min-height:100vh;}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متجر كماليات آثار - عالم العناية والتجميل</title>
 
-  .display{
-    font-family:'Reem Kufi', 'Cairo', sans-serif;
-    font-weight:400;
-  }
+    <!-- تسريع الاتصال بالخدمات الخارجية -->
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 
-  /* ===== NAV ===== */
-  .nav{
-    position:sticky; top:0; z-index:50;
-    background:rgba(250,245,240,0.92);
-    backdrop-filter:blur(8px);
-    border-bottom:1px solid var(--line);
-  }
-  .nav-inner{
-    max-width:1180px; margin:0 auto;
-    display:flex; align-items:center; justify-content:space-between;
-    padding:16px 24px;
-  }
-  .brand{
-    font-family:'Reem Kufi', sans-serif;
-    font-size:26px; color:var(--plum); letter-spacing:0.5px;
-    cursor:pointer; user-select:none;
-    display:flex; align-items:center; gap:8px;
-  }
-  .brand-dot{width:8px;height:8px;border-radius:50%;background:var(--rose);}
-  .nav-links{
-    display:flex; gap:28px; list-style:none; margin:0; padding:0;
-  }
-  .nav-links a{
-    color:var(--plum); text-decoration:none; font-size:15px; font-weight:600;
-    cursor:pointer; position:relative; padding-bottom:4px;
-    transition:color .2s ease;
-  }
-  .nav-links a:hover{color:var(--rose-dark);}
-  .nav-links a::after{
-    content:''; position:absolute; right:0; bottom:0; width:0; height:2px;
-    background:var(--rose); transition:width .25s ease;
-  }
-  .nav-links a:hover::after{width:100%;}
-  .cart-btn{
-    display:flex; align-items:center; gap:8px;
-    background:var(--plum); color:var(--cream);
-    border:none; border-radius:999px; padding:10px 18px;
-    font-family:'Cairo',sans-serif; font-weight:700; font-size:14px;
-    cursor:pointer; transition:transform .15s ease, background .2s ease;
-  }
-  .cart-btn:hover{background:var(--plum-2); transform:translateY(-1px);}
-  .cart-count{
-    background:var(--rose); color:var(--plum); border-radius:50%;
-    width:20px; height:20px; display:flex; align-items:center; justify-content:center;
-    font-size:12px; font-weight:800;
-  }
-  .nav-toggle{display:none; background:none; border:none; font-size:24px; color:var(--plum); cursor:pointer;}
+    <!-- تحميل مسبق لملفات فايربيس حتى تكون جاهزة قبل ما نحتاجها -->
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js">
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js">
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js">
 
-  /* ===== HERO ===== */
-  .hero{
-    max-width:1180px; margin:0 auto;
-    padding:72px 24px 56px;
-    display:grid; grid-template-columns:1.1fr 0.9fr; gap:48px; align-items:center;
-  }
-  .hero-eyebrow{
-    color:var(--rose-dark); font-weight:700; font-size:14px; margin-bottom:14px;
-  }
-  .hero h1{
-    font-family:'Reem Kufi', sans-serif; font-weight:400;
-    font-size:clamp(34px, 5vw, 56px); line-height:1.25; color:var(--plum);
-    margin:0 0 20px;
-  }
-  .hero p{
-    font-size:17px; line-height:1.9; color:#5b4d47; max-width:46ch; margin:0 0 28px;
-  }
-  .hero-actions{display:flex; gap:14px; flex-wrap:wrap;}
-  .btn-primary{
-    background:var(--rose); color:#fff; border:none; border-radius:10px;
-    padding:14px 26px; font-family:'Cairo',sans-serif; font-weight:700; font-size:15px;
-    cursor:pointer; transition:background .2s ease, transform .15s ease;
-  }
-  .btn-primary:hover{background:var(--rose-dark); transform:translateY(-1px);}
-  .btn-ghost{
-    background:transparent; color:var(--plum); border:1.5px solid var(--plum);
-    border-radius:10px; padding:14px 26px; font-family:'Cairo',sans-serif; font-weight:700; font-size:15px;
-    cursor:pointer; transition:all .2s ease;
-  }
-  .btn-ghost:hover{background:var(--plum); color:#fff;}
-  .hero-visual{
-    position:relative; height:380px; border-radius:24px;
-    background:linear-gradient(155deg, var(--cream-2) 0%, #EADFD3 55%, var(--rose) 140%);
-    display:flex; align-items:center; justify-content:center; overflow:hidden;
-  }
-  .hero-visual::before{
-    content:'✦'; position:absolute; font-size:220px; color:rgba(255,255,255,0.45);
-    font-family:serif; top:-40px; right:-30px;
-  }
-  .hero-jar{
-    width:150px; height:170px; background:var(--paper); border-radius:20px 20px 34px 34px;
-    box-shadow:0 30px 60px -20px rgba(62,38,52,0.35); position:relative; z-index:2;
-  }
-  .hero-jar::before{
-    content:''; position:absolute; top:-18px; left:50%; transform:translateX(-50%);
-    width:96px; height:26px; background:var(--sage); border-radius:10px;
-  }
-  .hero-jar::after{
-    content:'لمسة'; position:absolute; bottom:22px; left:0; right:0; text-align:center;
-    font-family:'Reem Kufi',sans-serif; color:var(--plum); font-size:20px;
-  }
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+        body { font-family: 'Cairo', sans-serif; background-color: #fffafb; color: #44383a; }
+        body.no-scroll { overflow: hidden; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-  /* ===== CATEGORY QUICK NAV ===== */
-  .cat-strip-wrap{
-    max-width:1180px; margin:0 auto; padding:0 24px 40px;
-  }
-  .cat-strip-head{
-    display:flex; align-items:center; justify-content:space-between;
-    margin-bottom:14px;
-  }
-  .cat-strip-head h3{
-    font-family:'Reem Kufi',sans-serif; font-weight:400; color:var(--plum);
-    font-size:20px; margin:0;
-  }
-  .cat-strip-more{
-    color:var(--rose-dark); font-size:13px; font-weight:700; text-decoration:none;
-    display:flex; align-items:center; gap:4px; background:none; border:none; cursor:pointer;
-  }
-  .cat-strip{
-    display:flex; gap:16px; overflow-x:auto; scroll-behavior:smooth;
-    padding:2px 2px 10px; scrollbar-width:none;
-  }
-  .cat-strip::-webkit-scrollbar{display:none;}
-  .cat-tile{
-    flex:0 0 auto; width:78px; display:flex; flex-direction:column; align-items:center; gap:8px;
-    background:none; border:none; cursor:pointer; padding:0;
-  }
-  .cat-tile-icon{
-    width:78px; height:78px; border-radius:18px;
-    display:flex; align-items:center; justify-content:center; font-size:30px;
-    transition:transform .15s ease;
-  }
-  .cat-tile:hover .cat-tile-icon{transform:translateY(-3px);}
-  .cat-tile-label{
-    font-size:12.5px; font-weight:700; color:var(--plum); text-align:center; line-height:1.35;
-  }
+        /* إلغاء تأخير اللمس وتحسين الاستجابة */
+        button, a, select, input, label { touch-action: manipulation; }
+        button { -webkit-tap-highlight-color: transparent; }
 
-  /* ===== SECTIONS ===== */
-  .section{
-    max-width:1180px; margin:0 auto; padding:54px 24px;
-    border-top:1px solid var(--line);
-  }
-  .section-head{
-    display:flex; align-items:baseline; justify-content:space-between;
-    margin-bottom:30px; gap:20px; flex-wrap:wrap;
-  }
-  .section-head h2{
-    font-family:'Reem Kufi', sans-serif; font-weight:400;
-    font-size:32px; color:var(--plum); margin:0;
-    display:flex; align-items:center; gap:12px;
-  }
-  .section-tag{
-    width:10px; height:10px; border-radius:3px; display:inline-block;
-  }
-  .section-desc{color:#7a6b64; font-size:14.5px; max-width:52ch; margin:6px 0 0;}
-  .section-count{color:#a3948d; font-size:14px; font-weight:600; white-space:nowrap;}
+        /* Skeleton shimmer */
+        .sk {
+            background: linear-gradient(90deg, #f6e7ee 25%, #fdf3f7 50%, #f6e7ee 75%);
+            background-size: 200% 100%;
+            animation: sk-move 1.2s ease-in-out infinite;
+        }
+        @keyframes sk-move { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        @media (prefers-reduced-motion: reduce) { .sk { animation: none; } }
 
-  .grid{
-    display:grid; grid-template-columns:repeat(2, minmax(0, 1fr));
-    gap:16px;
-  }
-  @media (min-width:640px){
-    .grid{grid-template-columns:repeat(3, minmax(0, 1fr)); gap:20px;}
-  }
-  @media (min-width:960px){
-    .grid{grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:22px;}
-  }
+        /* ظهور الصور بنعومة بدل ما تنط فجأة */
+        .img-fade { opacity: 0; transition: opacity .3s ease; }
+        .img-fade.loaded { opacity: 1; }
 
-  .card{
-    background:var(--paper); border-radius:16px; overflow:hidden;
-    border:1px solid var(--line);
-    display:flex; flex-direction:column;
-    transition:transform .22s ease, box-shadow .22s ease;
-  }
-  .card:hover{
-    transform:translateY(-5px);
-    box-shadow:0 18px 34px -18px rgba(62,38,52,0.3);
-  }
-  .card-media{
-    height:130px; position:relative;
-    display:flex; align-items:center; justify-content:center;
-    font-size:34px; overflow:hidden;
-  }
-  .card-media img{width:100%; height:100%; object-fit:cover;}
-  .discount-badge{
-    position:absolute; top:8px; left:8px; z-index:2;
-    background:var(--rose-dark); color:#fff; font-size:10.5px; font-weight:800;
-    padding:3px 8px; border-radius:999px;
-  }
-  .card-body{padding:12px 12px 14px; display:flex; flex-direction:column; gap:6px; flex:1;}
-  .card-name{font-weight:700; font-size:13.5px; color:var(--plum); margin:0; line-height:1.4;}
-  .card-desc{font-size:11.5px; color:#8b7c74; line-height:1.5; margin:0; min-height:auto;}
-  .card-foot{
-    margin-top:auto; display:flex; flex-direction:column; align-items:stretch; gap:8px;
-  }
-  .card-price{font-weight:800; color:var(--ink); font-size:13px; display:flex; align-items:baseline; gap:6px;}
-  .card-price-old{
-    font-weight:600; color:#a3948d; text-decoration:line-through;
-    font-size:11px;
-  }
-  .add-btn{
-    border:none; background:var(--cream-2); color:var(--plum);
-    border-radius:9px; padding:8px 12px; font-weight:700; font-size:11.5px;
-    cursor:pointer; transition:background .2s ease, color .2s ease; width:100%; justify-content:center;
-    display:flex; align-items:center; gap:6px;
-  }
-  .add-btn:hover{background:var(--rose); color:#fff;}
-  .add-btn.added{background:var(--sage); color:#fff;}
-  .add-btn.disabled, .add-btn:disabled{
-    background:#eee; color:#b3a89f; cursor:not-allowed;
-  }
-  .add-btn.disabled:hover, .add-btn:disabled:hover{background:#eee; color:#b3a89f;}
+        /* التصنيفات (حالة التحديد بدون إعادة بناء) */
+        .cat-btn { opacity: .8; transition: transform .15s ease, opacity .15s ease; }
+        .cat-btn:active { transform: scale(.95); }
+        .cat-btn.active { opacity: 1; transform: scale(1.05); }
+        .cat-thumb { border: 2px solid transparent; transition: border-color .15s ease, box-shadow .15s ease; }
+        .cat-btn.active .cat-thumb { border-color: #ec4899; box-shadow: 0 0 0 2px #fbcfe8; }
+        .cat-label { color: #57534e; }
+        .cat-btn.active .cat-label { color: #be185d; }
 
-  .stock-badge{
-    font-size:12px; font-weight:700; margin:-2px 0 0; padding:0;
-  }
-  .stock-badge.stock-low{color:var(--rose-dark);}
-  .stock-badge.stock-out{color:#b3a89f;}
+        /* التصنيفات الفرعية: تنفتح وتنغلق بنعومة حتى ما يقفز المحتوى */
+        #subcats-wrap { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .25s ease; }
+        #subcats-wrap.open { grid-template-rows: 1fr; }
+        #subcats-inner { overflow: hidden; min-height: 0; }
+        .sub-btn { padding: .45rem 1rem; border-radius: 9999px; font-weight: 700; font-size: .8125rem; white-space: nowrap; color: #57534e; transition: background-color .15s ease, color .15s ease, box-shadow .15s ease; }
+        .sub-btn:active { transform: scale(.96); }
+        .sub-btn.active { background: #fff; color: #be185d; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
 
-  /* ===== CART DRAWER ===== */
-  .overlay{
-    position:fixed; inset:0; background:rgba(43,35,32,0.4);
-    z-index:90; opacity:0; pointer-events:none; transition:opacity .25s ease;
-  }
-  .overlay.open{opacity:1; pointer-events:auto;}
-  .drawer{
-    position:fixed; top:0; bottom:0; left:0; width:min(380px, 92vw);
-    background:var(--cream); z-index:91;
-    transform:translateX(-100%); transition:transform .3s ease;
-    display:flex; flex-direction:column;
-    box-shadow:20px 0 50px rgba(0,0,0,0.15);
-  }
-  .drawer.open{transform:translateX(0);}
-  .drawer-head{
-    padding:22px 22px 16px; border-bottom:1px solid var(--line);
-    display:flex; align-items:center; justify-content:space-between;
-  }
-  .drawer-head h3{font-family:'Reem Kufi',sans-serif; font-weight:400; color:var(--plum); font-size:22px; margin:0;}
-  .drawer-close{background:none; border:none; font-size:22px; color:var(--plum); cursor:pointer;}
-  .drawer-list{flex:1; overflow-y:auto; padding:16px 22px;}
-  .drawer-item{
-    display:flex; gap:12px; padding:14px 0; border-bottom:1px solid var(--line);
-    align-items:center;
-  }
-  .drawer-item-icon{
-    width:52px; height:52px; border-radius:10px; background:var(--cream-2);
-    display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;
-    overflow:hidden;
-  }
-  .drawer-item-icon img{width:100%; height:100%; object-fit:cover;}
-  .drawer-item-info{flex:1;}
-  .drawer-item-info .name{font-weight:700; font-size:14px; color:var(--plum);}
-  .drawer-item-info .meta{font-size:12.5px; color:#9a8c84; margin-top:2px;}
-  .qty-controls{display:flex; align-items:center; gap:8px;}
-  .qty-btn{
-    width:24px; height:24px; border-radius:6px; border:1px solid var(--line);
-    background:#fff; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center;
-    color:var(--plum);
-  }
-  .empty-cart{
-    text-align:center; color:#a3948d; padding:60px 20px; font-size:14px;
-  }
-  .drawer-foot{
-    padding:18px 22px 24px; border-top:1px solid var(--line);
-  }
-  .drawer-total{
-    display:flex; justify-content:space-between; font-weight:800; color:var(--plum);
-    font-size:17px; margin-bottom:14px;
-  }
-  .checkout-btn{
-    width:100%; background:var(--plum); color:var(--cream); border:none;
-    border-radius:10px; padding:14px; font-weight:700; font-size:15px; cursor:pointer;
-    transition:background .2s ease;
-  }
-  .checkout-btn:hover{background:var(--plum-2);}
+        /* إشعار سريع بدل النافذة المنبثقة */
+        #toast {
+            position: fixed; bottom: 1.5rem; left: 50%; z-index: 60;
+            transform: translate(-50%, 12px); opacity: 0; pointer-events: none;
+            transition: opacity .2s ease, transform .2s ease;
+            max-width: 90vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        #toast.show { opacity: 1; transform: translate(-50%, 0); }
 
-  .footer{
-    text-align:center; padding:40px 24px 50px; color:#a3948d; font-size:13px;
-  }
-
-  .page-head{
-    max-width:1180px; margin:0 auto; padding:28px 24px 0;
-  }
-  .back-btn{
-    background:var(--paper); color:var(--plum); border:1.5px solid var(--line);
-    border-radius:999px; padding:9px 20px; font-family:'Cairo',sans-serif;
-    font-weight:700; font-size:14px; cursor:pointer; transition:all .2s ease;
-  }
-  .back-btn:hover{background:var(--plum); border-color:var(--plum); color:var(--cream);}
-
-  /* ===== ADMIN ===== */
-  .admin-link{margin-top:10px;}
-  .admin-link a{color:#c7bab2; font-size:12px; text-decoration:underline;}
-  .admin-link a:hover{color:var(--plum);}
-
-  .admin-gate{
-    min-height:100vh; display:flex; align-items:center; justify-content:center;
-    background:var(--cream); padding:24px;
-  }
-  .admin-gate-box{
-    background:var(--paper); border:1px solid var(--line); border-radius:16px;
-    padding:32px; width:100%; max-width:360px; text-align:center;
-    display:flex; flex-direction:column; gap:14px;
-  }
-  .admin-gate-box h2{font-family:'Reem Kufi',sans-serif; font-weight:400; color:var(--plum); margin:0 0 6px;}
-  .admin-gate-box input{
-    padding:12px 14px; border-radius:10px; border:1px solid var(--line);
-    font-family:inherit; font-size:15px; text-align:center;
-  }
-
-  .admin-page{max-width:760px; margin:0 auto; padding:36px 24px 60px;}
-  .admin-head{
-    display:flex; align-items:center; justify-content:space-between;
-    margin-bottom:26px; gap:16px; flex-wrap:wrap;
-  }
-  .admin-head h2{font-size:26px; color:var(--plum); margin:0;}
-  .admin-form{
-    background:var(--paper); border:1px solid var(--line); border-radius:16px;
-    padding:24px; display:flex; flex-direction:column; gap:14px; margin-bottom:34px;
-  }
-  .admin-form h3{margin:0 0 4px; color:var(--plum); font-size:17px;}
-  .admin-form label{
-    display:flex; flex-direction:column; gap:6px; font-size:13.5px; font-weight:700; color:var(--plum);
-  }
-  .admin-form input, .admin-form select, .admin-form textarea{
-    padding:10px 12px; border-radius:8px; border:1px solid var(--line);
-    font-family:inherit; font-size:14px; font-weight:400; color:var(--ink); resize:vertical;
-  }
-  .admin-status{font-size:13.5px; font-weight:700; margin:0; color:var(--plum);}
-  .admin-status.success{color:var(--sage);}
-  .admin-status.error{color:var(--rose-dark);}
-  .admin-image-preview{
-    width:100%; max-height:160px; object-fit:cover; border-radius:10px;
-    border:1px solid var(--line); margin-top:-4px;
-  }
-  .admin-item-thumb{
-    width:52px; height:52px; border-radius:10px; object-fit:cover; flex-shrink:0;
-    background:var(--cream-2);
-  }
-  .admin-item-thumb-empty{
-    display:flex; align-items:center; justify-content:center; font-size:22px;
-  }
-  .admin-stock-row{
-    display:flex; align-items:center; gap:8px; margin-top:8px; flex-wrap:wrap;
-  }
-  .admin-stock-tag{
-    font-size:12px; font-weight:700; color:var(--plum); background:var(--cream-2);
-    padding:4px 10px; border-radius:999px;
-  }
-  .admin-stock-tag.low{color:var(--rose-dark); background:#F7E4E8;}
-  .admin-stock-tag.out{color:#b3a89f; background:#eee;}
-  .admin-stock-input{
-    width:110px; padding:6px 8px; border-radius:8px; border:1px solid var(--line);
-    font-family:inherit; font-size:12.5px;
-  }
-  .admin-stock-btn{padding:6px 14px !important; font-size:12.5px !important;}
-
-  .admin-list-head{
-    display:flex; align-items:center; justify-content:space-between;
-    margin-bottom:16px; gap:12px; flex-wrap:wrap;
-  }
-  .admin-list-head h3{margin:0; color:var(--plum); font-size:17px;}
-  .admin-item{
-    background:var(--paper); border:1px solid var(--line); border-radius:12px;
-    padding:14px 16px; margin-bottom:10px;
-    display:flex; align-items:center; justify-content:space-between; gap:12px;
-  }
-  .admin-item-info strong{color:var(--plum); font-size:14.5px;}
-  .admin-item-price{color:var(--ink); font-weight:700; font-size:13px; margin-right:8px;}
-  .admin-item-desc{color:#8b7c74; font-size:12.5px; margin:4px 0 0;}
-  .delete-btn{
-    background:none; border:1.5px solid var(--rose-dark); color:var(--rose-dark);
-    border-radius:8px; padding:7px 14px; font-weight:700; font-size:12.5px;
-    cursor:pointer; transition:all .2s ease; flex-shrink:0;
-  }
-  .delete-btn:hover{background:var(--rose-dark); color:#fff;}
-
-  @media (max-width:820px){
-    .hero{grid-template-columns:1fr; padding-top:40px;}
-    .hero-visual{height:260px; order:-1;}
-    .nav-links{
-      position:fixed; top:64px; right:0; left:0; background:var(--cream);
-      flex-direction:column; padding:18px 24px; gap:16px;
-      border-bottom:1px solid var(--line);
-      transform:translateY(-130%); transition:transform .25s ease;
-      z-index:49;
-    }
-    .nav-links.open{transform:translateY(0);}
-    .nav-toggle{display:block;}
-  }
-</style>
+        .bump { animation: bump .25s ease; }
+        @keyframes bump { 50% { transform: scale(1.35); } }
+    </style>
 </head>
-<body>
-<div id="root"></div>
+<body class="min-h-screen flex flex-col bg-[#fffafb]">
 
-<script type="text/babel" data-presets="react">
-const { useState, useMemo, useRef, useEffect, useCallback } = React;
-
-// ===== تهيئة Firebase =====
-const firebaseConfig = {
-  apiKey: "AIzaSyD9zEK5n6N1HcUr84xHUJqqrwCx2uRd-8E",
-  authDomain: "dr-zanab.firebaseapp.com",
-  projectId: "dr-zanab",
-  storageBucket: "dr-zanab.firebasestorage.app",
-  messagingSenderId: "24928073316",
-  appId: "1:24928073316:web:29e0812d20e71514f05171",
-  measurementId: "G-BZTL6FEZJZ"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const storage = firebase.storage();
-
-const CATEGORIES = [
-  { id: "cleansers", name: "غسولات", color: "#C98A9B", icon: "🫧",
-    desc: "لتنظيف عميق ولطيف يومي يحافظ على توازن البشرة." },
-  { id: "creams", name: "كريمات", color: "#8FA37E", icon: "🧴",
-    desc: "تركيبات غنية للترطيب وإصلاح البشرة." },
-  { id: "serums", name: "سيروم", color: "#B08968", icon: "💧",
-    desc: "تركيزات فعّالة تستهدف مشاكل البشرة بدقة." },
-  { id: "moisturizers", name: "مرطبات", color: "#7C9CB5", icon: "🌿",
-    desc: "حماية ورطوبة تدوم طوال اليوم." },
-  { id: "masks", name: "ماسكات", color: "#A97C8E", icon: "✨",
-    desc: "عناية مكثفة أسبوعية لإشراقة فورية." },
-];
-
-// هذه القائمة تُستخدم فقط كبيانات أولية تُستورد مرة واحدة إلى Firestore من لوحة الإدارة.
-// بعد الاستيراد، المصدر الحقيقي للمنتجات يصبح Firestore وليس هذه القائمة.
-const SEED_PRODUCTS = [
-  { cat:"cleansers", name:"غسول الورد المهدئ", price:14000, desc:"لطيف على البشرة الحساسة" },
-  { cat:"cleansers", name:"غسول الفحم المنقي", price:16000, desc:"لتنظيف عميق ومسام صافية" },
-  { cat:"cleansers", name:"غسول الشاي الأخضر", price:13000, desc:"مضاد للأكسدة ومنعش" },
-  { cat:"cleansers", name:"غسول الحليب الكلاسيكي", price:12000, desc:"تنظيف يومي ناعم" },
-  { cat:"cleansers", name:"غسول اللافندر الليلي", price:15000, desc:"يهدئ البشرة قبل النوم" },
-
-  { cat:"creams", name:"كريم الشيا المكثف", price:22000, desc:"ترطيب عميق للبشرة الجافة" },
-  { cat:"creams", name:"كريم الليل المجدد", price:26000, desc:"يعمل أثناء النوم لبشرة نضرة" },
-  { cat:"creams", name:"كريم العين المضيء", price:19000, desc:"يقلل الانتفاخ والهالات" },
-  { cat:"creams", name:"كريم الفيتامين سي", price:24000, desc:"لإشراقة موحدة اللون" },
-  { cat:"creams", name:"كريم الزبدة الغنية", price:21000, desc:"حاجز حماية للبشرة الجافة جداً" },
-
-  { cat:"serums", name:"سيروم الهيالورونيك", price:28000, desc:"ترطيب مكثف وامتلاء فوري" },
-  { cat:"serums", name:"سيروم فيتامين سي", price:30000, desc:"يفتح ويوحد لون البشرة" },
-  { cat:"serums", name:"سيروم النياسيناميد", price:27000, desc:"يقلل المسام ويهدئ الاحمرار" },
-  { cat:"serums", name:"سيروم الريتينول اللطيف", price:32000, desc:"مضاد للشيخوخة تركيبة تدريجية" },
-
-  { cat:"moisturizers", name:"مرطب الألوفيرا اليومي", price:18000, desc:"خفيف وسريع الامتصاص" },
-  { cat:"moisturizers", name:"مرطب SPF 30", price:23000, desc:"حماية من الشمس وترطيب معاً" },
-  { cat:"moisturizers", name:"مرطب العكبري المغذي", price:20000, desc:"للبشرة المختلطة والدهنية" },
-  { cat:"moisturizers", name:"مرطب الجل المنعش", price:17000, desc:"مثالي للأجواء الحارة" },
-
-  { cat:"masks", name:"ماسك الطين الأخضر", price:15000, desc:"يمتص الزيوت الزائدة أسبوعياً" },
-  { cat:"masks", name:"ماسك الكولاجين الورقي", price:9000, desc:"انتعاش فوري خلال 15 دقيقة" },
-  { cat:"masks", name:"ماسك العسل والشوفان", price:14000, desc:"تغذية وتهدئة للبشرة الحساسة" },
-];
-
-function currency(n){ return n.toLocaleString("en-US") + " IQD"; }
-
-function finalPrice(product){
-  const discount = Number(product.discount) || 0;
-  if (discount <= 0) return product.price;
-  return Math.round(product.price * (1 - discount / 100));
-}
-
-function stockLabel(stock){
-  if (stock === 1) return "قطعة واحدة متبقية";
-  if (stock === 2) return "قطعتان متبقيتان";
-  if (stock >= 3 && stock <= 10) return stock + " قطع متبقية";
-  return stock + " متبقية";
-}
-const DELIVERY_FEE = 5000;
-const GOVERNORATES = ["بغداد","البصرة","نينوى","أربيل","السليمانية","دهوك","كركوك","النجف","كربلاء","بابل","المثنى","الديوانية","واسط","ديالى","الأنبار","صلاح الدين","ميسان","ذي قار"];
-
-function Nav({ cartCount, onCartClick, onNavClick }){
-  const [open, setOpen] = useState(false);
-  const handleClick = (id) => { setOpen(false); onNavClick(id); };
-  return (
-    <div className="nav">
-      <div className="nav-inner">
-        <div className="brand" onClick={() => handleClick("top")}>
-          <span className="brand-dot"></span> لمسة
-        </div>
-        <ul className={"nav-links" + (open ? " open" : "")}>
-          {CATEGORIES.map(c => (
-            <li key={c.id}><a onClick={() => handleClick(c.id)}>{c.name}</a></li>
-          ))}
-        </ul>
-        <div style={{display:"flex", alignItems:"center", gap:10}}>
-          <button className="cart-btn" onClick={onCartClick}>
-            السلة
-            {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
-          </button>
-          <button className="nav-toggle" onClick={() => setOpen(o=>!o)}>☰</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-const ProductCard = React.memo(function ProductCard({ product, category, onAdd, justAdded }){
-  const discount = Number(product.discount) || 0;
-  const hasDiscount = discount > 0;
-  const priceNow = finalPrice(product);
-  const isTracked = product.stock !== null && product.stock !== undefined;
-  const stock = isTracked ? Number(product.stock) : null;
-  const outOfStock = isTracked && stock <= 0;
-  const lowStock = isTracked && stock > 0 && stock <= 5;
-  return (
-    <div className="card">
-      <div className="card-media" style={{background: category.color + "22"}}>
-        {hasDiscount && <span className="discount-badge">خصم {discount}%</span>}
-        {product.imageUrl
-          ? <img src={product.imageUrl} alt={product.name} loading="lazy" decoding="async" onError={(e) => { e.target.style.display = "none"; }} />
-          : <span>{category.icon}</span>}
-      </div>
-      <div className="card-body">
-        <p className="card-name">{product.name}</p>
-        <p className="card-desc">{product.desc}</p>
-        {lowStock && <p className="stock-badge stock-low">{stockLabel(stock)}</p>}
-        {outOfStock && <p className="stock-badge stock-out">نفدت الكمية</p>}
-        <div className="card-foot">
-          <span className="card-price">
-            {hasDiscount && <span className="card-price-old" dir="ltr">{currency(product.price)}</span>}
-            <span dir="ltr">{currency(priceNow)}</span>
-          </span>
-          <button
-            className={"add-btn" + (justAdded ? " added" : "") + (outOfStock ? " disabled" : "")}
-            onClick={() => !outOfStock && onAdd(product)}
-            disabled={outOfStock}
-          >
-            {outOfStock ? "غير متوفر" : justAdded ? "✓ أُضيف" : "+ أضف للسلة"}
-          </button>
-
-        </div>
-      </div>
-    </div>
-  );
-});
-
-function CategorySection({ category, products, onAdd, justAddedId }){
-  const PAGE_SIZE = 8;
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const visibleProducts = products.slice(0, visibleCount);
-  const hasMore = products.length > visibleCount;
-
-  return (
-    <div className="section" id={category.id}>
-      <div className="section-head">
-        <div>
-          <h2>
-            <span className="section-tag" style={{background: category.color}}></span>
-            {category.name}
-          </h2>
-          <p className="section-desc">{category.desc}</p>
-        </div>
-        <span className="section-count">{products.length} منتج</span>
-      </div>
-      {products.length === 0 ? (
-        <p style={{color:"#a3948d", fontSize:14}}>لا توجد منتجات في هذا القسم حالياً.</p>
-      ) : (
-        <React.Fragment>
-          <div className="grid">
-            {visibleProducts.map(p => (
-              <ProductCard
-                key={p.id}
-                product={p}
-                category={category}
-                onAdd={onAdd}
-                justAdded={justAddedId === p.id}
-              />
-            ))}
-          </div>
-          {hasMore && (
-            <div style={{textAlign:"center", marginTop:24}}>
-              <button className="btn-ghost" onClick={() => setVisibleCount(v => v + PAGE_SIZE)}>
-                عرض المزيد ({products.length - visibleCount} متبقٍ)
-              </button>
-            </div>
-          )}
-        </React.Fragment>
-      )}
-    </div>
-  );
-}
-
-/* FIX: added `onCheckout` to the destructured props — it was missing,
-   which meant the checkout button's onClick handler was always undefined. */
-function CartDrawer({ open, onClose, items, onQtyChange, onRemove, onCheckout }){
-  const [governorate, setGovernorate] = useState(GOVERNORATES[0]);
-  const [phone, setPhone] = useState("");
-  const [area, setArea] = useState("");
-  const [error, setError] = useState("");
-
-  const subtotal = items.reduce((sum, it) => sum + it.price * it.qty, 0);
-  const total = subtotal + (items.length > 0 ? DELIVERY_FEE : 0);
-
-  const handleCheckoutClick = () => {
-    if (!phone.trim() || !area.trim()) {
-      setError("يرجى إدخال رقم الهاتف والمنطقة قبل إتمام الشراء");
-      return;
-    }
-    setError("");
-    onCheckout({ governorate, phone: phone.trim(), area: area.trim(), deliveryFee: DELIVERY_FEE, subtotal, total });
-  };
-
-  return (
-    <React.Fragment>
-      <div className={"overlay" + (open ? " open" : "")} onClick={onClose}></div>
-      <div className={"drawer" + (open ? " open" : "")}>
-        <div className="drawer-head">
-          <h3>سلة التسوق</h3>
-          <button className="drawer-close" onClick={onClose}>✕</button>
-        </div>
-        <div className="drawer-list">
-          {items.length === 0 && (
-            <div className="empty-cart">السلة فارغة — أضف منتجاً لتبدأ التسوق</div>
-          )}
-          {items.map(it => (
-            <div className="drawer-item" key={it.id}>
-              <div className="drawer-item-icon">
-                {it.imageUrl
-                  ? <img src={it.imageUrl} alt={it.name} loading="lazy" decoding="async" onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "flex"; }} />
-                  : null}
-                <span style={{display: it.imageUrl ? "none" : "flex"}}>{it.icon}</span>
-              </div>
-              <div className="drawer-item-info">
-                <div className="name">{it.name}</div>
-                <div className="meta">{currency(it.price)}</div>
-              </div>
-              <div className="qty-controls">
-                <button className="qty-btn" onClick={() => onQtyChange(it.id, it.qty - 1)}>−</button>
-                <span>{it.qty}</span>
-                <button className="qty-btn" onClick={() => onQtyChange(it.id, it.qty + 1)}>+</button>
-              </div>
-            </div>
-          ))}
-        </div>
-        {items.length > 0 && (
-          <div className="drawer-foot">
-            <div className="delivery-info" style={{display:"flex", flexDirection:"column", gap:10, marginBottom:14}}>
-              <label style={{fontSize:13, fontWeight:700, color:"var(--plum)"}}>
-                المحافظة
-                <select
-                  value={governorate}
-                  onChange={(e) => setGovernorate(e.target.value)}
-                  style={{width:"100%", marginTop:4, padding:"8px 10px", borderRadius:8, border:"1px solid var(--line)", fontFamily:"inherit"}}
-                >
-                  {GOVERNORATES.map(g => <option key={g} value={g}>{g}</option>)}
-                </select>
-              </label>
-              <div style={{position:"relative"}}>
-                <input
-                  type="tel"
-                  placeholder="رقم الهاتف"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  style={{width:"100%", padding:"10px 34px 10px 12px", borderRadius:8, border: "1px solid " + (phone.trim() === "" ? "var(--rose-dark)" : "var(--line)"), fontFamily:"inherit", fontSize:14}}
-                />
-                {phone.trim() === "" && (
-                  <span style={{position:"absolute", top:"50%", left:10, transform:"translateY(-50%)", color:"var(--rose-dark)", fontWeight:800}}>!</span>
-                )}
-              </div>
-              <div style={{position:"relative"}}>
-                <input
-                  type="text"
-                  placeholder="المنطقة"
-                  value={area}
-                  onChange={(e) => setArea(e.target.value)}
-                  style={{width:"100%", padding:"10px 34px 10px 12px", borderRadius:8, border: "1px solid " + (area.trim() === "" ? "var(--rose-dark)" : "var(--line)"), fontFamily:"inherit", fontSize:14}}
-                />
-                {area.trim() === "" && (
-                  <span style={{position:"absolute", top:"50%", left:10, transform:"translateY(-50%)", color:"var(--rose-dark)", fontWeight:800}}>!</span>
-                )}
-              </div>
-              {error && <p style={{color:"var(--rose-dark)", fontSize:12.5, margin:0}}>{error}</p>}
-            </div>
-            <div className="drawer-total" style={{flexDirection:"column", gap:4, alignItems:"stretch"}}>
-              <div style={{display:"flex", justifyContent:"space-between", fontWeight:600, fontSize:14}}>
-                <span>المجموع الفرعي</span><span>{currency(subtotal)}</span>
-              </div>
-              <div style={{display:"flex", justifyContent:"space-between", fontWeight:600, fontSize:14}}>
-                <span>التوصيل</span><span>{currency(DELIVERY_FEE)}</span>
-              </div>
-              <div style={{display:"flex", justifyContent:"space-between", fontWeight:800, fontSize:17, marginTop:4}}>
-                <span>الإجمالي</span><span>{currency(total)}</span>
-              </div>
-            </div>
-            <button className="checkout-btn" onClick={handleCheckoutClick} style={{marginTop:14}}>إتمام الشراء</button>
-          </div>
-        )}
-      </div>
-    </React.Fragment>
-  );
-}
-
-// ===== حماية بسيطة بكلمة مرور للوصول للوحة الإدارة =====
-// ملاحظة: هذه حماية بسيطة من جهة المتصفح فقط للاستخدام اليومي، وليست حماية أمنية حقيقية.
-// أي شخص يعرف كيف يقرأ كود الصفحة يمكنه رؤية كلمة المرور. للحماية الحقيقية لاحقاً
-// يفضّل استخدام Firebase Authentication + قواعد أمان Firestore تمنع الكتابة إلا لحساب مسجّل دخول.
-const ADMIN_PASSWORD = "لمسة2026";
-
-function AdminGate({ children }){
-  const [unlocked, setUnlocked] = useState(false);
-  const [pass, setPass] = useState("");
-  const [err, setErr] = useState("");
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (pass === ADMIN_PASSWORD) { setUnlocked(true); setErr(""); }
-    else setErr("كلمة المرور غير صحيحة");
-  };
-
-  if (unlocked) return children;
-
-  return (
-    <div className="admin-gate">
-      <form className="admin-gate-box" onSubmit={handleSubmit}>
-        <h2>دخول لوحة إدارة المتجر</h2>
-        <input
-          type="password"
-          placeholder="كلمة المرور"
-          value={pass}
-          onChange={(e) => setPass(e.target.value)}
-          autoFocus
-        />
-        <button type="submit" className="btn-primary">دخول</button>
-        {err && <p className="admin-status error">{err}</p>}
-      </form>
-    </div>
-  );
-}
-
-function AdminPage({ categories, onBack }){
-  const [products, setProducts] = useState([]);
-  const [loaded, setLoaded] = useState(false);
-  const [name, setName] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
-  const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState("");
-  const [price, setPrice] = useState("");
-  const [discount, setDiscount] = useState("");
-  const [stock, setStock] = useState("");
-  const [desc, setDesc] = useState("");
-  const [cat, setCat] = useState(categories[0].id);
-  const [status, setStatus] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [stockEdits, setStockEdits] = useState({});
-
-  useEffect(() => {
-    const unsub = db.collection("products").onSnapshot(
-      (snapshot) => {
-        setProducts(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
-        setLoaded(true);
-      },
-      (error) => {
-        console.error("فشل جلب المنتجات:", error);
-        setStatus("❌ تعذر الاتصال بقاعدة البيانات: " + error.message);
-        setLoaded(true);
-      }
-    );
-    return () => unsub();
-  }, []);
-
-  const resetForm = () => { setName(""); setImageUrl(""); setUploadError(""); setPrice(""); setDiscount(""); setStock(""); setDesc(""); };
-
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    e.target.value = ""; // للسماح باختيار نفس الملف مرة أخرى لاحقاً
-    if (!file) return;
-    setUploadError("");
-    setUploading(true);
-    try {
-      const path = "products/" + Date.now() + "_" + file.name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
-      const ref = storage.ref().child(path);
-      await ref.put(file);
-      const url = await ref.getDownloadURL();
-      setImageUrl(url);
-    } catch (error) {
-      setUploadError(
-        "❌ تعذر رفع الصورة: " + error.message +
-        " — تأكدي أن Firebase Storage مفعّل على خطة Blaze في مشروعك."
-      );
-    }
-    setUploading(false);
-  };
-
-  const handleAdd = async (e) => {
-    e.preventDefault();
-    const discountNum = discount === "" ? 0 : Number(discount);
-    if (!name.trim() || !price || Number(price) <= 0 || !desc.trim()) {
-      setStatus("⚠️ يرجى تعبئة كل الحقول بشكل صحيح (السعر يجب أن يكون رقماً أكبر من صفر)");
-      return;
-    }
-    if (discountNum < 0 || discountNum > 90) {
-      setStatus("⚠️ نسبة الخصم يجب أن تكون بين 0 و90%");
-      return;
-    }
-    setSaving(true);
-    try {
-      await db.collection("products").add({
-        name: name.trim(),
-        imageUrl: imageUrl.trim() || null,
-        price: Number(price),
-        discount: discountNum,
-        stock: stock === "" ? null : Math.max(0, Number(stock)),
-        desc: desc.trim(),
-        cat,
-        createdAt: new Date().toISOString(),
-      });
-      setStatus("✅ تمت إضافة المنتج، وسيظهر في الموقع تلقائياً الآن");
-      resetForm();
-    } catch (error) {
-      setStatus("❌ فشلت الإضافة: " + error.message);
-    }
-    setSaving(false);
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("هل أنتِ متأكدة من حذف هذا المنتج نهائياً؟")) return;
-    try {
-      await db.collection("products").doc(id).delete();
-    } catch (error) {
-      alert("تعذر الحذف: " + error.message);
-    }
-  };
-
-  const handleUpdateStock = async (id) => {
-    const value = stockEdits[id];
-    if (value === undefined || value === "") return;
-    try {
-      await db.collection("products").doc(id).update({ stock: Math.max(0, Number(value)) });
-      setStockEdits(prev => { const next = { ...prev }; delete next[id]; return next; });
-    } catch (error) {
-      alert("تعذر تحديث الكمية: " + error.message);
-    }
-  };
-
-  const handleSeed = async () => {
-    if (!window.confirm("سيتم استيراد " + SEED_PRODUCTS.length + " منتجاً افتراضياً إلى المتجر. متابعة؟")) return;
-    setStatus("⏳ جاري الاستيراد...");
-    try {
-      const batch = db.batch();
-      SEED_PRODUCTS.forEach(p => {
-        const ref = db.collection("products").doc();
-        batch.set(ref, { ...p, createdAt: new Date().toISOString() });
-      });
-      await batch.commit();
-      setStatus("✅ تم استيراد المنتجات الافتراضية بنجاح");
-    } catch (error) {
-      setStatus("❌ فشل الاستيراد: " + error.message);
-    }
-  };
-
-  return (
-    <div className="admin-page">
-      <div className="admin-head">
-        <h2 className="display">لوحة إدارة المنتجات</h2>
-        <button className="back-btn" onClick={onBack}>→ العودة للمتجر</button>
-      </div>
-
-      <form className="admin-form" onSubmit={handleAdd}>
-        <h3>إضافة منتج جديد</h3>
-        <label>
-          اسم المنتج
-          <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="مثال: غسول الورد المهدئ" />
-        </label>
-        <label>
-          صورة المنتج
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileUpload}
-            disabled={uploading}
-          />
-        </label>
-        {uploading && <p style={{fontSize:12.5, color:"var(--plum)", margin:0}}>⏳ جاري رفع الصورة...</p>}
-        {uploadError && <p style={{fontSize:12.5, color:"var(--rose-dark)", margin:0}}>{uploadError}</p>}
-        {imageUrl.trim() !== "" && !uploading && (
-          <div style={{display:"flex", flexDirection:"column", gap:6}}>
-            <img src={imageUrl} alt="معاينة" className="admin-image-preview" loading="lazy" decoding="async" onError={(e) => { e.target.style.display = "none"; }} />
-            <button type="button" className="btn-ghost" onClick={() => setImageUrl("")} style={{alignSelf:"flex-start", fontSize:12}}>إزالة الصورة</button>
-          </div>
-        )}
-        <details>
-          <summary style={{fontSize:12.5, color:"#a3948d", cursor:"pointer"}}>أو الصقي رابط صورة مباشر بدلاً من الرفع</summary>
-          <input
-            type="url"
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-            placeholder="https://example.com/image.jpg"
-            style={{marginTop:8, width:"100%", padding:"10px 12px", borderRadius:8, border:"1px solid var(--line)", fontFamily:"inherit", fontSize:14}}
-          />
-        </details>
-        <label>
-          السعر (بالدينار العراقي)
-          <input type="number" min="0" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="مثال: 15000" />
-        </label>
-        <label>
-          نسبة الخصم % (اختياري)
-          <input type="number" min="0" max="90" value={discount} onChange={(e) => setDiscount(e.target.value)} placeholder="مثال: 20" />
-        </label>
-        {discount !== "" && Number(discount) > 0 && price && Number(price) > 0 && (
-          <p style={{fontSize:12.5, color:"var(--sage)", margin:0}}>
-            السعر بعد الخصم: {Math.round(Number(price) * (1 - Number(discount) / 100)).toLocaleString("en-US")} IQD
-          </p>
-        )}
-        <label>
-          الكمية المتوفرة (اختياري — اتركيه فارغاً إذا لا تريدين تتبع المخزون)
-          <input type="number" min="0" value={stock} onChange={(e) => setStock(e.target.value)} placeholder="مثال: 10" />
-        </label>
-        <label>
-          الوصف
-          <textarea rows="2" value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="وصف قصير للمنتج"></textarea>
-        </label>
-        <label>
-          القسم
-          <select value={cat} onChange={(e) => setCat(e.target.value)}>
-            {categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
-          </select>
-        </label>
-        <button type="submit" className="btn-primary" disabled={saving || uploading}>
-          {saving ? "جاري الحفظ..." : "إضافة المنتج"}
-        </button>
-        {status && <p className={"admin-status" + (status.startsWith("✅") ? " success" : status.startsWith("⚠️") ? "" : " error")}>{status}</p>}
-      </form>
-
-      <div className="admin-list">
-        <div className="admin-list-head">
-          <h3>المنتجات الحالية ({products.length})</h3>
-          {loaded && products.length === 0 && (
-            <button className="btn-ghost" onClick={handleSeed}>استيراد المنتجات الافتراضية</button>
-          )}
-        </div>
-        {!loaded && <p style={{color:"#a3948d"}}>جاري تحميل المنتجات...</p>}
-        {loaded && products.length === 0 && (
-          <p style={{color:"#a3948d"}}>لا توجد منتجات بعد. أضيفي منتجك الأول من النموذج أعلاه، أو استوردي المنتجات الافتراضية.</p>
-        )}
-        {products.map(p => {
-          const category = categories.find(c => c.id === p.cat);
-          return (
-            <div className="admin-item" key={p.id}>
-              {p.imageUrl
-                ? <img src={p.imageUrl} alt={p.name} className="admin-item-thumb" loading="lazy" decoding="async" onError={(e) => { e.target.style.display = "none"; }} />
-                : <div className="admin-item-thumb admin-item-thumb-empty">{category ? category.icon : "🧴"}</div>}
-              <div className="admin-item-info">
-                <strong>{p.name}</strong>
-                <span className="admin-item-price" dir="ltr">
-                  {p.price != null ? p.price.toLocaleString("en-US") + " IQD" : ""}
-                  {Number(p.discount) > 0 && <span style={{color:"var(--rose-dark)"}}> (خصم {p.discount}% ← {finalPrice(p).toLocaleString("en-US")} IQD)</span>}
-                </span>
-                <p className="admin-item-desc">{p.desc}</p>
-                <div className="admin-stock-row">
-                  {p.stock === null || p.stock === undefined ? (
-                    <span className="admin-stock-tag">غير متتبَّع</span>
-                  ) : (
-                    <span className={"admin-stock-tag" + (Number(p.stock) <= 0 ? " out" : Number(p.stock) <= 5 ? " low" : "")}>
-                      المخزون: {p.stock}
-                    </span>
-                  )}
-                  <input
-                    type="number"
-                    min="0"
-                    className="admin-stock-input"
-                    placeholder="تحديث الكمية"
-                    value={stockEdits[p.id] ?? ""}
-                    onChange={(e) => setStockEdits(prev => ({ ...prev, [p.id]: e.target.value }))}
-                  />
-                  <button className="btn-ghost admin-stock-btn" onClick={() => handleUpdateStock(p.id)}>تحديث</button>
+    <!-- الهيدر والبحث -->
+    <header class="sticky top-0 z-40 bg-white shadow-sm border-b border-pink-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div id="store-logo-container" class="flex items-center gap-3 cursor-pointer select-none transition-all duration-200 active:scale-95" onclick="goToHome()" title="انقر مرتين للوصول للوحة التحكم">
+                <div class="w-12 h-12 rounded-2xl bg-pink-100 flex items-center justify-center overflow-hidden border border-pink-200 shadow-sm">
+                    <img id="store-logo-img" width="48" height="48" decoding="async" onerror="imgErr(this,'logo')" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23fce7f3'/><text x='50%' y='55%' font-family='Arial' font-weight='bold' font-size='28' fill='%23db2777' text-anchor='middle' dominant-baseline='middle'>آثار</text></svg>" alt="شعار كماليات آثار" class="w-full h-full object-cover">
                 </div>
-              </div>
-              <button className="delete-btn" onClick={() => handleDelete(p.id)}>حذف</button>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function Store(){
-  const [cart, setCart] = useState({});
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [justAddedId, setJustAddedId] = useState(null);
-  const flashTimer = useRef(null);
-
-  const [products, setProducts] = useState([]);
-  const [productsLoaded, setProductsLoaded] = useState(false);
-
-  useEffect(() => {
-    const unsub = db.collection("products").onSnapshot(
-      (snapshot) => {
-        setProducts(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
-        setProductsLoaded(true);
-      },
-      (error) => {
-        console.error("فشل جلب المنتجات من Firestore:", error);
-        setProductsLoaded(true);
-      }
-    );
-    return () => unsub();
-  }, []);
-
-  const catById = useMemo(() => {
-    const m = {};
-    CATEGORIES.forEach(c => m[c.id] = c);
-    return m;
-  }, []);
-
-  // منتج واحد على الأقل من كل قسم متوفر، لعرض تشكيلة متنوعة في الصفحة الرئيسية
-  const mixedProducts = useMemo(() => {
-    const seen = {};
-    const picks = [];
-    CATEGORIES.forEach(c => {
-      const match = products.find(p => p.cat === c.id && !seen[p.id]);
-      if (match) { picks.push(match); seen[match.id] = true; }
-    });
-    return picks;
-  }, [products]);
-
-  const addToCart = useCallback((product) => {
-    const isTracked = product.stock !== null && product.stock !== undefined;
-    const stock = isTracked ? Number(product.stock) : Infinity;
-    if (isTracked && stock <= 0) return;
-
-    const chargedPrice = finalPrice(product);
-    setCart(prev => {
-      const existing = prev[product.id];
-      const currentQty = existing ? existing.qty : 0;
-      if (isTracked && currentQty >= stock) {
-        alert("الكمية المتوفرة من هذا المنتج " + stock + " فقط");
-        return prev;
-      }
-      const qty = currentQty + 1;
-      return { ...prev, [product.id]: { ...product, qty, price: chargedPrice, icon: catById[product.cat].icon } };
-    });
-    setJustAddedId(product.id);
-    if (flashTimer.current) clearTimeout(flashTimer.current);
-    flashTimer.current = setTimeout(() => setJustAddedId(null), 900);
-  }, [catById]);
-
-  const changeQty = useCallback((id, qty) => {
-    setCart(prev => {
-      if (qty <= 0) {
-        const next = { ...prev };
-        delete next[id];
-        return next;
-      }
-      const item = prev[id];
-      const isTracked = item.stock !== null && item.stock !== undefined;
-      if (isTracked && qty > Number(item.stock)) {
-        alert("الكمية المتوفرة من هذا المنتج " + item.stock + " فقط");
-        return prev;
-      }
-      return { ...prev, [id]: { ...prev[id], qty } };
-    });
-  }, []);
-
-  /* FIX: this function was previously defined *inside* addToCart, so it
-     never existed in App's scope and calling it threw "sendToWhatsApp is
-     not defined". It also used object/foreach/encodeuricomponent instead
-     of the correctly-capitalized Object/forEach/encodeURIComponent. */
-  const sendToWhatsApp = (delivery) => {
-    const items = Object.values(cart);
-    if (items.length === 0) return;
-    let message = "تفاصيل الطلب:\n";
-    items.forEach(item => {
-      message += item.name + ": " + item.qty + " × " + currency(item.price) + "\n";
-    });
-    message += "\nالمجموع الفرعي: " + currency(delivery.subtotal);
-    message += "\nالتوصيل: " + currency(delivery.deliveryFee);
-    message += "\nالإجمالي: " + currency(delivery.total);
-    message += "\n\nالمحافظة: " + delivery.governorate;
-    message += "\nالمنطقة: " + delivery.area;
-    message += "\nرقم الهاتف: " + delivery.phone;
-    window.open("https://wa.me/9647869367775?text=" + encodeURIComponent(message), "_blank");
-
-    // إنقاص الكمية المتوفرة في Firestore لكل منتج تم شراؤه (فقط للمنتجات التي فيها تتبّع مخزون)
-    const trackedItems = items.filter(it => it.stock !== null && it.stock !== undefined);
-    if (trackedItems.length > 0) {
-      const batch = db.batch();
-      trackedItems.forEach(it => {
-        const ref = db.collection("products").doc(it.id);
-        batch.update(ref, { stock: firebase.firestore.FieldValue.increment(-it.qty) });
-      });
-      batch.commit().catch(error => console.error("تعذر تحديث المخزون:", error));
-    }
-
-    setCart({});
-    setDrawerOpen(false);
-  };
-
-  const cartItems = Object.values(cart);
-  const cartCount = cartItems.reduce((s, it) => s + it.qty, 0);
-
-  const [activePage, setActivePage] = useState(null); // null = الصفحة الرئيسية، أو معرّف القسم
-
-  const goTo = (id) => {
-    window.scrollTo({ top: 0, behavior: "auto" });
-    if (id === "top") { setActivePage(null); return; }
-    setActivePage(id);
-  };
-
-  return (
-    <React.Fragment>
-      <Nav cartCount={cartCount} onCartClick={() => setDrawerOpen(true)} onNavClick={goTo} />
-
-      {activePage === null ? (
-        <React.Fragment>
-          <div className="hero">
-            <div>
-              <div className="hero-eyebrow">عناية يومية بالبشرة</div>
-              <h1 className="display">جمالك يبدأ بروتين بسيط، يُصنع بعناية</h1>
-              <p>مجموعة مختارة من الغسولات والكريمات والسيرومات، مصممة لتناسب كل نوع بشرة — بمكونات واضحة ونتائج نلمسها.</p>
-              <div className="hero-actions">
-                <button className="btn-primary" onClick={() => goTo("cleansers")}>تسوقي الآن</button>
-                <button className="btn-ghost" onClick={() => goTo("serums")}>اكتشفي السيروم</button>
-              </div>
-            </div>
-            <div className="hero-visual">
-              <div className="hero-jar"></div>
-            </div>
-          </div>
-
-          <div className="cat-strip-wrap">
-            <div className="cat-strip-head">
-              <h3>التصنيفات</h3>
-            </div>
-            <div className="cat-strip">
-              {CATEGORIES.map(c => (
-                <button key={c.id} className="cat-tile" onClick={() => goTo(c.id)}>
-                  <span className="cat-tile-icon" style={{background: c.color + "26"}}>{c.icon}</span>
-                  <span className="cat-tile-label">{c.name}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {mixedProducts.length > 0 && (
-            <div className="section">
-              <div className="section-head">
                 <div>
-                  <h2>
-                    <span className="section-tag" style={{background: "var(--rose)"}}></span>
-                    تشكيلة متنوعة
-                  </h2>
-                  <p className="section-desc">لمحة سريعة من كل أقسام المتجر في مكان واحد.</p>
+                    <h1 class="text-xl font-black text-stone-900 tracking-tight">كماليات آثار</h1>
+                    <p class="text-xs text-pink-600 font-semibold">عالم العناية والتجميل الأصلي</p>
                 </div>
-              </div>
-              <div className="grid">
-                {mixedProducts.map(p => (
-                  <ProductCard
-                    key={p.id}
-                    product={p}
-                    category={catById[p.cat]}
-                    onAdd={addToCart}
-                    justAdded={justAddedId === p.id}
-                  />
-                ))}
-              </div>
             </div>
-          )}
-        </React.Fragment>
-      ) : (
-        <div className="page-head">
-          <button className="back-btn" onClick={() => goTo("top")}>→ الرئيسية</button>
+
+            <div class="flex items-center gap-3">
+                <button onclick="openCartModal()" class="relative bg-pink-50 hover:bg-pink-100 text-stone-800 px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all duration-200 active:scale-95 border border-pink-200/60 shadow-sm">
+                    <i class="fa-solid fa-bag-shopping text-pink-600 text-lg"></i>
+                    <span class="hidden sm:inline">السلة</span>
+                    <span id="cart-badge" class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center font-black shadow">0</span>
+                </button>
+            </div>
         </div>
-      )}
 
-      {activePage === null && productsLoaded && products.length === 0 && (
-        <p style={{textAlign:"center", color:"#a3948d", padding:"20px 24px"}}>
-          المتجر قيد التجهيز حالياً، تابعينا قريباً لمنتجات جديدة.
-        </p>
-      )}
+        <div class="bg-pink-50/70 border-t border-pink-100/60 py-3 px-4">
+            <div class="max-w-3xl mx-auto relative">
+                <i class="fa-solid fa-magnifying-glass absolute right-4 top-1/2 -translate-y-1/2 text-pink-500 text-lg"></i>
+                <input type="text" id="main-search-input" oninput="handleSearch(this.value)" placeholder="ابحثي عن منتج للعناية، مكياج، أو علامة تجارية..." class="w-full pl-4 pr-12 py-3 bg-white border border-pink-200 rounded-2xl shadow-inner focus:outline-none focus:ring-2 focus:ring-pink-500 font-medium text-stone-800 placeholder-stone-400 transition-all duration-200">
+                <button onclick="clearSearch()" id="clear-search-btn" class="hidden absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-all duration-200 active:scale-95">
+                    <i class="fa-solid fa-circle-xmark text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </header>
 
-      {CATEGORIES
-        .filter(cat => activePage === null || activePage === cat.id)
-        .map(cat => (
-          <CategorySection
-            key={cat.id}
-            category={cat}
-            products={products.filter(p => p.cat === cat.id)}
-            onAdd={addToCart}
-            justAddedId={justAddedId}
-          />
-        ))}
+    <!-- المحتوى الرئيسي -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
-      <div className="footer">
-        لمسة © 2026 — جميع الحقوق محفوظة
-        <div className="admin-link"><a href="#admin">إدارة المنتجات</a></div>
-      </div>
+        <!-- قسم التصنيفات: نفس الحاوية للـ skeleton وللمحتوى الحقيقي حتى ما يتغير الارتفاع -->
+        <section class="mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-black text-stone-900 flex items-center gap-2">
+                    <i class="fa-solid fa-border-all text-pink-600"></i> التصنيفات
+                </h2>
+            </div>
+            <div id="categories-container" class="flex gap-4 overflow-x-auto pb-3 hide-scrollbar items-start" style="min-height:100px"></div>
+            <div id="subcats-wrap">
+                <div id="subcats-inner">
+                    <div id="subcats-container" class="flex gap-2 overflow-x-auto hide-scrollbar bg-pink-50/70 border border-pink-100 rounded-2xl p-2 mt-3"></div>
+                </div>
+            </div>
+        </section>
 
-      <CartDrawer
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        items={cartItems}
-        onQtyChange={changeQty}
-        onCheckout={sendToWhatsApp}
-        onRemove={(id) => changeQty(id, 0)}
-      />
-    </React.Fragment>
-  );
-}
+        <!-- قسم المنتجات -->
+        <section>
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h2 id="section-title" class="text-xl font-black text-stone-900">جميع المنتجات المختارة</h2>
+                    <p id="section-subtitle" class="text-xs text-stone-500 mt-0.5">تسوقي أحدث منتجات العناية والمكياج</p>
+                </div>
+                <div class="text-xs font-bold text-pink-700 bg-pink-50 px-2.5 py-1 rounded-lg border border-pink-200 min-w-[64px] text-center">
+                    <span id="products-count">…</span> منتج
+                </div>
+            </div>
 
-function Root(){
-  const [route, setRoute] = useState(() => window.location.hash === "#admin" ? "admin" : "store");
+            <div id="products-grid" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4"></div>
 
-  useEffect(() => {
-    const onHashChange = () => setRoute(window.location.hash === "#admin" ? "admin" : "store");
-    window.addEventListener("hashchange", onHashChange);
-    return () => window.removeEventListener("hashchange", onHashChange);
-  }, []);
+            <div id="no-products-found" class="hidden text-center py-20">
+                <div class="w-16 h-16 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
+                    <i class="fa-solid fa-box-open"></i>
+                </div>
+                <h3 class="text-base font-bold text-stone-800">لا توجد منتجات مطابقة لبحثك</h3>
+                <p class="text-stone-500 text-xs mt-1">جربي البحث بكلمات أخرى أو تصفح قسم آخر.</p>
+                <button onclick="clearSearch()" class="mt-4 px-4 py-2 bg-pink-600 text-white rounded-xl font-bold text-xs hover:bg-pink-700 transition-all duration-200 active:scale-95">إلغاء البحث وعرض الكل</button>
+            </div>
+        </section>
+    </main>
 
-  if (route === "admin") {
-    return (
-      <AdminGate>
-        <AdminPage categories={CATEGORIES} onBack={() => { window.location.hash = ""; }} />
-      </AdminGate>
-    );
-  }
+    <footer class="bg-white border-t border-pink-100 mt-16 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h3 class="text-lg font-black text-stone-900">كماليات آثار</h3>
+            <p class="text-stone-500 text-sm mt-1">وجهتك الأولى لكل ما تحتاجه العناية والجمال الرائع.</p>
+            <p class="text-xs text-stone-400 mt-4">&copy; 2026 جميع الحقوق محفوظة لمتجر كماليات آثار.</p>
+        </div>
+    </footer>
 
-  return <Store />;
-}
+    <!-- إشعار سريع -->
+    <div id="toast" class="bg-stone-900 text-white text-sm font-bold px-4 py-2.5 rounded-xl shadow-lg" role="status" aria-live="polite"></div>
 
-ReactDOM.createRoot(document.getElementById("root")).render(<Root />);
-</script>
+    <!-- نافذة سلة المشتريات -->
+    <div id="cart-modal" class="fixed inset-0 z-50 bg-black/50 hidden flex items-center justify-center p-4" onclick="if(event.target===this)closeCartModal()">
+        <div class="bg-white rounded-3xl max-w-lg w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="p-5 border-b border-pink-100 flex items-center justify-between bg-pink-50/50">
+                <h3 class="text-lg font-black text-stone-900 flex items-center gap-2">
+                    <i class="fa-solid fa-bag-shopping text-pink-600"></i> سلة المشتريات وإتمام الطلب
+                </h3>
+                <button onclick="closeCartModal()" class="w-9 h-9 bg-pink-100 hover:bg-pink-200 text-pink-700 rounded-full flex items-center justify-center transition-all duration-200 active:scale-95">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="p-5 overflow-y-auto flex-grow space-y-4">
+                <div id="cart-items-container" class="divide-y divide-stone-100"></div>
+
+                <div class="bg-pink-50/30 p-4 rounded-2xl border border-pink-100 space-y-3 mt-4">
+                    <h4 class="font-bold text-sm text-stone-800 flex items-center gap-2">
+                        <i class="fa-solid fa-user-shield text-pink-600"></i> بيانات الزبونة والتوصيل
+                    </h4>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-700 mb-1">اسم الزبونة الكريمة:</label>
+                        <input type="text" id="customer-name" placeholder="أدخلي اسمك الكامل..." class="w-full px-3.5 py-2.5 bg-white border border-pink-200 rounded-xl text-sm focus:ring-2 focus:ring-pink-500 focus:outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-700 mb-1">رقم الهاتف:</label>
+                        <input type="tel" id="customer-phone" placeholder="07xxxxxxxxx" class="w-full px-3.5 py-2.5 bg-white border border-pink-200 rounded-xl text-sm focus:ring-2 focus:ring-pink-500 focus:outline-none transition-all">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-stone-700 mb-1">المحافظة:</label>
+                            <select id="customer-province" onchange="updateCartTotals()" class="w-full px-3.5 py-2.5 bg-white border border-pink-200 rounded-xl text-sm focus:ring-2 focus:ring-pink-500 focus:outline-none transition-all">
+                                <option value="بابل" data-fee="3000" selected>بابل (3,000 د.ع)</option>
+                                <option value="بغداد" data-fee="5000">بغداد (5,000 د.ع)</option>
+                                <option value="البصرة" data-fee="5000">البصرة (5,000 د.ع)</option>
+                                <option value="نينوى" data-fee="5000">نينوى (5,000 د.ع)</option>
+                                <option value="أربيل" data-fee="5000">أربيل (5,000 د.ع)</option>
+                                <option value="النجف" data-fee="5000">النجف (5,000 د.ع)</option>
+                                <option value="كربلاء" data-fee="5000">كربلاء (5,000 د.ع)</option>
+                                <option value="أخرى" data-fee="5000">باقي المحافظات (5,000 د.ع)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-700 mb-1">المنطقة / القضاء:</label>
+                            <input type="text" id="customer-area" placeholder="اسم المنطقة أو الحي..." class="w-full px-3.5 py-2.5 bg-white border border-pink-200 rounded-xl text-sm focus:ring-2 focus:ring-pink-500 focus:outline-none transition-all">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-5 border-t border-stone-100 bg-pink-50/30 space-y-2">
+                <div class="flex justify-between items-center text-xs text-stone-600">
+                    <span>مجموع المنتجات:</span>
+                    <span id="cart-subtotal" class="font-bold">0 د.ع</span>
+                </div>
+                <div class="flex justify-between items-center text-xs text-stone-600">
+                    <span>قيمة التوصيل:</span>
+                    <span id="cart-shipping-fee" class="font-bold">3,000 د.ع</span>
+                </div>
+                <div id="discount-row" class="flex justify-between items-center text-xs text-emerald-600 font-bold hidden">
+                    <span id="discount-label-text">الخصم المطبق:</span>
+                    <span id="cart-discount-val">-0 د.ع</span>
+                </div>
+                <div class="flex justify-between items-center text-base font-black text-stone-900 pt-2 border-t border-stone-200">
+                    <span>الإجمالي الكلي النهائي:</span>
+                    <span id="cart-total-price" class="text-pink-700 text-xl">0 د.ع</span>
+                </div>
+                <button onclick="checkoutViaWhatsApp()" class="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all duration-200 active:scale-95 shadow-lg shadow-emerald-600/20">
+                    <i class="fa-brands fa-whatsapp text-xl"></i> إتمام الطلب عبر واتساب
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- لوحة تحكم المسؤول -->
+    <div id="admin-login-modal" class="fixed inset-0 z-50 bg-black/50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-pink-100 text-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <h3 class="text-xl font-black text-stone-900">لوحة التحكم</h3>
+                <p class="text-xs text-stone-500 mt-1">يرجى إدخال كلمة المرور للمتابعة</p>
+            </div>
+            <form onsubmit="handleAdminLogin(event)">
+                <div class="mb-4">
+                    <input type="password" id="admin-password-input" placeholder="كلمة المرور" class="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-center tracking-widest text-lg font-bold focus:ring-2 focus:ring-pink-500 focus:outline-none" required>
+                </div>
+                <button type="submit" class="w-full bg-stone-900 hover:bg-stone-800 text-white py-3 rounded-xl font-bold transition-all duration-200 active:scale-95 shadow">تسجيل الدخول</button>
+            </form>
+            <button onclick="closeAdminLoginModal()" class="w-full mt-3 text-stone-500 text-sm font-semibold hover:text-stone-800 py-2">إلغاء</button>
+        </div>
+    </div>
+
+    <div id="admin-dashboard-modal" class="fixed inset-0 z-50 bg-stone-900/60 hidden flex items-center justify-center p-2 sm:p-4">
+        <div class="bg-white rounded-3xl max-w-5xl w-full max-h-[95vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="p-5 border-b border-stone-200 flex items-center justify-between bg-stone-900 text-white">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-sliders text-pink-400 text-xl"></i>
+                    <h3 class="text-lg font-black">لوحة تحكم كماليات آثار</h3>
+                </div>
+                <button onclick="closeAdminDashboard()" class="w-9 h-9 bg-stone-800 hover:bg-stone-700 text-white rounded-full flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="flex border-b border-stone-200 bg-stone-50 px-4 pt-2 gap-2 overflow-x-auto hide-scrollbar">
+                <button onclick="switchAdminTab('products')" id="tab-btn-products" class="px-5 py-3 font-bold text-sm border-b-2 border-pink-600 text-pink-700 bg-white rounded-t-xl">إدارة المنتجات</button>
+                <button onclick="switchAdminTab('categories')" id="tab-btn-categories" class="px-5 py-3 font-bold text-sm text-stone-600 hover:text-stone-900">إدارة التصنيفات</button>
+                <button onclick="switchAdminTab('discount')" id="tab-btn-discount" class="px-5 py-3 font-bold text-sm text-stone-600 hover:text-stone-900">إدارة الخصومات</button>
+                <button onclick="switchAdminTab('settings')" id="tab-btn-settings" class="px-5 py-3 font-bold text-sm text-stone-600 hover:text-stone-900">إعدادات المتجر</button>
+            </div>
+
+            <div class="p-6 overflow-y-auto flex-grow bg-stone-50/50">
+                <div id="admin-tab-products" class="space-y-6">
+                    <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm">
+                        <h4 id="product-form-title" class="text-base font-black text-stone-900 mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-plus-circle text-pink-600"></i> إضافة / تعديل منتج
+                        </h4>
+                        <form id="product-form" onsubmit="saveProduct(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <input type="hidden" id="edit-product-id">
+                            <div>
+                                <label class="block text-xs font-bold text-stone-700 mb-1">اسم المنتج:</label>
+                                <input type="text" id="p-name" class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-stone-700 mb-1">التصنيف:</label>
+                                <select id="p-category" onchange="fillAdminSubSelect()" class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm" required>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-stone-700 mb-1">التصنيف الفرعي (اختياري):</label>
+                                <select id="p-subcategory" class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm">
+                                    <option value="">بدون تصنيف فرعي</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-stone-700 mb-1">السعر (د.ع):</label>
+                                <input type="number" id="p-price" class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-stone-700 mb-1">رابط صورة المنتج:</label>
+                                <input type="url" id="p-image" placeholder="https://example.com/image.jpg" class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm" required>
+                            </div>
+                            <div class="sm:col-span-2 lg:col-span-3">
+                                <label class="block text-xs font-bold text-stone-700 mb-1">وصف المنتج:</label>
+                                <input type="text" id="p-desc" placeholder="وصف موجز للمنتج ومميزاته..." class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm" required>
+                            </div>
+                            <div class="sm:col-span-3 flex gap-3 mt-2">
+                                <button type="submit" class="bg-pink-600 hover:bg-pink-700 disabled:opacity-60 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow">حفظ المنتج</button>
+                                <button type="button" id="cancel-edit-btn" onclick="resetProductForm()" class="hidden bg-stone-200 hover:bg-stone-300 text-stone-700 px-5 py-2.5 rounded-xl font-bold text-sm">إلغاء التعديل</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
+                        <div class="p-4 border-b border-stone-100 font-black text-stone-900">المنتجات المسجلة</div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-right border-collapse">
+                                <thead class="bg-stone-50 text-stone-600 text-xs font-bold border-b border-stone-200">
+                                    <tr>
+                                        <th class="p-3">الصورة</th>
+                                        <th class="p-3">اسم المنتج</th>
+                                        <th class="p-3">التصنيف</th>
+                                        <th class="p-3">السعر</th>
+                                        <th class="p-3 text-center">الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-products-table" class="divide-y divide-stone-100 text-sm">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="admin-tab-categories" class="hidden space-y-6">
+                    <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm">
+                        <h4 class="text-base font-black text-stone-900 mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-folder-plus text-pink-600"></i> إضافة تصنيف جديد
+                        </h4>
+                        <form onsubmit="saveCategory(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-stone-700 mb-1">اسم التصنيف:</label>
+                                <input type="text" id="cat-name-input" placeholder="مثال: عناية بالبشرة" class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-stone-700 mb-1">رابط صورة التصنيف:</label>
+                                <input type="url" id="cat-image-input" placeholder="https://example.com/category.jpg" class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm" required>
+                            </div>
+                            <div class="sm:col-span-2">
+                                <button type="submit" class="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow">حفظ التصنيف الجديد</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm">
+                        <h4 class="text-base font-black text-stone-900 mb-1 flex items-center gap-2">
+                            <i class="fa-solid fa-layer-group text-pink-600"></i> إضافة تصنيف فرعي
+                        </h4>
+                        <p class="text-xs text-stone-500 mb-4">التصنيف الفرعي بدون صورة ويظهر تحت التصنيف الرئيسي. يمكنك إضافة أكثر من واحد دفعة واحدة بفصلها بفاصلة.</p>
+                        <form onsubmit="saveSubcategory(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-stone-700 mb-1">التصنيف الرئيسي:</label>
+                                <select id="sub-parent-select" class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm" required></select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-stone-700 mb-1">اسم التصنيف الفرعي:</label>
+                                <input type="text" id="sub-name-input" placeholder="مثال: ماسك البشرة، غسول البشرة" class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm" required>
+                            </div>
+                            <div class="sm:col-span-2">
+                                <button type="submit" class="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow">حفظ التصنيف الفرعي</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
+                        <div class="p-4 border-b border-stone-100 font-black text-stone-900">التصنيفات المتاحة</div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-right border-collapse">
+                                <thead class="bg-stone-50 text-stone-600 text-xs font-bold border-b border-stone-200">
+                                    <tr>
+                                        <th class="p-3">صورة التصنيف</th>
+                                        <th class="p-3">اسم التصنيف</th>
+                                        <th class="p-3">التصنيفات الفرعية</th>
+                                        <th class="p-3 text-center">الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-categories-table" class="divide-y divide-stone-100 text-sm">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="admin-tab-discount" class="hidden space-y-6">
+                    <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm max-w-xl">
+                        <h4 class="text-base font-black text-stone-900 mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-percent text-pink-600"></i> إعداد خصم مباشر للزبائن
+                        </h4>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-stone-700 mb-1">نوع الخصم:</label>
+                                <select id="admin-discount-type" class="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm">
+                                    <option value="none">بدون خصم</option>
+                                    <option value="percentage">نسبة مئوية (%) - يظهر على المنتجات</option>
+                                    <option value="fixed">مبلغ ثابت (د.ع) - يخصم من السلة النهائية فقط</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-stone-700 mb-1">قيمة الخصم (النسبة أو المبلغ):</label>
+                                <input type="number" id="admin-discount-value" placeholder="مثال: 10 أو 5000" class="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-stone-700 mb-1">عنوان الخصم (يظهر للزبون):</label>
+                                <input type="text" id="admin-discount-title" placeholder="مثال: خصم بداية الشهر" class="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm">
+                            </div>
+                            <button onclick="saveStoreDiscount()" class="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow">حفظ وتطبيق الخصم فوراً</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="admin-tab-settings" class="hidden space-y-6">
+                    <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm">
+                        <h4 class="text-base font-black text-stone-900 mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-image text-pink-600"></i> تخصيص شعار المتجر
+                        </h4>
+                        <div class="space-y-4 max-w-xl">
+                            <div>
+                                <label class="block text-xs font-bold text-stone-700 mb-1">رابط صورة الشعار:</label>
+                                <input type="url" id="store-logo-url-input" class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm">
+                            </div>
+                            <button onclick="updateStoreLogo()" class="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow">حفظ الشعار</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="custom-alert-modal" class="fixed inset-0 z-50 bg-black/40 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl">
+            <div id="alert-icon" class="w-16 h-16 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <h4 id="alert-title" class="text-lg font-black text-stone-900 mb-2">تنبيه</h4>
+            <p id="alert-message" class="text-stone-600 text-sm mb-6">رسالة...</p>
+            <button onclick="closeCustomAlert()" class="w-full bg-stone-900 hover:bg-stone-800 text-white py-3 rounded-xl font-bold">حسناً</button>
+        </div>
+    </div>
+
+    <!--
+        ملاحظة مهمة: الكود صار سكربت عادي (مو module) حتى تشتغل كل الأزرار فوراً.
+        قبل كان كل شيء ينتظر تحميل مكتبات فايربيس، وهذا سبب "الضغط ما يستجيب" بالبداية.
+        الآن فايربيس يتحمل بالخلفية بـ import() ولا يوقف الواجهة.
+    -->
+    <script>
+        /* ================= الإعدادات والأدوات ================= */
+        const firebaseConfig = {
+            apiKey: "AIzaSyBp78UAZQERWWNhWxPae4hsi9D-5jBUggQ",
+            authDomain: "athar-ef66f.firebaseapp.com",
+            projectId: "athar-ef66f",
+            storageBucket: "athar-ef66f.firebasestorage.app",
+            messagingSenderId: "371835325505",
+            appId: "1:371835325505:web:193000164899157d474ac0"
+        };
+
+        const $ = (id) => document.getElementById(id);
+        const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        const norm = (s) => String(s || '').toLowerCase()
+            .replace(/[\u064B-\u065F\u0670\u0640]/g, '')
+            .replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي');
+
+        // صور بديلة آمنة (مشفّرة بشكل صحيح، عكس النسخة القديمة اللي كان يخرب فيها الـ onerror)
+        const makeSvg = (text, size = 300, fs = 26) => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+            `<svg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}' viewBox='0 0 ${size} ${size}'><rect width='${size}' height='${size}' fill='#fce7f3'/><text x='50%' y='52%' font-family='Arial' font-weight='bold' font-size='${fs}' fill='#db2777' text-anchor='middle' dominant-baseline='middle'>${text}</text></svg>`
+        );
+        const svgAll = makeSvg('الكل', 100, 22);
+        const svgSkin = makeSvg('بشرة', 100, 22);
+        const svgMakeup = makeSvg('مكياج', 100, 22);
+        const svgPerfume = makeSvg('عطور', 100, 22);
+        const defaultLogo = makeSvg('آثار', 100, 28);
+        const svgProd1 = makeSvg('سيروم فيتامين C');
+        const svgProd2 = makeSvg('أحمر شفاه مات');
+        const svgFallback = makeSvg('كماليات آثار');
+
+        function imgErr(img, kind) {
+            img.onerror = null;
+            img.src = kind === 'cat' ? svgAll : kind === 'logo' ? defaultLogo : svgFallback;
+            img.classList.add('loaded');
+        }
+
+        /* ================= الكاش المحلي (أول عرض فوري) ================= */
+        const CACHE_KEY = 'athar_cache_v1';
+        let cache = {};
+        try { cache = JSON.parse(localStorage.getItem(CACHE_KEY)) || {}; } catch (e) { cache = {}; }
+        function persist(key, val) {
+            cache[key] = val;
+            try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch (e) { /* التخزين ممتلئ أو ممنوع */ }
+        }
+
+        /* ================= الحالة ================= */
+        const defaultCategories = [
+            { id: 'cat-1', name: 'الكل', image: svgAll },
+            { id: 'cat-2', name: 'العناية بالبشرة', image: svgSkin },
+            { id: 'cat-3', name: 'المكياج والتجميل', image: svgMakeup },
+            { id: 'cat-4', name: 'العطور والمسك', image: svgPerfume }
+        ];
+        const defaultProducts = [
+            { id: 'prod-1', name: 'سيروم فيتامين سي النقي', category: 'العناية بالبشرة', price: 18000, image: svgProd1, description: 'سيروم مغذي ومفتح للبشرة يحارب علامات التقدم في السن ويمنح إشراقة فورية.' },
+            { id: 'prod-2', name: 'مجموعة أحمر شفاه مات فخمة', category: 'المكياج والتجميل', price: 15000, image: svgProd2, description: 'درجات ثابتة ومقاومة للماء تدوم طوال اليوم دون أن تسبب جفاف الشفاه.' }
+        ];
+
+        const hasCache = Array.isArray(cache.products) && Array.isArray(cache.categories) && cache.categories.length > 0;
+        let categories = hasCache ? cache.categories : [...defaultCategories];
+        let products = hasCache ? cache.products : [...defaultProducts];
+        let storeDiscount = cache.discount || { type: 'none', value: 0, title: 'خصم خاص' };
+        let logoUrl = cache.logo || '';
+
+        let loading = !hasCache;              // إذا ماكو كاش نعرض skeleton لحد ما توصل البيانات
+        const ready = { categories: false, products: false };
+        let cart = [];
+        let cartOpen = false;
+        let adminOpen = false;
+        let currentSelectedCategory = 'الكل';
+        let currentSubcategory = 'الكل';
+        let searchQuery = '';
+        let isOfflineMode = false;
+        let db = null;
+        let fb = null;                         // دوال فايربيس بعد التحميل
+        const searchIndex = new Map();
+
+        function rebuildIndex() {
+            searchIndex.clear();
+            products.forEach((p) => searchIndex.set(p.id, norm(`${p.name} ${p.description} ${p.category} ${p.subcategory || ''}`)));
+        }
+        rebuildIndex();
+
+        /* ================= مساعدات الخصم ================= */
+        function activePercent() {
+            if (!storeDiscount || storeDiscount.type !== 'percentage') return 0;
+            const v = Number(storeDiscount.value) || 0;
+            return v > 0 ? Math.min(v, 100) : 0;
+        }
+        function calcDiscount(subtotal) {
+            const v = Number(storeDiscount.value) || 0;
+            let d = 0;
+            if (subtotal > 0 && v > 0) {
+                if (storeDiscount.type === 'percentage') d = Math.round(subtotal * Math.min(v, 100) / 100);
+                else if (storeDiscount.type === 'fixed') d = v;
+            }
+            return Math.min(d, subtotal);
+        }
+        function getShippingFee() {
+            const sel = $('customer-province');
+            return parseInt(sel.options[sel.selectedIndex].getAttribute('data-fee')) || 0;
+        }
+
+        /* ================= الإشعار السريع ================= */
+        let toastTimer;
+        function showToast(msg) {
+            const t = $('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => t.classList.remove('show'), 1500);
+        }
+
+        function syncScrollLock() {
+            const open = ['cart-modal', 'admin-login-modal', 'admin-dashboard-modal', 'custom-alert-modal']
+                .some((id) => !$(id).classList.contains('hidden'));
+            document.body.classList.toggle('no-scroll', open);
+        }
+
+        /* ================= رسم التصنيفات ================= */
+        function renderCategories() {
+            const c = $('categories-container');
+
+            if (loading) {
+                c.innerHTML = Array.from({ length: 6 }, () => `
+                    <div class="flex flex-col items-center min-w-[72px] gap-2">
+                        <div class="w-16 h-16 rounded-2xl sk"></div>
+                        <div class="h-4 flex items-center"><div class="w-10 h-2 rounded-full sk"></div></div>
+                    </div>`).join('');
+                return;
+            }
+
+            c.innerHTML = categories.map((cat) => `
+                <button type="button" class="cat-btn flex flex-col items-center min-w-[72px] gap-2" data-cat="${esc(cat.name)}">
+                    <div class="cat-thumb w-16 h-16 rounded-2xl overflow-hidden shadow-sm bg-pink-100">
+                        <img src="${esc(cat.image || svgAll)}" alt="${esc(cat.name)}" width="64" height="64" decoding="async" class="img-fade w-full h-full object-cover" onload="this.classList.add('loaded')" onerror="imgErr(this,'cat')">
+                    </div>
+                    <span class="cat-label text-[10px] font-bold leading-4 h-4 text-center truncate w-full px-1">${esc(cat.name)}</span>
+                </button>`).join('');
+
+            markLoadedImages(c);
+            updateCategoryActive();
+            renderSubcategories();
+            fillAdminCategorySelect();
+        }
+
+        function updateCategoryActive() {
+            $('categories-container').querySelectorAll('.cat-btn').forEach((b) => {
+                b.classList.toggle('active', b.dataset.cat === currentSelectedCategory);
+            });
+        }
+
+        function fillAdminCategorySelect() {
+            const sel = $('p-category');
+            const prev = sel.value;
+            sel.innerHTML = categories.filter((c) => c.name !== 'الكل')
+                .map((c) => `<option value="${esc(c.name)}">${esc(c.name)}</option>`).join('');
+            if (prev) sel.value = prev;
+            fillAdminSubSelect();
+            fillSubParentSelect();
+        }
+
+        // للصور اللي تكون جاهزة من الكاش قبل ما يشتغل onload
+        function markLoadedImages(root) {
+            root.querySelectorAll('img.img-fade').forEach((i) => { if (i.complete && i.naturalWidth > 0) i.classList.add('loaded'); });
+        }
+
+        /* ================= رسم المنتجات ================= */
+        function productSkeleton() {
+            return `
+                <div class="bg-white rounded-2xl p-3 border border-pink-100 shadow-sm flex flex-col h-full">
+                    <div class="w-full aspect-square rounded-xl sk mb-3"></div>
+                    <div class="mb-1 h-[35px] flex flex-col justify-center gap-1.5">
+                        <div class="h-3 sk rounded-full w-3/4"></div>
+                        <div class="h-3 sk rounded-full w-1/2"></div>
+                    </div>
+                    <div class="mb-3 flex-grow min-h-[30px] flex flex-col justify-center gap-1.5">
+                        <div class="h-2 sk rounded-full w-full"></div>
+                        <div class="h-2 sk rounded-full w-2/3"></div>
+                    </div>
+                    <div class="flex items-center justify-between mt-auto pt-2 border-t border-stone-50">
+                        <div class="h-9 flex items-center w-full justify-between">
+                            <div class="h-4 sk rounded-full w-16"></div>
+                            <div class="h-7 sk rounded-lg w-14"></div>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        function productCard(p) {
+            const price = Number(p.price) || 0;
+            const dv = activePercent();
+            let badge = '';
+            let priceHtml = `<span class="font-black text-pink-700 text-sm leading-5">${price.toLocaleString()} د.ع</span>`;
+
+            if (dv > 0) {
+                const np = Math.round(price - price * dv / 100);
+                badge = `<div class="absolute top-2 left-2 bg-red-600 text-white text-[11px] font-black px-2.5 py-1.5 rounded-md shadow-lg z-10 flex items-center gap-1"><i class="fa-solid fa-tags text-[9px]"></i> خصم ${dv}%</div>`;
+                priceHtml = `<span class="text-[10px] text-stone-400 line-through leading-4">${price.toLocaleString()} د.ع</span><span class="font-black text-red-600 text-sm leading-5">${np.toLocaleString()} د.ع</span>`;
+            }
+
+            return `
+                <div class="bg-white rounded-2xl p-3 border border-pink-100 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full relative">
+                    <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-3 bg-pink-50">
+                        ${badge}
+                        <img src="${esc(p.image || svgFallback)}" alt="${esc(p.name)}" width="380" height="380" loading="lazy" decoding="async" class="img-fade w-full h-full object-cover" onload="this.classList.add('loaded')" onerror="imgErr(this,'prod')">
+                        <div class="absolute top-2 right-2 bg-white/90 text-pink-600 text-[10px] font-bold px-2 py-1 rounded-md shadow-sm">${esc(p.category)}</div>
+                    </div>
+                    <h3 class="font-bold text-stone-800 text-sm mb-1 leading-tight line-clamp-2 min-h-[35px]">${esc(p.name)}</h3>
+                    <p class="text-[10px] text-stone-500 line-clamp-2 mb-3 flex-grow min-h-[30px]">${esc(p.description)}</p>
+                    <div class="flex items-center justify-between mt-auto pt-2 border-t border-stone-50">
+                        <div class="h-9 flex flex-col justify-center">${priceHtml}</div>
+                        <button type="button" data-add="${esc(p.id)}" class="bg-pink-600 hover:bg-pink-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 active:scale-95 shadow-sm shadow-pink-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-cart-plus text-[10px]"></i> أضف
+                        </button>
+                    </div>
+                </div>`;
+        }
+
+        function renderProducts() {
+            const grid = $('products-grid');
+            const noProducts = $('no-products-found');
+            const countBadge = $('products-count');
+
+            if (loading) {
+                grid.innerHTML = Array.from({ length: 8 }, productSkeleton).join('');
+                countBadge.textContent = '…';
+                noProducts.classList.add('hidden');
+                return;
+            }
+
+            let filtered = products;
+            if (currentSelectedCategory !== 'الكل') {
+                filtered = filtered.filter((p) => p.category === currentSelectedCategory);
+                if (currentSubcategory !== 'الكل') {
+                    filtered = filtered.filter((p) => p.subcategory === currentSubcategory);
+                }
+            }
+            const q = norm(searchQuery.trim());
+            if (q) {
+                filtered = filtered.filter((p) => (searchIndex.get(p.id) || '').includes(q));
+            }
+
+            countBadge.textContent = filtered.length;
+            noProducts.classList.toggle('hidden', filtered.length > 0);
+            grid.innerHTML = filtered.map(productCard).join('');
+            markLoadedImages(grid);
+        }
+
+        /* ================= البحث والتنقل ================= */
+        let searchTimer;
+        function handleSearch(val) {
+            searchQuery = val;
+            $('clear-search-btn').classList.toggle('hidden', val.length === 0);
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(renderProducts, 120);   // تأخير بسيط حتى ما نعيد الرسم مع كل حرف
+        }
+        function clearSearch() {
+            $('main-search-input').value = '';
+            searchQuery = '';
+            $('clear-search-btn').classList.add('hidden');
+            clearTimeout(searchTimer);
+            renderProducts();
+        }
+        function goToHome() {
+            currentSelectedCategory = 'الكل';
+            currentSubcategory = 'الكل';
+            clearSearch();
+            updateCategoryActive();
+            renderSubcategories();
+        }
+        function selectCategory(name) {
+            currentSelectedCategory = name;
+            currentSubcategory = 'الكل';
+            updateCategoryActive();
+            renderSubcategories();   // تحديث الحالة فقط بدون إعادة بناء التصنيفات
+            renderProducts();
+        }
+
+        // Event delegation: مستمع واحد بدل عشرات الأزرار
+        $('categories-container').addEventListener('click', (e) => {
+            const b = e.target.closest('[data-cat]');
+            if (b) selectCategory(b.dataset.cat);
+        });
+        $('subcats-container').addEventListener('click', (e) => {
+            const b = e.target.closest('[data-sub]');
+            if (!b) return;
+            currentSubcategory = b.dataset.sub;
+            $('subcats-container').querySelectorAll('.sub-btn').forEach((x) => x.classList.toggle('active', x.dataset.sub === currentSubcategory));
+            renderProducts();
+        });
+        $('products-grid').addEventListener('click', (e) => {
+            const b = e.target.closest('[data-add]');
+            if (b) addToCart(b.dataset.add);
+        });
+
+        /* ================= السلة ================= */
+        function updateBadge(bump) {
+            const b = $('cart-badge');
+            b.textContent = cart.reduce((s, i) => s + i.quantity, 0);
+            if (bump) { b.classList.remove('bump'); void b.offsetWidth; b.classList.add('bump'); }
+        }
+
+        function addToCart(id) {
+            const prod = products.find((p) => p.id === id);
+            if (!prod) return;
+            const existing = cart.find((i) => i.id === id);
+            if (existing) existing.quantity += 1;
+            else cart.push({ id: prod.id, name: prod.name, price: Number(prod.price) || 0, image: prod.image, quantity: 1 });
+            updateBadge(true);
+            if (cartOpen) updateCartUI();
+            showToast(`تمت إضافة ${prod.name} للسلة`);   // إشعار خفيف بدل نافذة تحتاج ضغطة "حسناً"
+        }
+
+        function updateQuantity(id, delta) {
+            const item = cart.find((i) => i.id === id);
+            if (item) {
+                item.quantity += delta;
+                if (item.quantity <= 0) cart = cart.filter((i) => i.id !== id);
+            }
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            updateBadge(false);
+            const container = $('cart-items-container');
+
+            if (cart.length === 0) {
+                container.innerHTML = '<p class="text-center text-sm text-stone-500 py-6">السلة فارغة حالياً.</p>';
+            } else {
+                const dv = activePercent();
+                container.innerHTML = cart.map((item) => {
+                    let displayPrice = item.price;
+                    let original = '';
+                    let priceClass = 'text-pink-600';
+                    if (dv > 0) {
+                        displayPrice = Math.round(item.price - item.price * dv / 100);
+                        original = `<span class="text-[10px] text-stone-400 line-through ml-1">${item.price.toLocaleString()}</span>`;
+                        priceClass = 'text-red-600';
+                    }
+                    return `
+                        <div class="py-3 flex gap-3">
+                            <img src="${esc(item.image || svgFallback)}" width="64" height="64" decoding="async" class="w-16 h-16 rounded-xl object-cover bg-stone-50" onerror="imgErr(this,'prod')">
+                            <div class="flex-grow">
+                                <h4 class="font-bold text-sm text-stone-800 line-clamp-1">${esc(item.name)}</h4>
+                                <div class="${priceClass} font-bold text-xs mt-1">${original}<span>${displayPrice.toLocaleString()} د.ع</span></div>
+                                <div class="flex items-center gap-3 mt-2">
+                                    <button type="button" onclick="updateQuantity('${esc(item.id)}', 1)" class="w-7 h-7 bg-stone-100 rounded-md text-stone-600 font-bold hover:bg-stone-200 active:scale-95 transition">+</button>
+                                    <span class="text-sm font-bold w-4 text-center">${item.quantity}</span>
+                                    <button type="button" onclick="updateQuantity('${esc(item.id)}', -1)" class="w-7 h-7 bg-stone-100 rounded-md text-stone-600 font-bold hover:bg-stone-200 active:scale-95 transition">-</button>
+                                </div>
+                            </div>
+                        </div>`;
+                }).join('');
+            }
+            updateCartTotals();
+        }
+
+        function updateCartTotals() {
+            const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+            const fee = getShippingFee();
+            const discount = calcDiscount(subtotal);
+
+            $('cart-subtotal').textContent = `${subtotal.toLocaleString()} د.ع`;
+            $('cart-shipping-fee').textContent = `${fee.toLocaleString()} د.ع`;
+
+            const row = $('discount-row');
+            if (discount > 0) {
+                row.classList.remove('hidden');
+                $('discount-label-text').textContent = `${storeDiscount.title || 'الخصم المطبق'}:`;
+                $('cart-discount-val').textContent = `-${discount.toLocaleString()} د.ع`;
+            } else {
+                row.classList.add('hidden');
+            }
+            $('cart-total-price').textContent = `${Math.max(0, subtotal + fee - discount).toLocaleString()} د.ع`;
+        }
+
+        function openCartModal() {
+            cartOpen = true;
+            updateCartUI();
+            $('cart-modal').classList.remove('hidden');
+            syncScrollLock();
+        }
+        function closeCartModal() {
+            cartOpen = false;
+            $('cart-modal').classList.add('hidden');
+            syncScrollLock();
+        }
+
+        function checkoutViaWhatsApp() {
+            if (cart.length === 0) return showCustomAlert('تنبيه', 'السلة فارغة!', true);
+
+            const name = $('customer-name').value.trim();
+            const phone = $('customer-phone').value.trim();
+            const prov = $('customer-province').value;
+            const area = $('customer-area').value.trim();
+            if (!name || !phone || !area) return showCustomAlert('نقص بيانات', 'يرجى إكمال بيانات العنوان والهاتف.', true);
+
+            const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+            const discount = calcDiscount(subtotal);
+            const total = Math.max(0, subtotal + getShippingFee() - discount);
+
+            let text = `*🛍️ طلب جديد من كماليات آثار*\n\n*👤 الزبون:* ${name}\n*📞 الهاتف:* ${phone}\n*📍 العنوان:* ${prov} - ${area}\n\n*🛒 المنتجات:*\n`;
+            cart.forEach((i) => { text += `▪️ ${i.name} (العدد: ${i.quantity}) - ${(i.price * i.quantity).toLocaleString()} د.ع\n`; });
+            if (discount > 0) text += `\n*🏷️ الخصم (${storeDiscount.title}):* -${discount.toLocaleString()} د.ع`;
+            text += `\n*💰 الإجمالي الكلي:* ${total.toLocaleString()} د.ع`;
+
+            window.open(`https://wa.me/9647869367775?text=${encodeURIComponent(text)}`, '_blank');
+        }
+
+        /* ================= التصنيفات الفرعية ================= */
+        function subsOf(catName) {
+            const c = categories.find((x) => x.name === catName);
+            return c && Array.isArray(c.subcategories) ? c.subcategories : [];
+        }
+
+        function renderSubcategories() {
+            const wrap = $('subcats-wrap');
+            const box = $('subcats-container');
+            const subs = currentSelectedCategory === 'الكل' ? [] : subsOf(currentSelectedCategory);
+
+            if (!subs.length) {
+                currentSubcategory = 'الكل';
+                wrap.classList.remove('open');   // يبقى المحتوى القديم أثناء الإغلاق حتى ما يومض
+                return;
+            }
+            if (currentSubcategory !== 'الكل' && !subs.includes(currentSubcategory)) currentSubcategory = 'الكل';
+
+            box.innerHTML = ['الكل', ...subs].map((s) =>
+                `<button type="button" class="sub-btn${s === currentSubcategory ? ' active' : ''}" data-sub="${esc(s)}">${esc(s)}</button>`
+            ).join('');
+            box.scrollLeft = 0;
+            wrap.classList.add('open');
+        }
+
+        function fillAdminSubSelect(selected) {
+            const sel = $('p-subcategory');
+            if (!sel) return;
+            const subs = subsOf($('p-category').value);
+            const prev = typeof selected === 'string' ? selected : sel.value;
+            sel.innerHTML = '<option value="">بدون تصنيف فرعي</option>' +
+                subs.map((s) => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
+            sel.value = subs.includes(prev) ? prev : '';
+        }
+
+        function fillSubParentSelect() {
+            const sel = $('sub-parent-select');
+            if (!sel) return;
+            const prev = sel.value;
+            sel.innerHTML = categories.filter((c) => c.name !== 'الكل')
+                .map((c) => `<option value="${esc(c.name)}">${esc(c.name)}</option>`).join('');
+            if (prev) sel.value = prev;
+        }
+
+        function updateCategorySubs(cat, subs) {
+            if (isOfflineMode || !db) {
+                cat.subcategories = subs;
+                renderCategories();
+                renderProducts();
+                renderAdminTables();
+            } else {
+                fb.updateDoc(fb.doc(db, 'categories', cat.id), { subcategories: subs }).catch(saveError);
+            }
+        }
+
+        function saveSubcategory(e) {
+            e.preventDefault();
+            const parent = $('sub-parent-select').value;
+            const names = $('sub-name-input').value.split(/[,،]/).map((x) => x.trim()).filter((x) => x && x !== 'الكل');
+            const cat = categories.find((c) => c.name === parent && c.name !== 'الكل');
+            if (!cat || !names.length) return;
+            updateCategorySubs(cat, [...new Set([...(cat.subcategories || []), ...names])]);
+            $('sub-name-input').value = '';
+            showToast('تم حفظ التصنيف الفرعي');
+        }
+
+        function deleteSubcategory(catId, name) {
+            if (!confirm(`حذف التصنيف الفرعي "${name}"؟ المنتجات المرتبطة به تبقى ظاهرة ضمن التصنيف الرئيسي.`)) return;
+            const cat = categories.find((c) => c.id === catId);
+            if (!cat) return;
+            updateCategorySubs(cat, (cat.subcategories || []).filter((x) => x !== name));
+        }
+
+        /* ================= لوحة التحكم ================= */
+        $('store-logo-container').addEventListener('dblclick', openAdminLoginModal);
+
+        function openAdminLoginModal() { $('admin-login-modal').classList.remove('hidden'); syncScrollLock(); }
+        function closeAdminLoginModal() { $('admin-login-modal').classList.add('hidden'); syncScrollLock(); }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const input = $('admin-password-input');
+            if (input.value === '12345') {
+                input.value = '';
+                closeAdminLoginModal();
+                adminOpen = true;
+                $('admin-dashboard-modal').classList.remove('hidden');
+                syncScrollLock();
+                renderAdminTables();
+            } else {
+                showCustomAlert('خطأ', 'كلمة المرور غير صحيحة.', true);
+            }
+        }
+        function closeAdminDashboard() {
+            adminOpen = false;
+            $('admin-dashboard-modal').classList.add('hidden');
+            syncScrollLock();
+        }
+
+        function switchAdminTab(tab) {
+            ['products', 'categories', 'discount', 'settings'].forEach((t) => {
+                $(`admin-tab-${t}`).classList.add('hidden');
+                $(`tab-btn-${t}`).className = 'px-5 py-3 font-bold text-sm text-stone-600 hover:text-stone-900';
+            });
+            $(`admin-tab-${tab}`).classList.remove('hidden');
+            $(`tab-btn-${tab}`).className = 'px-5 py-3 font-bold text-sm border-b-2 border-pink-600 text-pink-700 bg-white rounded-t-xl';
+
+            if (tab === 'discount') {
+                $('admin-discount-type').value = storeDiscount.type || 'none';
+                $('admin-discount-value').value = storeDiscount.value || 0;
+                $('admin-discount-title').value = storeDiscount.title || 'خصم خاص';
+            }
+        }
+
+        // جداول الإدارة تنرسم فقط وقت تكون اللوحة مفتوحة (قبل كانت تنرسم مع كل ضغطة/بحث)
+        function renderAdminTables() {
+            if (!adminOpen) return;
+            $('admin-products-table').innerHTML = products.map((p) => `
+                <tr>
+                    <td class="p-3"><img src="${esc(p.image || svgFallback)}" width="40" height="40" loading="lazy" decoding="async" class="w-10 h-10 rounded object-cover bg-stone-100" onerror="imgErr(this,'prod')"></td>
+                    <td class="p-3 font-bold">${esc(p.name)}</td>
+                    <td class="p-3">${esc(p.category)}</td>
+                    <td class="p-3">${(Number(p.price) || 0).toLocaleString()} د.ع</td>
+                    <td class="p-3 text-center">
+                        <button type="button" onclick="editProduct('${esc(p.id)}')" class="text-blue-500 mx-1 p-2"><i class="fa-solid fa-pen"></i></button>
+                        <button type="button" onclick="deleteProduct('${esc(p.id)}')" class="text-red-500 mx-1 p-2"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>`).join('');
+
+            $('admin-categories-table').innerHTML = categories.filter((c) => c.name !== 'الكل').map((c) => `
+                <tr>
+                    <td class="p-3"><img src="${esc(c.image || svgAll)}" width="40" height="40" loading="lazy" decoding="async" class="w-10 h-10 rounded object-cover bg-stone-100" onerror="imgErr(this,'cat')"></td>
+                    <td class="p-3 font-bold">${esc(c.name)}</td>
+                    <td class="p-3">
+                        <div class="flex flex-wrap gap-1.5">
+                            ${subsOf(c.name).map((s) => `<span class="inline-flex items-center gap-1.5 bg-pink-50 border border-pink-200 text-pink-700 text-xs font-bold px-2.5 py-1 rounded-full">${esc(s)}<button type="button" data-sub="${esc(s)}" onclick="deleteSubcategory('${esc(c.id)}', this.dataset.sub)" class="text-pink-400 hover:text-red-500" aria-label="حذف"><i class="fa-solid fa-xmark text-[10px]"></i></button></span>`).join('') || '<span class="text-xs text-stone-400">لا يوجد</span>'}
+                        </div>
+                    </td>
+                    <td class="p-3 text-center">
+                        <button type="button" onclick="deleteCategory('${esc(c.id)}')" class="text-red-500 mx-1 p-2"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>`).join('');
+        }
+
+        // الحفظ بدون انتظار السيرفر: فايربيس يحدّث الواجهة فوراً من النسخة المحلية
+        function saveError() { showCustomAlert('خطأ', 'تعذر الحفظ على السيرفر، تأكد من الاتصال بالإنترنت.', true); }
+
+        function saveProduct(e) {
+            e.preventDefault();
+            const btn = e.submitter;
+            if (btn) { btn.disabled = true; setTimeout(() => { btn.disabled = false; }, 700); }
+
+            const id = $('edit-product-id').value;
+            const data = {
+                name: $('p-name').value,
+                category: $('p-category').value,
+                subcategory: $('p-subcategory').value,
+                price: parseFloat($('p-price').value),
+                image: $('p-image').value,
+                description: $('p-desc').value,
+            };
+
+            if (isOfflineMode || !db) {
+                if (id) { const idx = products.findIndex((x) => x.id === id); if (idx > -1) products[idx] = { id, ...data }; }
+                else products.push({ id: 'p-' + Date.now(), ...data });
+                rebuildIndex();
+                renderProducts();
+                renderAdminTables();
+            } else {
+                const op = id ? fb.updateDoc(fb.doc(db, 'products', id), data) : fb.addDoc(fb.collection(db, 'products'), data);
+                op.catch(saveError);
+            }
+            resetProductForm();
+            showToast('تم حفظ المنتج');
+        }
+
+        function editProduct(id) {
+            const p = products.find((x) => x.id === id);
+            if (!p) return;
+            $('edit-product-id').value = p.id;
+            $('p-name').value = p.name;
+            $('p-category').value = p.category;
+            fillAdminSubSelect(p.subcategory || '');
+            $('p-price').value = p.price;
+            $('p-image').value = p.image;
+            $('p-desc').value = p.description;
+            $('cancel-edit-btn').classList.remove('hidden');
+            $('product-form-title').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function deleteProduct(id) {
+            if (!confirm('هل أنت متأكد من الحذف؟')) return;
+            if (isOfflineMode || !db) {
+                products = products.filter((x) => x.id !== id);
+                rebuildIndex();
+                renderProducts();
+                renderAdminTables();
+            } else {
+                fb.deleteDoc(fb.doc(db, 'products', id)).catch(saveError);
+            }
+        }
+
+        function resetProductForm() {
+            $('product-form').reset();
+            fillAdminSubSelect('');
+            $('edit-product-id').value = '';
+            $('cancel-edit-btn').classList.add('hidden');
+        }
+
+        function saveCategory(e) {
+            e.preventDefault();
+            const data = { name: $('cat-name-input').value.trim(), image: $('cat-image-input').value };
+            if (isOfflineMode || !db) {
+                categories.push({ id: 'c-' + Date.now(), ...data });
+                renderCategories();
+                renderAdminTables();
+            } else {
+                fb.addDoc(fb.collection(db, 'categories'), data).catch(saveError);
+            }
+            e.target.reset();
+            showToast('تم حفظ التصنيف');
+        }
+
+        function deleteCategory(id) {
+            if (!confirm('هل أنت متأكد من الحذف؟')) return;
+            if (isOfflineMode || !db) {
+                categories = categories.filter((x) => x.id !== id);
+                if (!categories.some((c) => c.name === currentSelectedCategory)) currentSelectedCategory = 'الكل';
+                renderCategories();
+                renderProducts();
+                renderAdminTables();
+            } else {
+                fb.deleteDoc(fb.doc(db, 'categories', id)).catch(saveError);
+            }
+        }
+
+        function applyDiscountUI() {
+            updateCartTotals();
+            if (cartOpen) updateCartUI();
+            renderProducts();
+        }
+
+        function saveStoreDiscount() {
+            const type = $('admin-discount-type').value;
+            const value = parseFloat($('admin-discount-value').value) || 0;
+            const title = $('admin-discount-title').value.trim() || 'خصم خاص';
+            storeDiscount = { type, value, title };
+            persist('discount', storeDiscount);
+            applyDiscountUI();
+            if (!isOfflineMode && db) {
+                fb.setDoc(fb.doc(db, 'store_settings', 'general'), { discount: storeDiscount }, { merge: true }).catch(saveError);
+            }
+            showCustomAlert('نجاح', 'تم تطبيق الخصم بنجاح على متجرك!', false);
+        }
+
+        function applyLogo() {
+            if (logoUrl) $('store-logo-img').src = logoUrl;
+        }
+        function updateStoreLogo() {
+            const url = $('store-logo-url-input').value.trim();
+            if (!url) return;
+            logoUrl = url;
+            persist('logo', url);
+            applyLogo();
+            if (!isOfflineMode && db) {
+                fb.setDoc(fb.doc(db, 'store_settings', 'general'), { logoUrl: url }, { merge: true }).catch(saveError);
+            }
+            showCustomAlert('نجاح', 'تم تحديث الشعار.', false);
+        }
+
+        function showCustomAlert(title, message, isError) {
+            $('alert-title').textContent = title;
+            $('alert-message').textContent = message;
+            const icon = $('alert-icon');
+            icon.className = isError
+                ? 'w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl'
+                : 'w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl';
+            icon.innerHTML = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
+            $('custom-alert-modal').classList.remove('hidden');
+            syncScrollLock();
+        }
+        function closeCustomAlert() { $('custom-alert-modal').classList.add('hidden'); syncScrollLock(); }
+
+        /* ================= فايربيس (يتحمل بالخلفية) ================= */
+        function markReady(key) {
+            ready[key] = true;
+            if (loading && ready.categories && ready.products) {
+                loading = false;
+                renderCategories();
+                renderProducts();
+            }
+        }
+
+        // إذا تأخر الاتصال كثير، لا نخلي الزبونة تشوف skeleton للأبد
+        function finishLoadingFallback() {
+            if (!loading) return;
+            loading = false;
+            renderCategories();
+            renderProducts();
+        }
+
+        function goOffline() {
+            isOfflineMode = true;
+            finishLoadingFallback();
+        }
+
+        async function initFirebase() {
+            try {
+                const B = 'https://www.gstatic.com/firebasejs/11.6.1/';
+                const [appM, authM, fsM] = await Promise.all([
+                    import(B + 'firebase-app.js'),
+                    import(B + 'firebase-auth.js'),
+                    import(B + 'firebase-firestore.js'),
+                ]);
+                fb = fsM;
+                const app = appM.initializeApp(firebaseConfig);
+                db = fsM.getFirestore(app);
+                await authM.signInAnonymously(authM.getAuth(app));
+                initFirestoreListeners();
+            } catch (err) {
+                console.error('Firebase init failed:', err);
+                goOffline();
+            }
+        }
+
+        function initFirestoreListeners() {
+            // الإعدادات (الشعار والخصم)
+            fb.onSnapshot(fb.doc(db, 'store_settings', 'general'), (snap) => {
+                if (!snap.exists()) return;
+                const d = snap.data();
+                if (d.logoUrl && d.logoUrl !== logoUrl) {
+                    logoUrl = d.logoUrl;
+                    persist('logo', logoUrl);
+                    applyLogo();
+                }
+                if (d.discount && JSON.stringify(d.discount) !== JSON.stringify(storeDiscount)) {
+                    storeDiscount = d.discount;
+                    persist('discount', storeDiscount);
+                    if (!loading) applyDiscountUI();
+                }
+            }, (err) => console.error(err));
+
+            // التصنيفات
+            fb.onSnapshot(fb.collection(db, 'categories'), (snap) => {
+                let list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+                if (!list.find((c) => c.name === 'الكل')) list.unshift({ id: 'cat-all', name: 'الكل', image: svgAll });
+                list.sort((a, b) => (a.name === 'الكل' ? -1 : 0) - (b.name === 'الكل' ? -1 : 0));
+
+                const changed = JSON.stringify(list) !== JSON.stringify(categories);
+                if (changed) {
+                    categories = list;
+                    persist('categories', list);
+                    if (!categories.some((c) => c.name === currentSelectedCategory)) currentSelectedCategory = 'الكل';
+                    if (!loading) { renderCategories(); renderProducts(); renderAdminTables(); }
+                }
+                markReady('categories');
+            }, (err) => { console.error(err); markReady('categories'); });
+
+            // المنتجات
+            fb.onSnapshot(fb.collection(db, 'products'), (snap) => {
+                const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+                const changed = JSON.stringify(list) !== JSON.stringify(products);
+                if (changed) {
+                    products = list;
+                    rebuildIndex();
+                    persist('products', list);
+                    if (!loading) { renderProducts(); renderAdminTables(); }
+                }
+                markReady('products');
+            }, (err) => { console.error(err); markReady('products'); });
+        }
+
+        /* ================= التشغيل ================= */
+        applyLogo();
+        renderCategories();
+        renderProducts();
+        updateCartUI();
+        initFirebase();
+        setTimeout(finishLoadingFallback, 8000);
+    </script>
 </body>
 </html>

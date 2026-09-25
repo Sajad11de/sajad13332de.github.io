@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>متجر كماليات آثار - عالم العناية والتجميل</title>
 
+    <!-- تسريع الاتصال بالخدمات الخارجية -->
     <link rel="preconnect" href="https://cdn.tailwindcss.com">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,23 +13,36 @@
     <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 
+    <!-- تحميل مسبق لملفات فايربيس حتى تكون جاهزة قبل ما نحتاجها -->
     <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js">
     <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js">
     <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js">
 
+    <link rel="preload" href="https://cdn.tailwindcss.com" as="script">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome وخط Cairo: تحميل غير معيق (async) حتى ما يأخرون أول ظهور للواجهة -->
+    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap">
+    </noscript>
     <style>
         html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
-        body { font-family: 'Cairo', sans-serif; background-color: #fffafb; color: #44383a; }
+        body { font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif; background-color: #fffafb; color: #44383a; }
         body.no-scroll { overflow: hidden; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+        /* إلغاء تأخير اللمس وتحسين الاستجابة */
         button, a, select, input, label { touch-action: manipulation; }
         button { -webkit-tap-highlight-color: transparent; }
 
+        /* حجز مساحة الأيقونة قبل وصول خط Font Awesome (يمنع القفزة البصرية) */
+        .fa-solid, .fa-brands { display: inline-block; min-width: 1em; text-align: center; }
+
+        /* Skeleton shimmer */
         .sk {
             background: linear-gradient(90deg, #f6e7ee 25%, #fdf3f7 50%, #f6e7ee 75%);
             background-size: 200% 100%;
@@ -37,9 +51,11 @@
         @keyframes sk-move { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
         @media (prefers-reduced-motion: reduce) { .sk { animation: none; } }
 
+        /* ظهور الصور بنعومة بدل ما تنط فجأة */
         .img-fade { opacity: 0; transition: opacity .3s ease; }
         .img-fade.loaded { opacity: 1; }
 
+        /* التصنيفات (حالة التحديد بدون إعادة بناء) */
         .cat-btn { opacity: .8; transition: transform .15s ease, opacity .15s ease; }
         .cat-btn:active { transform: scale(.95); }
         .cat-btn.active { opacity: 1; transform: scale(1.05); }
@@ -48,6 +64,7 @@
         .cat-label { color: #57534e; }
         .cat-btn.active .cat-label { color: #be185d; }
 
+        /* التصنيفات الفرعية: تنفتح وتنغلق بنعومة حتى ما يقفز المحتوى */
         #subcats-wrap { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .25s ease; }
         #subcats-wrap.open { grid-template-rows: 1fr; }
         #subcats-inner { overflow: hidden; min-height: 0; }
@@ -55,6 +72,7 @@
         .sub-btn:active { transform: scale(.96); }
         .sub-btn.active { background: #fff; color: #be185d; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
 
+        /* إشعار سريع بدل النافذة المنبثقة */
         #toast {
             position: fixed; bottom: 1.5rem; left: 50%; z-index: 60;
             transform: translate(-50%, 12px); opacity: 0; pointer-events: none;
@@ -69,6 +87,7 @@
 </head>
 <body class="min-h-screen flex flex-col bg-[#fffafb]">
 
+    <!-- الهيدر والبحث -->
     <header class="sticky top-0 z-40 bg-white shadow-sm border-b border-pink-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             <div id="store-logo-container" class="flex items-center gap-3 cursor-pointer select-none transition-all duration-200 active:scale-95" onclick="goToHome()" title="انقر مرتين للوصول للوحة التحكم">
@@ -101,7 +120,10 @@
         </div>
     </header>
 
+    <!-- المحتوى الرئيسي -->
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- قسم التصنيفات: نفس الحاوية للـ skeleton وللمحتوى الحقيقي حتى ما يتغير الارتفاع -->
         <section class="mb-8">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl font-black text-stone-900 flex items-center gap-2">
@@ -116,6 +138,7 @@
             </div>
         </section>
 
+        <!-- قسم المنتجات -->
         <section>
             <div class="flex items-center justify-between mb-4">
                 <div>
@@ -148,6 +171,7 @@
         </div>
     </footer>
 
+    <!-- إشعار سريع -->
     <div id="toast" class="bg-stone-900 text-white text-sm font-bold px-4 py-2.5 rounded-xl shadow-lg" role="status" aria-live="polite"></div>
 
     <!-- نافذة سلة المشتريات -->
@@ -216,14 +240,12 @@
                     <span>الإجمالي الكلي النهائي:</span>
                     <span id="cart-total-price" class="text-pink-700 text-xl">0 د.ع</span>
                 </div>
-
-                <!-- أزرار إتمام الطلب (واتساب + انستكرام) -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
-                    <button onclick="checkoutViaWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 active:scale-95 shadow-md shadow-emerald-600/20">
-                        <i class="fa-brands fa-whatsapp text-lg"></i> إتمام عبر واتساب
+                <div class="grid grid-cols-2 gap-2 mt-2">
+                    <button onclick="checkoutViaWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all duration-200 active:scale-95 shadow-lg shadow-emerald-600/20">
+                        <i class="fa-brands fa-whatsapp text-xl"></i> واتساب
                     </button>
-                    <button onclick="checkoutViaInstagram()" class="w-full bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 hover:opacity-95 text-white py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 active:scale-95 shadow-md shadow-pink-600/20">
-                        <i class="fa-brands fa-instagram text-lg"></i> إتمام عبر انستكرام
+                    <button onclick="checkoutViaInstagram()" class="w-full text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all duration-200 active:scale-95 shadow-lg" style="background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)">
+                        <i class="fa-brands fa-instagram text-xl"></i> انستكرام
                     </button>
                 </div>
             </div>
@@ -353,7 +375,7 @@
                         <h4 class="text-base font-black text-stone-900 mb-1 flex items-center gap-2">
                             <i class="fa-solid fa-layer-group text-pink-600"></i> إضافة تصنيف فرعي
                         </h4>
-                        <p class="text-xs text-stone-500 mb-4">التصنيف الفرعي بدون صورة ويظهر تحت التصنيف الرئيسي.</p>
+                        <p class="text-xs text-stone-500 mb-4">التصنيف الفرعي بدون صورة ويظهر تحت التصنيف الرئيسي. يمكنك إضافة أكثر من واحد دفعة واحدة بفصلها بفاصلة.</p>
                         <form onsubmit="saveSubcategory(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-bold text-stone-700 mb-1">التصنيف الرئيسي:</label>
@@ -361,7 +383,7 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-stone-700 mb-1">اسم التصنيف الفرعي:</label>
-                                <input type="text" id="sub-name-input" placeholder="مثال: ماسك البشرة" class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm" required>
+                                <input type="text" id="sub-name-input" placeholder="مثال: ماسك البشرة، غسول البشرة" class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm" required>
                             </div>
                             <div class="sm:col-span-2">
                                 <button type="submit" class="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow">حفظ التصنيف الفرعي</button>
@@ -397,16 +419,16 @@
                                 <label class="block text-xs font-bold text-stone-700 mb-1">نوع الخصم:</label>
                                 <select id="admin-discount-type" class="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm">
                                     <option value="none">بدون خصم</option>
-                                    <option value="percentage">نسبة مئوية (%)</option>
-                                    <option value="fixed">مبلغ ثابت (د.ع)</option>
+                                    <option value="percentage">نسبة مئوية (%) - يظهر على المنتجات</option>
+                                    <option value="fixed">مبلغ ثابت (د.ع) - يخصم من السلة النهائية فقط</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-stone-700 mb-1">قيمة الخصم:</label>
+                                <label class="block text-xs font-bold text-stone-700 mb-1">قيمة الخصم (النسبة أو المبلغ):</label>
                                 <input type="number" id="admin-discount-value" placeholder="مثال: 10 أو 5000" class="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-stone-700 mb-1">عنوان الخصم:</label>
+                                <label class="block text-xs font-bold text-stone-700 mb-1">عنوان الخصم (يظهر للزبون):</label>
                                 <input type="text" id="admin-discount-title" placeholder="مثال: خصم بداية الشهر" class="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm">
                             </div>
                             <button onclick="saveStoreDiscount()" class="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow">حفظ وتطبيق الخصم فوراً</button>
@@ -443,7 +465,13 @@
         </div>
     </div>
 
+    <!--
+        ملاحظة مهمة: الكود صار سكربت عادي (مو module) حتى تشتغل كل الأزرار فوراً.
+        قبل كان كل شيء ينتظر تحميل مكتبات فايربيس، وهذا سبب "الضغط ما يستجيب" بالبداية.
+        الآن فايربيس يتحمل بالخلفية بـ import() ولا يوقف الواجهة.
+    -->
     <script>
+        /* ================= الإعدادات والأدوات ================= */
         const firebaseConfig = {
             apiKey: "AIzaSyBp78UAZQERWWNhWxPae4hsi9D-5jBUggQ",
             authDomain: "athar-ef66f.firebaseapp.com",
@@ -459,6 +487,7 @@
             .replace(/[\u064B-\u065F\u0670\u0640]/g, '')
             .replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي');
 
+        // صور بديلة آمنة (مشفّرة بشكل صحيح، عكس النسخة القديمة اللي كان يخرب فيها الـ onerror)
         const makeSvg = (text, size = 300, fs = 26) => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
             `<svg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}' viewBox='0 0 ${size} ${size}'><rect width='${size}' height='${size}' fill='#fce7f3'/><text x='50%' y='52%' font-family='Arial' font-weight='bold' font-size='${fs}' fill='#db2777' text-anchor='middle' dominant-baseline='middle'>${text}</text></svg>`
         );
@@ -477,14 +506,16 @@
             img.classList.add('loaded');
         }
 
+        /* ================= الكاش المحلي (أول عرض فوري) ================= */
         const CACHE_KEY = 'athar_cache_v1';
         let cache = {};
         try { cache = JSON.parse(localStorage.getItem(CACHE_KEY)) || {}; } catch (e) { cache = {}; }
         function persist(key, val) {
             cache[key] = val;
-            try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch (e) {}
+            try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch (e) { /* التخزين ممتلئ أو ممنوع */ }
         }
 
+        /* ================= الحالة ================= */
         const defaultCategories = [
             { id: 'cat-1', name: 'الكل', image: svgAll },
             { id: 'cat-2', name: 'العناية بالبشرة', image: svgSkin },
@@ -502,7 +533,7 @@
         let storeDiscount = cache.discount || { type: 'none', value: 0, title: 'خصم خاص' };
         let logoUrl = cache.logo || '';
 
-        let loading = !hasCache;
+        let loading = !hasCache;              // إذا ماكو كاش نعرض skeleton لحد ما توصل البيانات
         const ready = { categories: false, products: false };
         let cart = [];
         let cartOpen = false;
@@ -512,7 +543,7 @@
         let searchQuery = '';
         let isOfflineMode = false;
         let db = null;
-        let fb = null;
+        let fb = null;                         // دوال فايربيس بعد التحميل
         const searchIndex = new Map();
 
         function rebuildIndex() {
@@ -521,6 +552,7 @@
         }
         rebuildIndex();
 
+        /* ================= مساعدات الخصم ================= */
         function activePercent() {
             if (!storeDiscount || storeDiscount.type !== 'percentage') return 0;
             const v = Number(storeDiscount.value) || 0;
@@ -540,6 +572,7 @@
             return parseInt(sel.options[sel.selectedIndex].getAttribute('data-fee')) || 0;
         }
 
+        /* ================= الإشعار السريع ================= */
         let toastTimer;
         function showToast(msg) {
             const t = $('toast');
@@ -555,8 +588,10 @@
             document.body.classList.toggle('no-scroll', open);
         }
 
+        /* ================= رسم التصنيفات ================= */
         function renderCategories() {
             const c = $('categories-container');
+
             if (loading) {
                 c.innerHTML = Array.from({ length: 6 }, () => `
                     <div class="flex flex-col items-center min-w-[72px] gap-2">
@@ -588,7 +623,6 @@
 
         function fillAdminCategorySelect() {
             const sel = $('p-category');
-            if (!sel) return;
             const prev = sel.value;
             sel.innerHTML = categories.filter((c) => c.name !== 'الكل')
                 .map((c) => `<option value="${esc(c.name)}">${esc(c.name)}</option>`).join('');
@@ -597,10 +631,12 @@
             fillSubParentSelect();
         }
 
+        // للصور اللي تكون جاهزة من الكاش قبل ما يشتغل onload
         function markLoadedImages(root) {
             root.querySelectorAll('img.img-fade').forEach((i) => { if (i.complete && i.naturalWidth > 0) i.classList.add('loaded'); });
         }
 
+        /* ================= رسم المنتجات ================= */
         function productSkeleton() {
             return `
                 <div class="bg-white rounded-2xl p-3 border border-pink-100 shadow-sm flex flex-col h-full">
@@ -682,12 +718,13 @@
             markLoadedImages(grid);
         }
 
+        /* ================= البحث والتنقل ================= */
         let searchTimer;
         function handleSearch(val) {
             searchQuery = val;
             $('clear-search-btn').classList.toggle('hidden', val.length === 0);
             clearTimeout(searchTimer);
-            searchTimer = setTimeout(renderProducts, 100);
+            searchTimer = setTimeout(renderProducts, 120);   // تأخير بسيط حتى ما نعيد الرسم مع كل حرف
         }
         function clearSearch() {
             $('main-search-input').value = '';
@@ -707,10 +744,11 @@
             currentSelectedCategory = name;
             currentSubcategory = 'الكل';
             updateCategoryActive();
-            renderSubcategories();
+            renderSubcategories();   // تحديث الحالة فقط بدون إعادة بناء التصنيفات
             renderProducts();
         }
 
+        // Event delegation: مستمع واحد بدل عشرات الأزرار
         $('categories-container').addEventListener('click', (e) => {
             const b = e.target.closest('[data-cat]');
             if (b) selectCategory(b.dataset.cat);
@@ -727,6 +765,7 @@
             if (b) addToCart(b.dataset.add);
         });
 
+        /* ================= السلة ================= */
         function updateBadge(bump) {
             const b = $('cart-badge');
             b.textContent = cart.reduce((s, i) => s + i.quantity, 0);
@@ -741,7 +780,7 @@
             else cart.push({ id: prod.id, name: prod.name, price: Number(prod.price) || 0, image: prod.image, quantity: 1 });
             updateBadge(true);
             if (cartOpen) updateCartUI();
-            showToast(`تمت إضافة ${prod.name} للسلة`);
+            showToast(`تمت إضافة ${prod.name} للسلة`);   // إشعار خفيف بدل نافذة تحتاج ضغطة "حسناً"
         }
 
         function updateQuantity(id, delta) {
@@ -819,54 +858,69 @@
             syncScrollLock();
         }
 
-        function getOrderSummaryText() {
+        // تتحقق من بيانات الزبونة وترجع نص الطلب الكامل، أو null إذا ناقصة بيانات (وتعرض تنبيه مناسب)
+        function buildOrderText(plain) {
+            if (cart.length === 0) { showCustomAlert('تنبيه', 'السلة فارغة!', true); return null; }
+
             const name = $('customer-name').value.trim();
             const phone = $('customer-phone').value.trim();
             const prov = $('customer-province').value;
             const area = $('customer-area').value.trim();
+            if (!name || !phone || !area) { showCustomAlert('نقص بيانات', 'يرجى إكمال بيانات العنوان والهاتف.', true); return null; }
 
             const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
             const discount = calcDiscount(subtotal);
             const total = Math.max(0, subtotal + getShippingFee() - discount);
 
-            let text = `*🛍️ طلب جديد من كماليات آثار*\n\n*👤 الزبون:* ${name}\n*📞 الهاتف:* ${phone}\n*📍 العنوان:* ${prov} - ${area}\n\n*🛒 المنتجات:*\n`;
+            const b = plain ? '' : '*';
+            let text = `${b}🛍️ طلب جديد من كماليات آثار${b}\n\n${b}👤 الزبون:${b} ${name}\n${b}📞 الهاتف:${b} ${phone}\n${b}📍 العنوان:${b} ${prov} - ${area}\n\n${b}🛒 المنتجات:${b}\n`;
             cart.forEach((i) => { text += `▪️ ${i.name} (العدد: ${i.quantity}) - ${(i.price * i.quantity).toLocaleString()} د.ع\n`; });
-            if (discount > 0) text += `\n*🏷️ الخصم (${storeDiscount.title}):* -${discount.toLocaleString()} د.ع`;
-            text += `\n*💰 الإجمالي الكلي:* ${total.toLocaleString()} د.ع`;
+            if (discount > 0) text += `\n${b}🏷️ الخصم (${storeDiscount.title}):${b} -${discount.toLocaleString()} د.ع`;
+            text += `\n${b}💰 الإجمالي الكلي:${b} ${total.toLocaleString()} د.ع`;
             return text;
         }
 
         function checkoutViaWhatsApp() {
-            if (cart.length === 0) return showCustomAlert('تنبيه', 'السلة فارغة!', true);
-            const name = $('customer-name').value.trim();
-            const phone = $('customer-phone').value.trim();
-            const area = $('customer-area').value.trim();
-            if (!name || !phone || !area) return showCustomAlert('نقص بيانات', 'يرجى إكمال بيانات العنوان والهاتف.', true);
-
-            const text = getOrderSummaryText();
+            const text = buildOrderText(false);
+            if (!text) return;
             window.open(`https://wa.me/9647869367775?text=${encodeURIComponent(text)}`, '_blank');
         }
 
-        function checkoutViaInstagram() {
-            if (cart.length === 0) return showCustomAlert('تنبيه', 'السلة فارغة!', true);
-            const name = $('customer-name').value.trim();
-            const phone = $('customer-phone').value.trim();
-            const area = $('customer-area').value.trim();
-            if (!name || !phone || !area) return showCustomAlert('نقص بيانات', 'يرجى إكمال بيانات العنوان والهاتف.', true);
+        // انستكرام ما يدعم فتح محادثة بنص جاهز، فننسخ تفاصيل الطلب للحافظة تلقائياً
+        // ونفتح صفحة الدردشة المباشرة مع المتجر حتى تضغط الزبونة "لصق" وترسل
+        async function checkoutViaInstagram() {
+            const text = buildOrderText(true);
+            if (!text) return;
 
-            const text = getOrderSummaryText();
+            let copied = false;
+            try {
+                await navigator.clipboard.writeText(text);
+                copied = true;
+            } catch (e) {
+                try {
+                    const ta = document.createElement('textarea');
+                    ta.value = text;
+                    ta.style.position = 'fixed';
+                    ta.style.opacity = '0';
+                    document.body.appendChild(ta);
+                    ta.focus();
+                    ta.select();
+                    copied = document.execCommand('copy');
+                    document.body.removeChild(ta);
+                } catch (e2) { copied = false; }
+            }
 
-            // نسخ تفاصيل الطلب للحافظة ثم فتح الانستغرام بيوزر hj8.7s
-            navigator.clipboard.writeText(text).then(() => {
-                showCustomAlert('تم نسخ تفاصيل الطلب!', 'تم نسخ تفاصيل الطلب إلى الحافظة. سيتم فتح صفحة الانستغرام، يرجى لصقها (Paste) في رسائل الصفحة.', false);
-                setTimeout(() => {
-                    window.open('https://instagram.com/hj8.7s', '_blank');
-                }, 1500);
-            }).catch(() => {
-                window.open('https://instagram.com/hj8.7s', '_blank');
-            });
+            showCustomAlert(
+                copied ? 'تم نسخ تفاصيل الطلب' : 'تنبيه',
+                copied
+                    ? 'راح تنفتح صفحة الدردشة بانستكرام — اضغطي "لصق" بمربع الكتابة وأرسلي الطلب.'
+                    : 'تعذر النسخ التلقائي، انسخي تفاصيل السلة يدوياً وأرسليها عبر انستكرام.',
+                !copied
+            );
+            window.open(`https://ig.me/m/hj8.7s`, '_blank');
         }
 
+        /* ================= التصنيفات الفرعية ================= */
         function subsOf(catName) {
             const c = categories.find((x) => x.name === catName);
             return c && Array.isArray(c.subcategories) ? c.subcategories : [];
@@ -879,7 +933,7 @@
 
             if (!subs.length) {
                 currentSubcategory = 'الكل';
-                wrap.classList.remove('open');
+                wrap.classList.remove('open');   // يبقى المحتوى القديم أثناء الإغلاق حتى ما يومض
                 return;
             }
             if (currentSubcategory !== 'الكل' && !subs.includes(currentSubcategory)) currentSubcategory = 'الكل';
@@ -933,12 +987,13 @@
         }
 
         function deleteSubcategory(catId, name) {
-            if (!confirm(`حذف التصنيف الفرعي "${name}"؟`)) return;
+            if (!confirm(`حذف التصنيف الفرعي "${name}"؟ المنتجات المرتبطة به تبقى ظاهرة ضمن التصنيف الرئيسي.`)) return;
             const cat = categories.find((c) => c.id === catId);
             if (!cat) return;
             updateCategorySubs(cat, (cat.subcategories || []).filter((x) => x !== name));
         }
 
+        /* ================= لوحة التحكم ================= */
         $('store-logo-container').addEventListener('dblclick', openAdminLoginModal);
 
         function openAdminLoginModal() { $('admin-login-modal').classList.remove('hidden'); syncScrollLock(); }
@@ -973,11 +1028,13 @@
             $(`tab-btn-${tab}`).className = 'px-5 py-3 font-bold text-sm border-b-2 border-pink-600 text-pink-700 bg-white rounded-t-xl';
 
             if (tab === 'discount') {
-                $('admin-discount-type').value = storeDiscount.type \vert{}\vert{} 'none';$('admin-discount-value').value = storeDiscount.value || 0;
+                $('admin-discount-type').value = storeDiscount.type || 'none';
+                $('admin-discount-value').value = storeDiscount.value || 0;
                 $('admin-discount-title').value = storeDiscount.title || 'خصم خاص';
             }
         }
 
+        // جداول الإدارة تنرسم فقط وقت تكون اللوحة مفتوحة (قبل كانت تنرسم مع كل ضغطة/بحث)
         function renderAdminTables() {
             if (!adminOpen) return;
             $('admin-products-table').innerHTML = products.map((p) => `
@@ -1007,6 +1064,7 @@
                 </tr>`).join('');
         }
 
+        // الحفظ بدون انتظار السيرفر: فايربيس يحدّث الواجهة فوراً من النسخة المحلية
         function saveError() { showCustomAlert('خطأ', 'تعذر الحفظ على السيرفر، تأكد من الاتصال بالإنترنت.', true); }
 
         function saveProduct(e) {
@@ -1048,7 +1106,8 @@
             $('p-price').value = p.price;
             $('p-image').value = p.image;
             $('p-desc').value = p.description;
-            $('cancel-edit-btn').classList.remove('hidden');$('product-form-title').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            $('cancel-edit-btn').classList.remove('hidden');
+            $('product-form-title').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function deleteProduct(id) {
@@ -1066,12 +1125,13 @@
         function resetProductForm() {
             $('product-form').reset();
             fillAdminSubSelect('');
-            $('edit-product-id').value = '';$('cancel-edit-btn').classList.add('hidden');
+            $('edit-product-id').value = '';
+            $('cancel-edit-btn').classList.add('hidden');
         }
 
         function saveCategory(e) {
             e.preventDefault();
-            const data = { name: $('cat-name-input').value.trim(), image:$('cat-image-input').value };
+            const data = { name: $('cat-name-input').value.trim(), image: $('cat-image-input').value };
             if (isOfflineMode || !db) {
                 categories.push({ id: 'c-' + Date.now(), ...data });
                 renderCategories();
@@ -1143,6 +1203,7 @@
         }
         function closeCustomAlert() { $('custom-alert-modal').classList.add('hidden'); syncScrollLock(); }
 
+        /* ================= فايربيس (يتحمل بالخلفية) ================= */
         function markReady(key) {
             ready[key] = true;
             if (loading && ready.categories && ready.products) {
@@ -1152,6 +1213,7 @@
             }
         }
 
+        // إذا تأخر الاتصال كثير، لا نخلي الزبونة تشوف skeleton للأبد
         function finishLoadingFallback() {
             if (!loading) return;
             loading = false;
@@ -1184,6 +1246,7 @@
         }
 
         function initFirestoreListeners() {
+            // الإعدادات (الشعار والخصم)
             fb.onSnapshot(fb.doc(db, 'store_settings', 'general'), (snap) => {
                 if (!snap.exists()) return;
                 const d = snap.data();
@@ -1199,6 +1262,7 @@
                 }
             }, (err) => console.error(err));
 
+            // التصنيفات
             fb.onSnapshot(fb.collection(db, 'categories'), (snap) => {
                 let list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
                 if (!list.find((c) => c.name === 'الكل')) list.unshift({ id: 'cat-all', name: 'الكل', image: svgAll });
@@ -1214,6 +1278,7 @@
                 markReady('categories');
             }, (err) => { console.error(err); markReady('categories'); });
 
+            // المنتجات
             fb.onSnapshot(fb.collection(db, 'products'), (snap) => {
                 const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
                 const changed = JSON.stringify(list) !== JSON.stringify(products);
@@ -1227,12 +1292,13 @@
             }, (err) => { console.error(err); markReady('products'); });
         }
 
+        /* ================= التشغيل ================= */
         applyLogo();
         renderCategories();
         renderProducts();
         updateCartUI();
         initFirebase();
-        setTimeout(finishLoadingFallback, 3000);
+        setTimeout(finishLoadingFallback, 8000);
     </script>
 </body>
 </html>

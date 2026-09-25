@@ -293,11 +293,11 @@
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-            <div class="flex border-b border-stone-200 bg-stone-50 px-4 pt-2 gap-2 overflow-x-auto hide-scrollbar">
-                <button onclick="switchAdminTab('products')" id="tab-btn-products" class="px-5 py-3 font-bold text-sm border-b-2 border-pink-600 text-pink-700 bg-white rounded-t-xl">إدارة المنتجات</button>
-                <button onclick="switchAdminTab('categories')" id="tab-btn-categories" class="px-5 py-3 font-bold text-sm text-stone-600 hover:text-stone-900">إدارة التصنيفات</button>
-                <button onclick="switchAdminTab('discount')" id="tab-btn-discount" class="px-5 py-3 font-bold text-sm text-stone-600 hover:text-stone-900">إدارة الخصومات</button>
-                <button onclick="switchAdminTab('settings')" id="tab-btn-settings" class="px-5 py-3 font-bold text-sm text-stone-600 hover:text-stone-900">إعدادات المتجر</button>
+            <div class="sticky top-0 z-10 grid grid-cols-2 sm:flex sm:flex-wrap border-b border-stone-200 bg-stone-50 p-3 gap-2">
+                <button onclick="switchAdminTab('products')" id="tab-btn-products" class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-center transition-colors bg-pink-600 text-white shadow">إدارة المنتجات</button>
+                <button onclick="switchAdminTab('categories')" id="tab-btn-categories" class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-center transition-colors bg-white text-stone-600 border border-stone-200 hover:bg-stone-100">إدارة التصنيفات</button>
+                <button onclick="switchAdminTab('discount')" id="tab-btn-discount" class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-center transition-colors bg-white text-stone-600 border border-stone-200 hover:bg-stone-100">إدارة الخصومات</button>
+                <button onclick="switchAdminTab('settings')" id="tab-btn-settings" class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-center transition-colors bg-white text-stone-600 border border-stone-200 hover:bg-stone-100">إعدادات المتجر</button>
             </div>
 
             <div class="p-6 overflow-y-auto flex-grow bg-stone-50/50">
@@ -528,10 +528,10 @@
 
         /* ================= الحالة ================= */
         const defaultCategories = [
-            { id: 'cat-1', name: 'الكل', image: svgAll },
-            { id: 'cat-2', name: 'العناية بالبشرة', image: svgSkin },
-            { id: 'cat-3', name: 'المكياج والتجميل', image: svgMakeup },
-            { id: 'cat-4', name: 'العطور والمسك', image: svgPerfume }
+            { id: 'cat-1', name: 'الكل', image: svgAll, order: 0 },
+            { id: 'cat-2', name: 'العناية بالبشرة', image: svgSkin, order: 1 },
+            { id: 'cat-3', name: 'المكياج والتجميل', image: svgMakeup, order: 2 },
+            { id: 'cat-4', name: 'العطور والمسك', image: svgPerfume, order: 3 }
         ];
         const defaultProducts = [
             { id: 'prod-1', name: 'سيروم فيتامين سي النقي', category: 'العناية بالبشرة', price: 18000, image: svgProd1, description: 'سيروم مغذي ومفتح للبشرة يحارب علامات التقدم في السن ويمنح إشراقة فورية.' },
@@ -541,6 +541,15 @@
         const hasCache = Array.isArray(cache.products) && Array.isArray(cache.categories) && cache.categories.length > 0;
         let categories = hasCache ? cache.categories : [...defaultCategories];
         let products = hasCache ? cache.products : [...defaultProducts];
+
+        function sortCategories(list) {
+            return [...list].sort((a, b) => {
+                if (a.name === 'الكل') return -1;
+                if (b.name === 'الكل') return 1;
+                return (Number(a.order) || 0) - (Number(b.order) || 0);
+            });
+        }
+        categories = sortCategories(categories);
         let storeDiscount = cache.discount || { type: 'none', value: 0, title: 'خصم خاص' };
         let logoUrl = cache.logo || '';
 
@@ -612,12 +621,13 @@
                 return;
             }
 
-            c.innerHTML = categories.map((cat) => `
-                <button type="button" class="cat-btn flex flex-col items-center min-w-[72px] gap-2" data-cat="${esc(cat.name)}">
+            const sorted = sortCategories(categories);
+            c.innerHTML = sorted.map((cat) => `
+                <button type="button" class="cat-btn flex flex-col items-center min-w-[80px] max-w-[92px] gap-2" data-cat="${esc(cat.name)}">
                     <div class="cat-thumb w-16 h-16 rounded-2xl overflow-hidden shadow-sm bg-pink-100">
                         <img src="${esc(cat.image || svgAll)}" alt="${esc(cat.name)}" width="64" height="64" decoding="async" class="img-fade w-full h-full object-cover" onload="this.classList.add('loaded')" onerror="imgErr(this,'cat')">
                     </div>
-                    <span class="cat-label text-[10px] font-bold leading-4 h-4 text-center truncate w-full px-1">${esc(cat.name)}</span>
+                    <span class="cat-label text-[10px] font-bold leading-4 text-center break-words w-full px-1">${esc(cat.name)}</span>
                 </button>`).join('');
 
             markLoadedImages(c);
@@ -1036,10 +1046,10 @@
         function switchAdminTab(tab) {
             ['products', 'categories', 'discount', 'settings'].forEach((t) => {
                 $(`admin-tab-${t}`).classList.add('hidden');
-                $(`tab-btn-${t}`).className = 'px-5 py-3 font-bold text-sm text-stone-600 hover:text-stone-900';
+                $(`tab-btn-${t}`).className = 'px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-center transition-colors bg-white text-stone-600 border border-stone-200 hover:bg-stone-100';
             });
             $(`admin-tab-${tab}`).classList.remove('hidden');
-            $(`tab-btn-${tab}`).className = 'px-5 py-3 font-bold text-sm border-b-2 border-pink-600 text-pink-700 bg-white rounded-t-xl';
+            $(`tab-btn-${tab}`).className = 'px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-center transition-colors bg-pink-600 text-white shadow';
 
             if (tab === 'discount') {
                 $('admin-discount-type').value = storeDiscount.type || 'none';
@@ -1063,7 +1073,8 @@
                     </td>
                 </tr>`).join('');
 
-            $('admin-categories-table').innerHTML = categories.filter((c) => c.name !== 'الكل').map((c) => `
+            const sortedCats = sortCategories(categories).filter((c) => c.name !== 'الكل');
+            $('admin-categories-table').innerHTML = sortedCats.map((c, idx) => `
                 <tr>
                     <td class="p-3"><img src="${esc(c.image || svgAll)}" width="40" height="40" loading="lazy" decoding="async" class="w-10 h-10 rounded object-cover bg-stone-100" onerror="imgErr(this,'cat')"></td>
                     <td class="p-3 font-bold">${esc(c.name)}</td>
@@ -1072,7 +1083,9 @@
                             ${subsOf(c.name).map((s) => `<span class="inline-flex items-center gap-1.5 bg-pink-50 border border-pink-200 text-pink-700 text-xs font-bold px-2.5 py-1 rounded-full">${esc(s)}<button type="button" data-sub="${esc(s)}" onclick="deleteSubcategory('${esc(c.id)}', this.dataset.sub)" class="text-pink-400 hover:text-red-500" aria-label="حذف"><i class="fa-solid fa-xmark text-[10px]"></i></button></span>`).join('') || '<span class="text-xs text-stone-400">لا يوجد</span>'}
                         </div>
                     </td>
-                    <td class="p-3 text-center">
+                    <td class="p-3 text-center whitespace-nowrap">
+                        <button type="button" onclick="moveCategory('${esc(c.id)}', -1)" ${idx === 0 ? 'disabled' : ''} class="text-stone-500 hover:text-pink-700 disabled:opacity-30 disabled:cursor-not-allowed mx-1 p-2" title="تحريك للأعلى"><i class="fa-solid fa-arrow-up"></i></button>
+                        <button type="button" onclick="moveCategory('${esc(c.id)}', 1)" ${idx === sortedCats.length - 1 ? 'disabled' : ''} class="text-stone-500 hover:text-pink-700 disabled:opacity-30 disabled:cursor-not-allowed mx-1 p-2" title="تحريك للأسفل"><i class="fa-solid fa-arrow-down"></i></button>
                         <button type="button" onclick="deleteCategory('${esc(c.id)}')" class="text-red-500 mx-1 p-2"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 </tr>`).join('');
@@ -1143,9 +1156,32 @@
             $('cancel-edit-btn').classList.add('hidden');
         }
 
+        function moveCategory(id, direction) {
+            const sorted = sortCategories(categories).filter((c) => c.name !== 'الكل');
+            const idx = sorted.findIndex((c) => c.id === id);
+            const swapIdx = idx + direction;
+            if (idx === -1 || swapIdx < 0 || swapIdx >= sorted.length) return;
+
+            [sorted[idx], sorted[swapIdx]] = [sorted[swapIdx], sorted[idx]];
+            sorted.forEach((c, i) => { c.order = i + 1; });
+
+            if (isOfflineMode || !db) {
+                persist('categories', categories);
+                renderCategories();
+                renderProducts();
+                renderAdminTables();
+            } else {
+                Promise.all([
+                    fb.updateDoc(fb.doc(db, 'categories', sorted[idx].id), { order: sorted[idx].order }),
+                    fb.updateDoc(fb.doc(db, 'categories', sorted[swapIdx].id), { order: sorted[swapIdx].order })
+                ]).catch(saveError);
+            }
+        }
+
         function saveCategory(e) {
             e.preventDefault();
-            const data = { name: $('cat-name-input').value.trim(), image: $('cat-image-input').value };
+            const maxOrder = categories.reduce((m, c) => Math.max(m, Number(c.order) || 0), 0);
+            const data = { name: $('cat-name-input').value.trim(), image: $('cat-image-input').value, order: maxOrder + 1 };
             if (isOfflineMode || !db) {
                 categories.push({ id: 'c-' + Date.now(), ...data });
                 renderCategories();

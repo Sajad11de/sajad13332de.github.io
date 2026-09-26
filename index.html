@@ -695,11 +695,11 @@
                 <div class="bg-white rounded-2xl p-3 border border-pink-100 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full relative">
                     <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-3 bg-pink-50">
                         ${badge}
-                        <img src="${esc(p.image || svgFallback)}" alt="${esc(p.name)}" width="380" height="380" loading="lazy" decoding="async" class="img-fade w-full h-full object-cover" onload="this.classList.add('loaded')" onerror="imgErr(this,'prod')">
+                        <img src="${esc(p.image || svgFallback)}" alt="${esc(p.name)}" width="380" height="380" loading="lazy" decoding="async" class="img-fade w-full h-full object-contain" onload="this.classList.add('loaded')" onerror="imgErr(this,'prod')">
                         <div class="absolute top-2 right-2 bg-white/90 text-pink-600 text-[10px] font-bold px-2 py-1 rounded-md shadow-sm">${esc(p.category)}</div>
                     </div>
-                    <h3 class="font-bold text-stone-800 text-sm mb-1 leading-tight line-clamp-2 min-h-[35px]">${esc(p.name)}</h3>
-                    <p class="text-[10px] text-stone-500 line-clamp-2 mb-3 flex-grow min-h-[30px]">${esc(p.description)}</p>
+                    <h3 class="font-bold text-stone-800 text-sm mb-1 leading-tight min-h-[35px]" title="${esc(p.name)}">${esc(p.name)}</h3>
+                    <p class="text-[10px] text-stone-500 mb-3 flex-grow min-h-[30px]" title="${esc(p.description)}">${esc(p.description)}</p>
                     <div class="flex items-center justify-between mt-auto pt-2 border-t border-stone-50">
                         <div class="h-9 flex flex-col justify-center">${priceHtml}</div>
                         <button type="button" data-add="${esc(p.id)}" class="bg-pink-600 hover:bg-pink-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 active:scale-95 shadow-sm shadow-pink-200 flex items-center gap-1.5">
@@ -832,7 +832,7 @@
                     }
                     return `
                         <div class="py-3 flex gap-3">
-                            <img src="${esc(item.image || svgFallback)}" width="64" height="64" decoding="async" class="w-16 h-16 rounded-xl object-cover bg-stone-50" onerror="imgErr(this,'prod')">
+                            <img src="${esc(item.image || svgFallback)}" width="64" height="64" decoding="async" class="w-16 h-16 rounded-xl object-contain bg-stone-50" onerror="imgErr(this,'prod')">
                             <div class="flex-grow">
                                 <h4 class="font-bold text-sm text-stone-800 line-clamp-1">${esc(item.name)}</h4>
                                 <div class="${priceClass} font-bold text-xs mt-1">${original}<span>${displayPrice.toLocaleString()} د.ع</span></div>
@@ -991,6 +991,7 @@
         function updateCategorySubs(cat, subs) {
             if (isOfflineMode || !db) {
                 cat.subcategories = subs;
+                persist('categories', categories);
                 renderCategories();
                 renderProducts();
                 renderAdminTables();
@@ -1113,14 +1114,18 @@
                 if (id) { const idx = products.findIndex((x) => x.id === id); if (idx > -1) products[idx] = { id, ...data }; }
                 else products.push({ id: 'p-' + Date.now(), ...data });
                 rebuildIndex();
+                persist('products', products);
                 renderProducts();
                 renderAdminTables();
+                resetProductForm();
+                showToast('تم حفظ المنتج');
             } else {
                 const op = id ? fb.updateDoc(fb.doc(db, 'products', id), data) : fb.addDoc(fb.collection(db, 'products'), data);
-                op.catch(saveError);
+                op.then(() => {
+                    resetProductForm();
+                    showToast('تم حفظ المنتج');
+                }).catch(saveError);
             }
-            resetProductForm();
-            showToast('تم حفظ المنتج');
         }
 
         function editProduct(id) {
@@ -1142,6 +1147,7 @@
             if (isOfflineMode || !db) {
                 products = products.filter((x) => x.id !== id);
                 rebuildIndex();
+                persist('products', products);
                 renderProducts();
                 renderAdminTables();
             } else {
@@ -1184,6 +1190,7 @@
             const data = { name: $('cat-name-input').value.trim(), image: $('cat-image-input').value, order: maxOrder + 1 };
             if (isOfflineMode || !db) {
                 categories.push({ id: 'c-' + Date.now(), ...data });
+                persist('categories', categories);
                 renderCategories();
                 renderAdminTables();
             } else {
@@ -1198,6 +1205,7 @@
             if (isOfflineMode || !db) {
                 categories = categories.filter((x) => x.id !== id);
                 if (!categories.some((c) => c.name === currentSelectedCategory)) currentSelectedCategory = 'الكل';
+                persist('categories', categories);
                 renderCategories();
                 renderProducts();
                 renderAdminTables();

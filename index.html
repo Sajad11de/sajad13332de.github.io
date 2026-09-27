@@ -857,38 +857,36 @@
                     document.body.appendChild(ta);
                     ta.focus();
                     ta.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(ta);
-                    resolve();
-                } catch (err) { reject(err); }
-            });
-        }
+                   document.execCommand('copy');
+                document.body.removeChild(ta);
+                resolve();
+            } catch (err) { reject(err); }
+        });
+    }
 
-        const INSTAGRAM_USERNAME = 'athar_cosmetic';
-        function checkoutViaInstagram() {
-            const text = buildOrderText(true);
-            if (!text) return;
-            copyTextToClipboard(text).then(() => {
-                showToast('تم نسخ تفاصيل الطلب، الصقيه (Paste) داخل المحادثة 📋');
-            }).catch(() => {
-                showToast('تعذر نسخ الطلب تلقائياً، اكتبيه يدوياً بالمحادثة');
-            });
-            openInstagramApp();
-        }
+    const INSTAGRAM_USERNAME = 'athar_cosmetic';
+    function checkoutViaInstagram() {
+        const text = buildOrderText(true);
+        if (!text) return;
+        copyTextToClipboard(text).then(() => {
+            showToast('تم نسخ تفاصيل الطلب، الصقيه (Paste) داخل المحادثة 📋');
+        }).catch(() => {
+            showToast('تعذر نسخ الطلب تلقائياً، اكتبيه يدوياً بالمحادثة');
+        });
+        openInstagramApp();
+    }
 
-        // يفتح تطبيق انستكرام فقط (بدون أي رجوع لصفحة المتصفح): إذا التطبيق مثبت ينفتح،
-        // وإذا مو مثبت ما يصير أي شي ظاهر (يضل بنفس صفحة المتجر)
-        function openInstagramApp() {
-          const appUrl = "instagram://user?username=athar_cosmetic";
-const appUrl = "instagram://user?username=athar_cosmetic";
+    // يفتح تطبيق انستكرام فقط (بدون أي رجوع لصفحة المتصفح): إذا التطبيق مثبت ينفتح،
+    // وإذا مو مثبت ما يصير أي شي ظاهر (يضل بنفس صفحة المتجر)
+    function openInstagramApp() {
+        const appUrl = "instagram://user?username=athar_cosmetic";
+        window.location.href = appUrl;
+    }
 
-        }
-
-        function subsOf(catName) {
-            const c = categories.find((x) => x.name === catName);
-            return c && Array.isArray(c.subcategories) ? c.subcategories : [];
-        }
-
+    function subsOf(catName) {
+        const c = categories.find((x) => x.name === catName);
+        return c && Array.isArray(c.subcategories) ? c.subcategories : [];
+    }
         function renderSubcategories() {
             const wrap = $('subcats-wrap');
             const box = $('subcats-container');

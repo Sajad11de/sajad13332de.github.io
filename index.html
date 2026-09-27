@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>متجر كوزمتك اثار / الجمعية - عالم العناية والتجميل</title>
 
-    <!-- تسريع الاتصال بالخدمات الخارجية -->
     <link rel="preconnect" href="https://cdn.tailwindcss.com">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -36,11 +35,7 @@
         button, a, select, input, label { touch-action: manipulation; }
         button { -webkit-tap-highlight-color: transparent; }
         .fa-solid, .fa-brands { display: inline-block; min-width: 1em; text-align: center; }
-        .sk {
-            background: linear-gradient(90deg, #f6e7ee 25%, #fdf3f7 50%, #f6e7ee 75%);
-            background-size: 200% 100%;
-            animation: sk-move 1.2s ease-in-out infinite;
-        }
+        .sk { background: linear-gradient(90deg, #f6e7ee 25%, #fdf3f7 50%, #f6e7ee 75%); background-size: 200% 100%; animation: sk-move 1.2s ease-in-out infinite; }
         @keyframes sk-move { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
         @media (prefers-reduced-motion: reduce) { .sk { animation: none; } }
         .img-fade { opacity: 0; transition: opacity .3s ease; }
@@ -58,12 +53,7 @@
         .sub-btn { padding: .45rem 1rem; border-radius: 9999px; font-weight: 700; font-size: .8125rem; white-space: nowrap; color: #57534e; transition: background-color .15s ease, color .15s ease, box-shadow .15s ease; }
         .sub-btn:active { transform: scale(.96); }
         .sub-btn.active { background: #fff; color: #be185d; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
-        #toast {
-            position: fixed; bottom: 1.5rem; left: 50%; z-index: 60;
-            transform: translate(-50%, 12px); opacity: 0; pointer-events: none;
-            transition: opacity .2s ease, transform .2s ease;
-            max-width: 90vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
+        #toast { position: fixed; bottom: 1.5rem; left: 50%; z-index: 60; transform: translate(-50%, 12px); opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease; max-width: 90vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         #toast.show { opacity: 1; transform: translate(-50%, 0); }
         .bump { animation: bump .25s ease; }
         @keyframes bump { 50% { transform: scale(1.35); } }
@@ -82,7 +72,6 @@
                     <p class="text-xs text-pink-600 font-semibold">عالم العناية والتجميل الأصلي</p>
                 </div>
             </div>
-
             <div class="flex items-center gap-3">
                 <button onclick="openCartModal()" class="relative bg-pink-50 hover:bg-pink-100 text-stone-800 px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all duration-200 active:scale-95 border border-pink-200/60 shadow-sm">
                     <i class="fa-solid fa-bag-shopping text-pink-600 text-lg"></i>
@@ -91,7 +80,6 @@
                 </button>
             </div>
         </div>
-
         <div class="bg-pink-50/70 border-t border-pink-100/60 py-3 px-4">
             <div class="max-w-3xl mx-auto relative">
                 <i class="fa-solid fa-magnifying-glass absolute right-4 top-1/2 -translate-y-1/2 text-pink-500 text-lg"></i>
@@ -104,7 +92,6 @@
     </header>
 
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-
         <section class="mb-8">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl font-black text-stone-900 flex items-center gap-2">
@@ -118,7 +105,6 @@
                 </div>
             </div>
         </section>
-
         <section>
             <div class="flex items-center justify-between mb-4">
                 <div>
@@ -129,9 +115,7 @@
                     <span id="products-count">…</span> منتج
                 </div>
             </div>
-
             <div id="products-grid" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4"></div>
-
             <div id="no-products-found" class="hidden text-center py-20">
                 <div class="w-16 h-16 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
                     <i class="fa-solid fa-box-open"></i>
@@ -163,10 +147,8 @@
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-
             <div class="p-5 overflow-y-auto flex-grow space-y-4">
                 <div id="cart-items-container" class="divide-y divide-stone-100"></div>
-
                 <div class="bg-pink-50/30 p-4 rounded-2xl border border-pink-100 space-y-3 mt-4">
                     <h4 class="font-bold text-sm text-stone-800 flex items-center gap-2">
                         <i class="fa-solid fa-user-shield text-pink-600"></i> بيانات الزبونة والتوصيل
@@ -210,7 +192,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="p-5 border-t border-stone-100 bg-pink-50/30 space-y-2">
                 <div class="flex justify-between items-center text-xs text-stone-600">
                     <span>مجموع المنتجات:</span>
@@ -276,7 +257,6 @@
                 <button onclick="switchAdminTab('discount')" id="tab-btn-discount" class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-center transition-colors bg-white text-stone-600 border border-stone-200 hover:bg-stone-100">إدارة الخصومات</button>
                 <button onclick="switchAdminTab('settings')" id="tab-btn-settings" class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-center transition-colors bg-white text-stone-600 border border-stone-200 hover:bg-stone-100">إعدادات المتجر</button>
             </div>
-
             <div class="p-6 overflow-y-auto flex-grow bg-stone-50/50">
                 <div id="admin-tab-products" class="space-y-6">
                     <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm">
@@ -333,7 +313,6 @@
                             </div>
                         </form>
                     </div>
-
                     <div class="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
                         <div class="p-4 border-b border-stone-100 font-black text-stone-900">المنتجات المسجلة</div>
                         <div class="overflow-x-auto">
@@ -347,13 +326,11 @@
                                         <th class="p-3 text-center">الإجراءات</th>
                                     </tr>
                                 </thead>
-                                <tbody id="admin-products-table" class="divide-y divide-stone-100 text-sm">
-                                </tbody>
+                                <tbody id="admin-products-table" class="divide-y divide-stone-100 text-sm"></tbody>
                             </table>
                         </div>
                     </div>
                 </div>
-
                 <div id="admin-tab-categories" class="hidden space-y-6">
                     <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm">
                         <h4 class="text-base font-black text-stone-900 mb-4 flex items-center gap-2">
@@ -404,13 +381,11 @@
                                         <th class="p-3 text-center">الإجراءات</th>
                                     </tr>
                                 </thead>
-                                <tbody id="admin-categories-table" class="divide-y divide-stone-100 text-sm">
-                                </tbody>
+                                <tbody id="admin-categories-table" class="divide-y divide-stone-100 text-sm"></tbody>
                             </table>
                         </div>
                     </div>
                 </div>
-
                 <div id="admin-tab-discount" class="hidden space-y-6">
                     <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm max-w-xl">
                         <h4 class="text-base font-black text-stone-900 mb-2 flex items-center gap-2">
@@ -437,7 +412,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div id="admin-tab-settings" class="hidden space-y-6">
                     <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm">
                         <h4 class="text-base font-black text-stone-900 mb-4 flex items-center gap-2">
@@ -594,7 +568,6 @@
 
         function renderCategories() {
             const c = $('categories-container');
-
             if (loading) {
                 c.innerHTML = Array.from({ length: 6 }, () => `
                     <div class="flex flex-col items-center min-w-[72px] gap-2">
@@ -603,7 +576,6 @@
                     </div>`).join('');
                 return;
             }
-
             const sorted = sortCategories(categories);
             c.innerHTML = sorted.map((cat) => `
                 <button type="button" class="cat-btn flex flex-col items-center min-w-[80px] max-w-[92px] gap-2" data-cat="${esc(cat.name)}">
@@ -612,7 +584,6 @@
                     </div>
                     <span class="cat-label text-[10px] font-bold leading-4 text-center break-words w-full px-1">${esc(cat.name)}</span>
                 </button>`).join('');
-
             markLoadedImages(c);
             updateCategoryActive();
             renderSubcategories();
@@ -665,13 +636,11 @@
             const dv = activePercent();
             let badge = '';
             let priceHtml = `<span class="font-black text-pink-700 text-sm leading-5">${price.toLocaleString()} د.ع</span>`;
-
             if (dv > 0) {
                 const np = Math.round(price - price * dv / 100);
                 badge = `<div class="absolute top-2 left-2 bg-red-600 text-white text-[11px] font-black px-2.5 py-1.5 rounded-md shadow-lg z-10 flex items-center gap-1"><i class="fa-solid fa-tags text-[9px]"></i> خصم ${dv}%</div>`;
                 priceHtml = `<span class="text-[10px] text-stone-400 line-through leading-4">${price.toLocaleString()} د.ع</span><span class="font-black text-red-600 text-sm leading-5">${np.toLocaleString()} د.ع</span>`;
             }
-
             return `
                 <div class="bg-white rounded-2xl p-3 border border-pink-100 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full relative">
                     <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-3 bg-pink-50">
@@ -694,14 +663,12 @@
             const grid = $('products-grid');
             const noProducts = $('no-products-found');
             const countBadge = $('products-count');
-
             if (loading) {
                 grid.innerHTML = Array.from({ length: 8 }, productSkeleton).join('');
                 countBadge.textContent = '…';
                 noProducts.classList.add('hidden');
                 return;
             }
-
             let filtered = products;
             if (currentSelectedCategory !== 'الكل') {
                 filtered = filtered.filter((p) => p.category === currentSelectedCategory);
@@ -713,7 +680,6 @@
             if (q) {
                 filtered = filtered.filter((p) => (searchIndex.get(p.id) || '').includes(q));
             }
-
             countBadge.textContent = filtered.length;
             noProducts.classList.toggle('hidden', filtered.length > 0);
             grid.innerHTML = filtered.map(productCard).join('');
@@ -794,7 +760,6 @@
         function updateCartUI() {
             updateBadge(false);
             const container = $('cart-items-container');
-
             if (cart.length === 0) {
                 container.innerHTML = '<p class="text-center text-sm text-stone-500 py-6">السلة فارغة حالياً.</p>';
             } else {
@@ -830,10 +795,8 @@
             const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
             const fee = getShippingFee();
             const discount = calcDiscount(subtotal);
-
             $('cart-subtotal').textContent = `${subtotal.toLocaleString()} د.ع`;
             $('cart-shipping-fee').textContent = `${fee.toLocaleString()} د.ع`;
-
             const row = $('discount-row');
             if (discount > 0) {
                 row.classList.remove('hidden');
@@ -859,17 +822,14 @@
 
         function buildOrderText(plain) {
             if (cart.length === 0) { showCustomAlert('تنبيه', 'السلة فارغة!', true); return null; }
-
             const name = $('customer-name').value.trim();
             const phone = $('customer-phone').value.trim();
             const prov = $('customer-province').value;
             const area = $('customer-area').value.trim();
             if (!name || !phone || !area) { showCustomAlert('نقص بيانات', 'يرجى إكمال بيانات العنوان والهاتف.', true); return null; }
-
             const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
             const discount = calcDiscount(subtotal);
             const total = Math.max(0, subtotal + getShippingFee() - discount);
-
             const b = plain ? '' : '*';
             let text = `${b}🛍️ طلب جديد من كوزمتك اثار / الجمعية${b}\n\n${b}👤 الزبون:${b} ${name}\n${b}📞 الهاتف:${b} ${phone}\n${b}📍 العنوان:${b} ${prov} - ${area}\n\n${b}🛒 المنتجات:${b}\n`;
             cart.forEach((i) => { text += `▪️ ${i.name} (العدد: ${i.quantity}) - ${(i.price * i.quantity).toLocaleString()} د.ع\n`; });
@@ -919,17 +879,10 @@
             });
         }
 
+        // يفتح تطبيق انستكرام فقط (بدون أي رجوع لصفحة المتصفح): إذا التطبيق مثبت ينفتح،
+        // وإذا مو مثبت ما يصير أي شي ظاهر (يضل بنفس صفحة المتجر)
         function openInstagramApp() {
-            const appUrl = `instagram://user?username=${INSTAGRAM_USERNAME}`;
-            const webUrl = `https://ig.me/m/${INSTAGRAM_USERNAME}`;
-            let appOpened = false;
-            const blurHandler = () => { appOpened = true; };
-            window.addEventListener('blur', blurHandler, { once: true });
-            window.location.href = appUrl;
-            setTimeout(() => {
-                window.removeEventListener('blur', blurHandler);
-                if (!appOpened) window.location.href = webUrl;
-            }, 1200);
+            window.location.href = `instagram://user?username=${INSTAGRAM_USERNAME}`;
         }
 
         function subsOf(catName) {
@@ -941,14 +894,12 @@
             const wrap = $('subcats-wrap');
             const box = $('subcats-container');
             const subs = currentSelectedCategory === 'الكل' ? [] : subsOf(currentSelectedCategory);
-
             if (!subs.length) {
                 currentSubcategory = 'الكل';
                 wrap.classList.remove('open');
                 return;
             }
             if (currentSubcategory !== 'الكل' && !subs.includes(currentSubcategory)) currentSubcategory = 'الكل';
-
             box.innerHTML = ['الكل', ...subs].map((s) =>
                 `<button type="button" class="sub-btn${s === currentSubcategory ? ' active' : ''}" data-sub="${esc(s)}">${esc(s)}</button>`
             ).join('');
@@ -1037,7 +988,6 @@
             });
             $(`admin-tab-${tab}`).classList.remove('hidden');
             $(`tab-btn-${tab}`).className = 'px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-center transition-colors bg-pink-600 text-white shadow';
-
             if (tab === 'discount') {
                 $('admin-discount-type').value = storeDiscount.type || 'none';
                 $('admin-discount-value').value = storeDiscount.value || 0;
@@ -1058,7 +1008,6 @@
                         <button type="button" onclick="deleteProduct('${esc(p.id)}')" class="text-red-500 mx-1 p-2"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 </tr>`).join('');
-
             const sortedCats = sortCategories(categories).filter((c) => c.name !== 'الكل');
             $('admin-categories-table').innerHTML = sortedCats.map((c, idx) => `
                 <tr>
@@ -1100,17 +1049,14 @@
             const w = canvas.width, h = canvas.height;
             const imgData = ctx.getImageData(0, 0, w, h);
             const data = imgData.data;
-
             const sampleAt = (x, y) => { const i = (y * w + x) * 4; return [data[i], data[i + 1], data[i + 2]]; };
             const corners = [sampleAt(0, 0), sampleAt(w - 1, 0), sampleAt(0, h - 1), sampleAt(w - 1, h - 1)];
             const bg = [0, 0, 0];
             corners.forEach((c) => { bg[0] += c[0] / 4; bg[1] += c[1] / 4; bg[2] += c[2] / 4; });
-
             const visited = new Uint8Array(w * h);
             const queue = [];
             for (let x = 0; x < w; x++) { queue.push(x); queue.push((h - 1) * w + x); }
             for (let y = 0; y < h; y++) { queue.push(y * w); queue.push(y * w + (w - 1)); }
-
             let qi = 0;
             while (qi < queue.length) {
                 const p = queue[qi++];
@@ -1119,7 +1065,6 @@
                 const i = p * 4;
                 const dr = data[i] - bg[0], dg = data[i + 1] - bg[1], db = data[i + 2] - bg[2];
                 if (Math.sqrt(dr * dr + dg * dg + db * db) > tolerance) continue;
-
                 data[i] = 255; data[i + 1] = 255; data[i + 2] = 255; data[i + 3] = 255;
                 const x = p % w, y = (p / w) | 0;
                 if (x > 0) queue.push(p - 1);
@@ -1163,7 +1108,6 @@
             try {
                 const { blob, dataUrl } = await compressImageFile(file, { whitenBg: true });
                 showImagePreview(dataUrl);
-
                 if (!isOfflineMode && db && fbStorage && storage) {
                     try {
                         const path = `products/${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
@@ -1194,7 +1138,6 @@
             if (imageUploadBusy) { showCustomAlert('انتظري قليلاً', 'الصورة لسا قيد الرفع، حاولي الحفظ بعد لحظات.', true); return; }
             const btn = e.submitter;
             if (btn) { btn.disabled = true; setTimeout(() => { btn.disabled = false; }, 700); }
-
             const id = $('edit-product-id').value;
             const data = {
                 name: $('p-name').value,
@@ -1204,7 +1147,6 @@
                 image: $('p-image').value,
                 description: $('p-desc').value,
             };
-
             if (isOfflineMode || !db) {
                 if (id) { const idx = products.findIndex((x) => x.id === id); if (idx > -1) products[idx] = { id, ...data }; }
                 else products.push({ id: 'p-' + Date.now(), ...data });
@@ -1264,10 +1206,8 @@
             const idx = sorted.findIndex((c) => c.id === id);
             const swapIdx = idx + direction;
             if (idx === -1 || swapIdx < 0 || swapIdx >= sorted.length) return;
-
             [sorted[idx], sorted[swapIdx]] = [sorted[swapIdx], sorted[idx]];
             sorted.forEach((c, i) => { c.order = i + 1; });
-
             if (isOfflineMode || !db) {
                 persist('categories', categories);
                 renderCategories();
@@ -1352,7 +1292,6 @@
             $('alert-title').textContent = title;
             $('alert-message').textContent = message;
             $('alert-message').classList.toggle('hidden', !message);
-
             const stepsBox = $('alert-steps');
             if (options.warn) {
                 stepsBox.innerHTML = `
@@ -1373,16 +1312,13 @@
                 stepsBox.classList.add('hidden');
                 stepsBox.innerHTML = '';
             }
-
             const icon = $('alert-icon');
             icon.className = isError
                 ? 'w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl'
                 : 'w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl';
             icon.innerHTML = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
-
             $('alert-confirm-btn').textContent = options.confirmText || 'حسناً';
             alertConfirmAction = typeof options.onConfirm === 'function' ? options.onConfirm : null;
-
             $('custom-alert-modal').classList.remove('hidden');
             syncScrollLock();
         }
@@ -1457,7 +1393,6 @@
                 let list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
                 if (!list.find((c) => c.name === 'الكل')) list.unshift({ id: 'cat-all', name: 'الكل', image: svgAll });
                 list.sort((a, b) => (a.name === 'الكل' ? -1 : 0) - (b.name === 'الكل' ? -1 : 0));
-
                 const changed = JSON.stringify(list) !== JSON.stringify(categories);
                 if (changed) {
                     categories = list;

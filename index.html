@@ -880,12 +880,8 @@
         // وإذا مو مثبت ما يصير أي شي ظاهر (يضل بنفس صفحة المتجر)
         function openInstagramApp() {
           const appUrl = "instagram://user?username=athar_cosmetic";
-const webUrl = "https://www.instagram.com/athar_cosmetic";
+const appUrl = "instagram://user?username=athar_cosmetic";
 
-window.location.href = appUrl;
-setTimeout(() => {
-  window.location.href = webUrl;
-}, 500);
         }
 
         function subsOf(catName) {

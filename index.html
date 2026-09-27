@@ -879,7 +879,13 @@
         // يفتح تطبيق انستكرام فقط (بدون أي رجوع لصفحة المتصفح): إذا التطبيق مثبت ينفتح،
         // وإذا مو مثبت ما يصير أي شي ظاهر (يضل بنفس صفحة المتجر)
         function openInstagramApp() {
-            window.location.href = `instagram://user?username=${INSTAGRAM_USERNAME}`;
+          const appUrl = "instagram://user?username=athar_cosmetic";
+const webUrl = "https://www.instagram.com/athar_cosmetic";
+
+window.location.href = appUrl;
+setTimeout(() => {
+  window.location.href = webUrl;
+}, 500);
         }
 
         function subsOf(catName) {

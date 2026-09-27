@@ -17,6 +17,7 @@
     <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js">
     <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js">
     <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js">
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js">
 
     <link rel="preload" href="https://cdn.tailwindcss.com" as="script">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -327,9 +328,24 @@
                                 <label class="block text-xs font-bold text-stone-700 mb-1">السعر (د.ع):</label>
                                 <input type="number" id="p-price" class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm" required>
                             </div>
-                            <div>
-                                <label class="block text-xs font-bold text-stone-700 mb-1">رابط صورة المنتج:</label>
-                                <input type="url" id="p-image" placeholder="https://example.com/image.jpg" class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm" required>
+                            <div class="sm:col-span-2 lg:col-span-3">
+                                <label class="block text-xs font-bold text-stone-700 mb-1">صورة المنتج:</label>
+                                <div class="flex flex-col sm:flex-row gap-3 items-start">
+                                    <div class="shrink-0 relative w-20 h-20 rounded-xl overflow-hidden bg-stone-100 border border-stone-200 flex items-center justify-center">
+                                        <img id="p-image-preview" src="" class="hidden w-full h-full object-contain">
+                                        <i id="p-image-preview-icon" class="fa-solid fa-image text-stone-300 text-2xl"></i>
+                                        <div id="p-image-uploading" class="hidden absolute inset-0 bg-white/70 flex items-center justify-center">
+                                            <i class="fa-solid fa-spinner fa-spin text-pink-600 text-lg"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow w-full space-y-2">
+                                        <label class="w-full flex items-center justify-center gap-2 bg-white border border-dashed border-pink-300 hover:bg-pink-50 text-pink-700 font-bold text-xs py-2.5 rounded-xl cursor-pointer transition-all active:scale-95">
+                                            <i class="fa-solid fa-camera"></i> اختيار صورة من الاستديو أو الهاتف
+                                            <input type="file" id="p-image-file" accept="image/*" class="hidden" onchange="handleImageFileSelect(event)">
+                                        </label>
+                                        <input type="url" id="p-image" placeholder="أو الصقي رابط صورة مباشر هنا..." class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm" oninput="onManualImageUrlInput()" required>
+                                    </div>
+                                </div>
                             </div>
                             <div class="sm:col-span-2 lg:col-span-3">
                                 <label class="block text-xs font-bold text-stone-700 mb-1">وصف المنتج:</label>
@@ -564,6 +580,9 @@
         let isOfflineMode = false;
         let db = null;
         let fb = null;                         // دوال فايربيس بعد التحميل
+        let storage = null;
+        let fbStorage = null;                  // دوال تخزين الصور بعد التحميل
+        let imageUploadBusy = false;
         const searchIndex = new Map();
 
         function rebuildIndex() {
@@ -1092,11 +1111,88 @@
                 </tr>`).join('');
         }
 
+        /* ================= صورة المنتج: اختيار من الهاتف/الاستديو أو رابط ================= */
+        function showImagePreview(src) {
+            const img = $('p-image-preview');
+            const icon = $('p-image-preview-icon');
+            if (!src) { resetImagePreview(); return; }
+            img.src = src;
+            img.classList.remove('hidden');
+            icon.classList.add('hidden');
+        }
+        function resetImagePreview() {
+            const img = $('p-image-preview');
+            img.src = '';
+            img.classList.add('hidden');
+            $('p-image-preview-icon').classList.remove('hidden');
+        }
+        function onManualImageUrlInput() {
+            showImagePreview($('p-image').value.trim());
+        }
+
+        // تصغير/ضغط الصورة داخل المتصفح قبل الرفع حتى تصير الأحجام مناسبة (خصوصاً صور الكاميرا)
+        function compressImageFile(file, maxDim = 1000, quality = 0.82) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const img = new Image();
+                    img.onload = () => {
+                        let { width, height } = img;
+                        if (width > maxDim || height > maxDim) {
+                            if (width > height) { height = Math.round(height * maxDim / width); width = maxDim; }
+                            else { width = Math.round(width * maxDim / height); height = maxDim; }
+                        }
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width; canvas.height = height;
+                        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                        canvas.toBlob((blob) => resolve({ blob, dataUrl: canvas.toDataURL('image/jpeg', quality) }), 'image/jpeg', quality);
+                    };
+                    img.onerror = reject;
+                    img.src = reader.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function handleImageFileSelect(e) {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            imageUploadBusy = true;
+            $('p-image-uploading').classList.remove('hidden');
+            try {
+                const { blob, dataUrl } = await compressImageFile(file);
+                showImagePreview(dataUrl);
+
+                if (!isOfflineMode && db && fbStorage && storage) {
+                    try {
+                        const path = `products/${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
+                        const sref = fbStorage.ref(storage, path);
+                        await fbStorage.uploadBytes(sref, blob);
+                        const url = await fbStorage.getDownloadURL(sref);
+                        $('p-image').value = url;
+                    } catch (uploadErr) {
+                        console.error('تعذر الرفع لمخزن فايربيس، سيتم استخدام الصورة نفسها كرابط مباشر:', uploadErr);
+                        $('p-image').value = dataUrl;
+                    }
+                } else {
+                    $('p-image').value = dataUrl;   // بوضع الأوفلاين نخزن الصورة نفسها محلياً
+                }
+            } catch (err) {
+                console.error(err);
+                showCustomAlert('خطأ', 'تعذرت معالجة الصورة، جربي صورة أخرى.', true);
+            } finally {
+                imageUploadBusy = false;
+                $('p-image-uploading').classList.add('hidden');
+            }
+        }
+
         // الحفظ بدون انتظار السيرفر: فايربيس يحدّث الواجهة فوراً من النسخة المحلية
         function saveError() { showCustomAlert('خطأ', 'تعذر الحفظ على السيرفر، تأكد من الاتصال بالإنترنت.', true); }
 
         function saveProduct(e) {
             e.preventDefault();
+            if (imageUploadBusy) { showCustomAlert('انتظري قليلاً', 'الصورة لسا قيد الرفع، حاولي الحفظ بعد لحظات.', true); return; }
             const btn = e.submitter;
             if (btn) { btn.disabled = true; setTimeout(() => { btn.disabled = false; }, 700); }
 
@@ -1137,6 +1233,7 @@
             fillAdminSubSelect(p.subcategory || '');
             $('p-price').value = p.price;
             $('p-image').value = p.image;
+            showImagePreview(p.image);
             $('p-desc').value = p.description;
             $('cancel-edit-btn').classList.remove('hidden');
             $('product-form-title').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1160,6 +1257,7 @@
             fillAdminSubSelect('');
             $('edit-product-id').value = '';
             $('cancel-edit-btn').classList.add('hidden');
+            resetImagePreview();
         }
 
         function moveCategory(id, direction) {
@@ -1324,14 +1422,17 @@
         async function initFirebase() {
             try {
                 const B = 'https://www.gstatic.com/firebasejs/11.6.1/';
-                const [appM, authM, fsM] = await Promise.all([
+                const [appM, authM, fsM, storM] = await Promise.all([
                     import(B + 'firebase-app.js'),
                     import(B + 'firebase-auth.js'),
                     import(B + 'firebase-firestore.js'),
+                    import(B + 'firebase-storage.js'),
                 ]);
                 fb = fsM;
+                fbStorage = storM;
                 const app = appM.initializeApp(firebaseConfig);
                 db = fsM.getFirestore(app);
+                storage = storM.getStorage(app);
                 await authM.signInAnonymously(authM.getAuth(app));
                 initFirestoreListeners();
             } catch (err) {

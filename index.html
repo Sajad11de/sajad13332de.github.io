@@ -869,19 +869,17 @@
             const text = buildOrderText(true);
             if (!text) return;
             copyTextToClipboard(text).then(() => {
-                showCustomAlert('تم نسخ تفاصيل الطلب ✅', '', false, {
-                    warn: 'مهم جداً: تم نسخ تفاصيل طلبك تلقائياً، يجب لصقه (Paste) داخل محادثة الانستكرام بعد فتحها حتى يصل الطلب بشكل صحيح.',
-                    confirmText: 'فتح المحادثة في الانستكرام الآن',
-                    onConfirm: openInstagramApp
-                });
+                showToast('تم نسخ تفاصيل الطلب، الصقيه (Paste) داخل المحادثة 📋');
             }).catch(() => {
-                showCustomAlert('تنبيه', `تعذر نسخ الطلب تلقائياً. يرجى مراسلتنا مباشرة على انستكرام ${INSTAGRAM_USERNAME}@ وكتابة طلبك يدوياً.`, true);
+                showToast('تعذر نسخ الطلب تلقائياً، اكتبيه يدوياً بالمحادثة');
             });
+            openInstagramApp();
         }
 
-        // استخدام رابط ig.me للتوجه المباشر إلى رسائل الخاص (DM)
+        // يفتح تطبيق انستكرام فقط (بدون أي رجوع لصفحة المتصفح): إذا التطبيق مثبت ينفتح،
+        // وإذا مو مثبت ما يصير أي شي ظاهر (يضل بنفس صفحة المتجر)
         function openInstagramApp() {
-            window.open instagram://user?username=$
+            window.location.href = `instagram://user?username=${INSTAGRAM_USERNAME}`;
         }
 
         function subsOf(catName) {
@@ -1175,7 +1173,8 @@
             $('p-image').value = p.image;
             showImagePreview(p.image);
             $('p-desc').value = p.description;
-            $('cancel-edit-btn').classList.remove('hidden');$('product-form-title').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            $('cancel-edit-btn').classList.remove('hidden');
+            $('product-form-title').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function deleteProduct(id) {
@@ -1194,7 +1193,8 @@
         function resetProductForm() {
             $('product-form').reset();
             fillAdminSubSelect('');
-            $('edit-product-id').value = '';$('cancel-edit-btn').classList.add('hidden');
+            $('edit-product-id').value = '';
+            $('cancel-edit-btn').classList.add('hidden');
             resetImagePreview();
         }
 
@@ -1221,7 +1221,7 @@
         function saveCategory(e) {
             e.preventDefault();
             const maxOrder = categories.reduce((m, c) => Math.max(m, Number(c.order) || 0), 0);
-            const data = { name: $('cat-name-input').value.trim(), image:$('cat-image-input').value, order: maxOrder + 1 };
+            const data = { name: $('cat-name-input').value.trim(), image: $('cat-image-input').value, order: maxOrder + 1 };
             if (isOfflineMode || !db) {
                 categories.push({ id: 'c-' + Date.now(), ...data });
                 persist('categories', categories);

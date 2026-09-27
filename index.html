@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>متجر كوزمتك اثار / الجمعية - عالم العناية والتجميل</title>
+    <title>متجر كماليات آثار - عالم العناية والتجميل</title>
 
     <link rel="preconnect" href="https://cdn.tailwindcss.com">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
@@ -65,10 +65,10 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             <div id="store-logo-container" class="flex items-center gap-3 cursor-pointer select-none transition-all duration-200 active:scale-95" onclick="goToHome()" title="انقر مرتين للوصول للوحة التحكم">
                 <div class="w-12 h-12 rounded-2xl bg-pink-100 flex items-center justify-center overflow-hidden border border-pink-200 shadow-sm">
-                    <img id="store-logo-img" width="48" height="48" decoding="async" onerror="imgErr(this,'logo')" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23fce7f3'/><text x='50%' y='55%' font-family='Arial' font-weight='bold' font-size='28' fill='%23db2777' text-anchor='middle' dominant-baseline='middle'>آثار</text></svg>" alt="شعار كوزمتك اثار / الجمعية" class="w-full h-full object-cover">
+                    <img id="store-logo-img" width="48" height="48" decoding="async" onerror="imgErr(this,'logo')" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23fce7f3'/><text x='50%' y='55%' font-family='Arial' font-weight='bold' font-size='28' fill='%23db2777' text-anchor='middle' dominant-baseline='middle'>آثار</text></svg>" alt="شعار كماليات آثار" class="w-full h-full object-cover">
                 </div>
                 <div>
-                    <h1 class="text-xl font-black text-stone-900 tracking-tight">كوزمتك اثار / الجمعية</h1>
+                    <h1 class="text-xl font-black text-stone-900 tracking-tight">كماليات آثار</h1>
                     <p class="text-xs text-pink-600 font-semibold">عالم العناية والتجميل الأصلي</p>
                 </div>
             </div>
@@ -129,9 +129,9 @@
 
     <footer class="bg-white border-t border-pink-100 mt-16 py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h3 class="text-lg font-black text-stone-900">كوزمتك اثار / الجمعية</h3>
+            <h3 class="text-lg font-black text-stone-900">كماليات آثار</h3>
             <p class="text-stone-500 text-sm mt-1">وجهتك الأولى لكل ما تحتاجه العناية والجمال الرائع.</p>
-            <p class="text-xs text-stone-400 mt-4">&copy; 2026 جميع الحقوق محفوظة لمتجر كوزمتك اثار / الجمعية.</p>
+            <p class="text-xs text-stone-400 mt-4">&copy; 2026 جميع الحقوق محفوظة لمتجر كماليات آثار.</p>
         </div>
     </footer>
 
@@ -245,7 +245,7 @@
             <div class="p-5 border-b border-stone-200 flex items-center justify-between bg-stone-900 text-white">
                 <div class="flex items-center gap-3">
                     <i class="fa-solid fa-sliders text-pink-400 text-xl"></i>
-                    <h3 class="text-lg font-black">لوحة تحكم كوزمتك اثار / الجمعية</h3>
+                    <h3 class="text-lg font-black">لوحة تحكم كماليات آثار</h3>
                 </div>
                 <button onclick="closeAdminDashboard()" class="w-9 h-9 bg-stone-800 hover:bg-stone-700 text-white rounded-full flex items-center justify-center">
                     <i class="fa-solid fa-xmark"></i>
@@ -468,7 +468,7 @@
         const defaultLogo = makeSvg('آثار', 100, 28);
         const svgProd1 = makeSvg('سيروم فيتامين C');
         const svgProd2 = makeSvg('أحمر شفاه مات');
-        const svgFallback = makeSvg('كوزمتك اثار / الجمعية');
+        const svgFallback = makeSvg('كماليات آثار');
 
         function imgErr(img, kind) {
             img.onerror = null;
@@ -831,7 +831,7 @@
             const discount = calcDiscount(subtotal);
             const total = Math.max(0, subtotal + getShippingFee() - discount);
             const b = plain ? '' : '*';
-            let text = `${b}🛍️ طلب جديد من كوزمتك اثار / الجمعية${b}\n\n${b}👤 الزبون:${b} ${name}\n${b}📞 الهاتف:${b} ${phone}\n${b}📍 العنوان:${b} ${prov} - ${area}\n\n${b}🛒 المنتجات:${b}\n`;
+            let text = `${b}🛍️ طلب جديد من كماليات آثار${b}\n\n${b}👤 الزبون:${b} ${name}\n${b}📞 الهاتف:${b} ${phone}\n${b}📍 العنوان:${b} ${prov} - ${area}\n\n${b}🛒 المنتجات:${b}\n`;
             cart.forEach((i) => { text += `▪️ ${i.name} (العدد: ${i.quantity}) - ${(i.price * i.quantity).toLocaleString()} د.ع\n`; });
             if (discount > 0) text += `\n${b}🏷️ الخصم (${storeDiscount.title}):${b} -${discount.toLocaleString()} د.ع`;
             text += `\n${b}💰 الإجمالي الكلي:${b} ${total.toLocaleString()} د.ع`;
@@ -1176,8 +1176,7 @@
             $('p-image').value = p.image;
             showImagePreview(p.image);
             $('p-desc').value = p.description;
-            $('cancel-edit-btn').classList.remove('hidden');
-            $('product-form-title').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            $('cancel-edit-btn').classList.remove('hidden');$('product-form-title').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function deleteProduct(id) {
@@ -1196,8 +1195,7 @@
         function resetProductForm() {
             $('product-form').reset();
             fillAdminSubSelect('');
-            $('edit-product-id').value = '';
-            $('cancel-edit-btn').classList.add('hidden');
+            $('edit-product-id').value = '';$('cancel-edit-btn').classList.add('hidden');
             resetImagePreview();
         }
 
@@ -1224,7 +1222,7 @@
         function saveCategory(e) {
             e.preventDefault();
             const maxOrder = categories.reduce((m, c) => Math.max(m, Number(c.order) || 0), 0);
-            const data = { name: $('cat-name-input').value.trim(), image: $('cat-image-input').value, order: maxOrder + 1 };
+            const data = { name: $('cat-name-input').value.trim(), image:$('cat-image-input').value, order: maxOrder + 1 };
             if (isOfflineMode || !db) {
                 categories.push({ id: 'c-' + Date.now(), ...data });
                 persist('categories', categories);

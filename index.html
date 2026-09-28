@@ -17,7 +17,6 @@
     <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js">
     <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js">
     <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js">
-    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js">
  
     <link rel="preload" href="https://cdn.tailwindcss.com" as="script">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -85,6 +84,7 @@
         .bump { animation: bump .25s ease; }
         @keyframes bump { 50% { transform: scale(1.35); } }
     </style>
+<meta name="athar-image-mode" content="firestore-base64-only-v2">
 </head>
 <body class="min-h-screen flex flex-col bg-[#fffafb]">
  
@@ -334,7 +334,7 @@
                                     <div class="shrink-0 relative w-20 h-20 rounded-xl overflow-hidden bg-stone-100 border border-stone-200 flex items-center justify-center">
                                         <img id="p-image-preview" src="" class="hidden w-full h-full object-contain">
                                         <i id="p-image-preview-icon" class="fa-solid fa-image text-stone-300 text-2xl"></i>
-                                        <div id="p-image-uploading" class="hidden absolute inset-0 bg-white/70 flex items-center justify-center">
+                                        <div id="p-image-uploading" class="hidden !hidden absolute inset-0 bg-white/70 flex items-center justify-center">
                                             <i class="fa-solid fa-spinner fa-spin text-pink-600 text-lg"></i>
                                         </div>
                                     </div>
@@ -344,7 +344,7 @@
                                             <input type="file" id="p-image-file" accept="image/*" class="hidden" onchange="handleImageFileSelect(event)">
                                         </label>
                                         <input type="hidden" id="p-image" required>
-                                        <p class="text-[11px] text-stone-400">سيتم رفع الصورة مباشرة إلى Firebase Storage ولا تحتاجين إلى Imgur أو أي موقع خارجي.</p>
+                                        <p class="text-[11px] text-stone-400">سيتم تحويل الصورة إلى Base64 وحفظها مباشرة داخل Firestore بدون Storage أو مواقع خارجية.</p>
                                     </div>
                                 </div>
                             </div>
@@ -522,7 +522,6 @@
             apiKey: "AIzaSyBOeBszexRWhAOC80ixGiWZseRX4ks_ipQ",
             authDomain: "athar-e00bf.firebaseapp.com",
             projectId: "athar-e00bf",
-            storageBucket: "athar-e00bf.firebasestorage.app",
             messagingSenderId: "264890265095",
             appId: "1:264890265095:web:24e706e7e5fa8570d044a2",
             measurementId: "G-2FMK3EBME5"
@@ -599,9 +598,8 @@
         let searchQuery = '';
         let isOfflineMode = false;
         let db = null;
+        let firebaseInitPromise = null;
         let fb = null;                         // دوال فايربيس بعد التحميل
-        let storage = null;
-        let fbStorage = null;                  // دوال تخزين الصور بعد التحميل
         let imageUploadBusy = false;
         let authOk = false;                    // نجح الدخول المجهول؟
         let authError = null;                  // سبب فشل الدخول المجهول (إن وُجد)
@@ -738,7 +736,7 @@
  
             return `
                 <div class="bg-white rounded-2xl p-3 border border-pink-100 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full relative">
-                    <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-3 bg-pink-50">
+                    <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-3 bg-white">
                         ${badge}
                         <img src="${esc(p.image || svgFallback)}" alt="${esc(p.name)}" width="380" height="380" loading="lazy" decoding="async" class="img-fade w-full h-full object-contain" onload="this.classList.add('loaded')" onerror="imgErr(this,'prod')">
                         <div class="absolute top-2 right-2 bg-white/90 text-pink-600 text-[10px] font-bold px-2 py-1 rounded-md shadow-sm">${esc(p.category)}</div>
@@ -1163,22 +1161,24 @@
             showImagePreview($('p-image').value.trim());
         }
         
-        async function uploadImageToFirebase(file, folder, options = {}) {
+        // تحويل الصورة إلى Base64 وحفظها مباشرة داخل Firestore — بدون Firebase Storage
+        async function imageFileToBase64(file, options = {}) {
             if (!file || !file.type.startsWith('image/')) throw new Error('invalid-image');
-            if (isOfflineMode || !storage || !fbStorage) throw new Error('firebase-storage-unavailable');
-            const { blob } = await compressImageFile(file, {
-                maxDim: options.maxDim || 900,
-                quality: options.quality || 0.76,
-                whitenBg: !!options.whitenBg
-            });
-            const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
-            const sref = fbStorage.ref(storage, path);
-            await withTimeout(fbStorage.uploadBytes(sref, blob, { contentType: 'image/jpeg' }), 30000);
-            const url = await withTimeout(fbStorage.getDownloadURL(sref), 10000);
-            return { url, dataUrl };
+            const maxDim = options.maxDim || 700;
+            let quality = options.quality || 0.62;
+            // Firestore يفرض حداً يقارب 1 MiB للمستند؛ نترك مساحة لباقي بيانات المنتج.
+            // إذا كانت الصورة كبيرة، نعيد ضغطها تلقائياً حتى تدخل بأمان داخل المستند.
+            for (let i = 0; i < 5; i++) {
+                const { dataUrl } = await compressImageFile(file, {
+                    maxDim: Math.max(450, maxDim - (i * 70)),
+                    quality: Math.max(0.42, quality - (i * 0.06)),
+                    whitenBg: !!options.whitenBg
+                });
+                if (dataUrl.length <= 700000) return dataUrl;
+            }
+            throw new Error('image-too-large-for-firestore');
         }
 
- 
         // يحوّل خلفية الصورة (المتصلة بحوافها الخارجية ومتقاربة اللون) إلى اللون الأبيض تلقائياً،
         // مع ترك المنتج نفسه بدون تغيير (يشتغل زين مع خلفيات الاستديو الموحدة اللون)
         function whitenBackground(canvas, tolerance = 42) {
@@ -1216,7 +1216,7 @@
             ctx.putImageData(imgData, 0, 0);
         }
  
-        // تصغير/ضغط الصورة داخل المتصفح قبل الرفع حتى تصير الأحجام مناسبة (خصوصاً صور الكاميرا)
+        // تصغير/ضغط الصورة داخل المتصفح قبل تحويلها إلى Base64 حتى تصير الأحجام مناسبة (خصوصاً صور الكاميرا)
         function compressImageFile(file, { maxDim = 1000, quality = 0.82, whitenBg = false } = {}) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -1232,7 +1232,7 @@
                         canvas.width = width; canvas.height = height;
                         canvas.getContext('2d').drawImage(img, 0, 0, width, height);
                         if (whitenBg) whitenBackground(canvas);
-                        canvas.toBlob((blob) => resolve({ blob }), 'image/jpeg', quality);
+                        resolve({ dataUrl: canvas.toDataURL('image/jpeg', quality) });
                     };
                     img.onerror = reject;
                     img.src = reader.result;
@@ -1246,25 +1246,32 @@
             const file = e.target.files && e.target.files[0];
             if (!file) return;
             imageUploadBusy = true;
-            $('p-image-uploading').classList.remove('hidden');
+            // إظهار الصورة الأصلية فوراً من الهاتف بدون انتظار التحويل إلى Base64.
+            // هذا يمنع ظهور شاشة التحميل فوق المعاينة؛ التحويل إلى Base64 يحصل بالخلفية.
+            const localPreview = URL.createObjectURL(file);
+            showImagePreview(localPreview);
+            const loader = $('p-image-uploading');
+            if (loader) loader.classList.add('hidden');
             try {
-                if (isOfflineMode || !db || !storage || !fbStorage) throw new Error('firebase-storage-unavailable');
-                // أظهر الصورة فوراً من الجهاز، ولا ننتظر Firebase لعرض المعاينة
-                const localPreview = URL.createObjectURL(file);
-                showImagePreview(localPreview);
-                const { url } = await uploadImageToFirebase(file, 'products', { maxDim: 900, quality: 0.76, whitenBg: false });
-                $('p-image').value = url;
-                URL.revokeObjectURL(localPreview);
-                showToast('تم رفع الصورة إلى Firebase Storage');
+                // تجهيز الصورة لا يعتمد على Firebase نهائياً: تتحول إلى Base64 محلياً أولاً.
+                const dataUrl = await imageFileToBase64(file, { maxDim: 700, quality: 0.62, whitenBg: false });
+                $('p-image').value = dataUrl;
+                // نستبدل المعاينة المحلية بالنسخة النهائية فقط بعد اكتمال التحويل.
+                showImagePreview(dataUrl);
+                showToast('تم تجهيز الصورة ✓');
             } catch (err) {
-                console.error('Firebase Storage upload failed:', err);
+                console.error('Base64 image conversion failed:', err);
                 $('p-image').value = '';
                 e.target.value = '';
                 resetImagePreview();
-                showCustomAlert('تعذر رفع الصورة', 'يجب الاتصال بفايربيس ورفع الصورة إلى Firebase Storage قبل حفظ المنتج. لا يتم استخدام Imgur أو روابط خارجية.', true);
+                const msg = err.message === 'image-too-large-for-firestore'
+                    ? 'الصورة كبيرة على حد Firestore. اختر صورة أصغر أو سيتم تصغيرها تلقائياً.'
+                    : 'تعذر تجهيز الصورة. حاولي مرة أخرى.';
+                showCustomAlert('تعذر تجهيز الصورة', msg, true);
             } finally {
+                URL.revokeObjectURL(localPreview);
                 imageUploadBusy = false;
-                $('p-image-uploading').classList.add('hidden');
+                if (loader) loader.classList.add('hidden');
             }
         }
 
@@ -1273,18 +1280,18 @@
             if (!file) return;
             const status = $('cat-image-status');
             try {
-                status.textContent = 'جارٍ رفع الصورة إلى Firebase...';
-                const { url } = await uploadImageToFirebase(file, 'categories', { maxDim: 650, quality: 0.76, whitenBg: false });
-                $('cat-image-input').value = url;
-                status.textContent = 'تم رفع الصورة إلى Firebase Storage ✓';
+                status.textContent = 'جارٍ تحويل الصورة إلى Base64...';
+                const dataUrl = await imageFileToBase64(file, { maxDim: 550, quality: 0.58, whitenBg: false });
+                $('cat-image-input').value = dataUrl;
+                status.textContent = 'تم تجهيز الصورة ✓ وستُحفظ مباشرة في Firestore';
                 status.className = 'text-[11px] text-emerald-600 mt-1 font-bold';
             } catch (err) {
                 console.error(err);
                 $('cat-image-input').value = '';
                 e.target.value = '';
-                status.textContent = 'فشل رفع الصورة إلى Firebase';
+                status.textContent = 'تعذر تجهيز الصورة';
                 status.className = 'text-[11px] text-red-600 mt-1 font-bold';
-                showCustomAlert('تعذر رفع الصورة', 'تأكدي من اتصال Firebase وصلاحيات Storage ثم حاولي مرة أخرى.', true);
+                showCustomAlert('تعذر تجهيز الصورة', 'حاولي اختيار صورة أصغر.', true);
             }
         }
 
@@ -1293,24 +1300,24 @@
             if (!file) return;
             const status = $('store-logo-upload-status');
             try {
-                status.textContent = 'جارٍ رفع الشعار إلى Firebase...';
-                const { url, dataUrl } = await uploadImageToFirebase(file, 'store', { maxDim: 1000, quality: 0.85, whitenBg: true });
-                $('store-logo-url-input').value = url;
-                status.textContent = 'تم رفع الشعار إلى Firebase Storage ✓';
+                status.textContent = 'جارٍ تحويل الشعار إلى Base64...';
+                const dataUrl = await imageFileToBase64(file, { maxDim: 500, quality: 0.62, whitenBg: true });
+                $('store-logo-url-input').value = dataUrl;
+                status.textContent = 'تم تجهيز الشعار ✓ وسيُحفظ مباشرة في Firestore';
                 status.className = 'text-[11px] text-emerald-600 mt-1 font-bold';
-                logoUrl = url;
-                persist('logo', url);
+                logoUrl = dataUrl;
+                persist('logo', dataUrl);
                 applyLogo();
                 if (!isOfflineMode && db) {
-                    await fb.setDoc(fb.doc(db, 'store_settings', 'general'), { logoUrl: url }, { merge: true });
+                    await fb.setDoc(fb.doc(db, 'store_settings', 'general'), { logoUrl: dataUrl }, { merge: true });
                 }
-                showToast('تم رفع الشعار وحفظه');
+                showToast('تم تحويل الشعار وحفظه داخل قاعدة البيانات');
             } catch (err) {
                 console.error(err);
-                status.textContent = 'فشل رفع الشعار إلى Firebase';
+                status.textContent = 'تعذر تجهيز الشعار';
                 status.className = 'text-[11px] text-red-600 mt-1 font-bold';
                 e.target.value = '';
-                showCustomAlert('تعذر رفع الشعار', 'تأكدي من اتصال Firebase وصلاحيات Storage ثم حاولي مرة أخرى.', true);
+                showCustomAlert('تعذر تجهيز الشعار', 'حاولي اختيار صورة أصغر.', true);
             }
         }
 
@@ -1363,28 +1370,20 @@
                     lines.push('✅ الكتابة والحذف بمجموعة المنتجات مسموحة');
                 } catch (e) { lines.push(`❌ الكتابة بمجموعة المنتجات مرفوضة: ${e.code || e.message}`); }
             }
-            if (storage && fbStorage) {
-                try {
-                    const r = fbStorage.ref(storage, 'products/__healthcheck__.txt');
-                    await withTimeout(fbStorage.uploadBytes(r, new Blob(['ok'], { type: 'text/plain' })), 12000);
-                    lines.push('✅ رفع الصور لمخزن فايربيس (Storage) شغال');
-                    try { await fbStorage.deleteObject(r); } catch (_) { }
-                } catch (e) { lines.push(`❌ رفع الصور لمخزن فايربيس فشل: ${e.code || e.message}`); }
-            }
             if (btn) { btn.disabled = false; btn.textContent = 'ابدأ الفحص'; }
             showCustomAlert('نتيجة فحص قاعدة البيانات', '', lines.some((l) => l.startsWith('❌')), { steps: lines });
         }
  
-        function saveProduct(e) {
+        async function saveProduct(e) {
             e.preventDefault();
-            if (imageUploadBusy) { showCustomAlert('انتظري قليلاً', 'الصورة لسا قيد الرفع، حاولي الحفظ بعد لحظات.', true); return; }
+            if (imageUploadBusy) { showCustomAlert('انتظري قليلاً', 'الصورة ما زالت قيد التجهيز، حاولي الحفظ بعد لحظات.', true); return; }
             const btn = e.submitter;
             if (btn) { btn.disabled = true; setTimeout(() => { btn.disabled = false; }, 700); }
  
             const id = $('edit-product-id').value;
             const image = $('p-image').value.trim();
             if (!image) {
-                showCustomAlert('الصورة مطلوبة', 'اختاري صورة من الاستديو وانتظري حتى يكتمل رفعها إلى Firebase Storage.', true);
+                showCustomAlert('الصورة مطلوبة', 'اختاري صورة من الاستديو وانتظري حتى يتم تجهيزها كـ Base64.', true);
                 return;
             }
             const data = {
@@ -1397,6 +1396,10 @@
             };
             if (!id) data.createdAt = Date.now();
  
+            // إذا كان Firebase ما زال يتحمل، ننتظره حتى لا يتحول الحفظ بالغلط إلى محلي.
+            if (!db && firebaseInitPromise) {
+                try { await Promise.race([firebaseInitPromise, new Promise(resolve => setTimeout(resolve, 12000))]); } catch (_) {}
+            }
             if (isOfflineMode || !db) {
                 if (id) { const idx = products.findIndex((x) => x.id === id); if (idx > -1) products[idx] = { ...products[idx], id, ...data }; }
                 else products.push({ id: 'p-' + Date.now(), ...data });
@@ -1479,7 +1482,7 @@
             const maxOrder = categories.reduce((m, c) => Math.max(m, Number(c.order) || 0), 0);
             const image = $('cat-image-input').value.trim();
             if (!image) {
-                showCustomAlert('الصورة مطلوبة', 'اختاري صورة من الاستديو ليتم رفعها مباشرة إلى Firebase Storage.', true);
+                showCustomAlert('الصورة مطلوبة', 'اختاري صورة من الاستديو ليتم تحويلها إلى Base64 وحفظها في Firestore.', true);
                 return;
             }
             const data = { name: $('cat-name-input').value.trim(), image, order: maxOrder + 1 };
@@ -1619,17 +1622,14 @@
         async function initFirebase() {
             try {
                 const B = 'https://www.gstatic.com/firebasejs/11.6.1/';
-                const [appM, authM, fsM, storM] = await Promise.all([
+                const [appM, authM, fsM] = await Promise.all([
                     import(B + 'firebase-app.js'),
                     import(B + 'firebase-auth.js'),
                     import(B + 'firebase-firestore.js'),
-                    import(B + 'firebase-storage.js'),
                 ]);
                 fb = fsM;
-                fbStorage = storM;
                 const app = appM.initializeApp(firebaseConfig);
                 db = fsM.getFirestore(app);
-                storage = storM.getStorage(app);
                 try {
                     await authM.signInAnonymously(authM.getAuth(app));
                     authOk = true;
@@ -1697,7 +1697,7 @@
         renderCategories();
         renderProducts();
         updateCartUI();
-        initFirebase();
+        firebaseInitPromise = initFirebase();
         setTimeout(finishLoadingFallback, 8000);
     </script>
 </body>

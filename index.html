@@ -349,8 +349,8 @@
                                 </div>
                             </div>
                             <div class="sm:col-span-2 lg:col-span-3">
-                                <label class="block text-xs font-bold text-stone-700 mb-1">وصف المنتج:</label>
-                                <input type="text" id="p-desc" placeholder="وصف موجز للمنتج ومميزاته..." class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm" required>
+                                <label class="block text-xs font-bold text-stone-700 mb-1">وصف وتفاصيل المنتج (اختياري):</label>
+                                <input type="text" id="p-desc" placeholder="وصف موجز للمنتج ومميزاته (يمكن تركه فارغاً)..." class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm">
                             </div>
                             <div class="sm:col-span-3 flex gap-3 mt-2">
                                 <button type="submit" class="bg-pink-600 hover:bg-pink-700 disabled:opacity-60 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow">حفظ المنتج</button>
@@ -510,11 +510,6 @@
         </div>
     </div>
  
-    <!--
-        ملاحظة مهمة: الكود صار سكربت عادي (مو module) حتى تشتغل كل الأزرار فوراً.
-        قبل كان كل شيء ينتظر تحميل مكتبات فايربيس، وهذا سبب "الضغط ما يستجيب" بالبداية.
-        الآن فايربيس يتحمل بالخلفية بـ import() ولا يوقف الواجهة.
-    -->
     <script>
         /* ================= الإعدادات والأدوات ================= */
         // إعدادات مشروع فايربيس الجديد (athar-e00bf)
@@ -533,7 +528,7 @@
             .replace(/[\u064B-\u065F\u0670\u0640]/g, '')
             .replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي');
  
-        // صور بديلة آمنة (مشفّرة بشكل صحيح، عكس النسخة القديمة اللي كان يخرب فيها الـ onerror)
+        // صور بديلة آمنة
         const makeSvg = (text, size = 300, fs = 26) => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
             `<svg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}' viewBox='0 0 ${size} ${size}'><rect width='${size}' height='${size}' fill='#fce7f3'/><text x='50%' y='52%' font-family='Arial' font-weight='bold' font-size='${fs}' fill='#db2777' text-anchor='middle' dominant-baseline='middle'>${text}</text></svg>`
         );
@@ -552,13 +547,13 @@
             img.classList.add('loaded');
         }
  
-        /* ================= الكاش المحلي (أول عرض فوري) ================= */
+        /* ================= الكاش المحلي ================= */
         const CACHE_KEY = 'athar_cache_v1';
         let cache = {};
         try { cache = JSON.parse(localStorage.getItem(CACHE_KEY)) || {}; } catch (e) { cache = {}; }
         function persist(key, val) {
             cache[key] = val;
-            try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch (e) { /* التخزين ممتلئ أو ممنوع */ }
+            try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch (e) { }
         }
  
         /* ================= الحالة ================= */
@@ -588,7 +583,7 @@
         let storeDiscount = cache.discount || { type: 'none', value: 0, title: 'خصم خاص' };
         let logoUrl = cache.logo || '';
  
-        let loading = !hasCache;              // إذا ماكو كاش نعرض skeleton لحد ما توصل البيانات
+        let loading = !hasCache;
         const ready = { categories: false, products: false };
         let cart = [];
         let cartOpen = false;
@@ -599,18 +594,18 @@
         let isOfflineMode = false;
         let db = null;
         let firebaseInitPromise = null;
-        let fb = null;                         // دوال فايربيس بعد التحميل
+        let fb = null;
         let imageUploadBusy = false;
-        let authOk = false;                    // نجح الدخول المجهول؟
-        let authError = null;                  // سبب فشل الدخول المجهول (إن وُجد)
-        let lastDbError = null;                // آخر خطأ من قاعدة البيانات
+        let authOk = false;
+        let authError = null;
+        let lastDbError = null;
         let localWarned = false;
         const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
         const searchIndex = new Map();
  
         function rebuildIndex() {
             searchIndex.clear();
-            products.forEach((p) => searchIndex.set(p.id, norm(`${p.name} ${p.description} ${p.category} ${p.subcategory || ''}`)));
+            products.forEach((p) => searchIndex.set(p.id, norm(`${p.name} ${p.description || ''} ${p.category} ${p.subcategory || ''}`)));
         }
         rebuildIndex();
  
@@ -695,7 +690,6 @@
             fillSubParentSelect();
         }
  
-        // للصور اللي تكون جاهزة من الكاش قبل ما يشتغل onload
         function markLoadedImages(root) {
             root.querySelectorAll('img.img-fade').forEach((i) => { if (i.complete && i.naturalWidth > 0) i.classList.add('loaded'); });
         }
@@ -734,6 +728,8 @@
                 priceHtml = `<span class="text-[10px] text-stone-400 line-through leading-4">${price.toLocaleString()} د.ع</span><span class="font-black text-red-600 text-sm leading-5">${np.toLocaleString()} د.ع</span>`;
             }
  
+            const descText = p.description ? esc(p.description) : '';
+ 
             return `
                 <div class="bg-white rounded-2xl p-3 border border-pink-100 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full relative">
                     <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-3 bg-white">
@@ -742,7 +738,7 @@
                         <div class="absolute top-2 right-2 bg-white/90 text-pink-600 text-[10px] font-bold px-2 py-1 rounded-md shadow-sm">${esc(p.category)}</div>
                     </div>
                     <h3 class="font-bold text-stone-800 text-sm mb-1 leading-tight min-h-[35px]" title="${esc(p.name)}">${esc(p.name)}</h3>
-                    <p class="text-[10px] text-stone-500 mb-3 flex-grow min-h-[30px]" title="${esc(p.description)}">${esc(p.description)}</p>
+                    <p class="text-[10px] text-stone-500 mb-3 flex-grow min-h-[30px]" title="${descText}">${descText}</p>
                     <div class="flex items-center justify-between mt-auto pt-2 border-t border-stone-50">
                         <div class="h-9 flex flex-col justify-center">${priceHtml}</div>
                         <button type="button" data-add="${esc(p.id)}" class="bg-pink-600 hover:bg-pink-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 active:scale-95 shadow-sm shadow-pink-200 flex items-center gap-1.5">
@@ -788,7 +784,7 @@
             searchQuery = val;
             $('clear-search-btn').classList.toggle('hidden', val.length === 0);
             clearTimeout(searchTimer);
-            searchTimer = setTimeout(renderProducts, 120);   // تأخير بسيط حتى ما نعيد الرسم مع كل حرف
+            searchTimer = setTimeout(renderProducts, 120);
         }
         function clearSearch() {
             $('main-search-input').value = '';
@@ -808,11 +804,10 @@
             currentSelectedCategory = name;
             currentSubcategory = 'الكل';
             updateCategoryActive();
-            renderSubcategories();   // تحديث الحالة فقط بدون إعادة بناء التصنيفات
+            renderSubcategories();
             renderProducts();
         }
  
-        // Event delegation: مستمع واحد بدل عشرات الأزرار
         $('categories-container').addEventListener('click', (e) => {
             const b = e.target.closest('[data-cat]');
             if (b) selectCategory(b.dataset.cat);
@@ -844,7 +839,7 @@
             else cart.push({ id: prod.id, name: prod.name, price: Number(prod.price) || 0, image: prod.image, quantity: 1 });
             updateBadge(true);
             if (cartOpen) updateCartUI();
-            showToast(`تمت إضافة ${prod.name} للسلة`);   // إشعار خفيف بدل نافذة تحتاج ضغطة "حسناً"
+            showToast(`تمت إضافة ${prod.name} للسلة`);
         }
  
         function updateQuantity(id, delta) {
@@ -922,7 +917,6 @@
             syncScrollLock();
         }
  
-        // تتحقق من بيانات الزبونة وترجع نص الطلب الكامل، أو null إذا ناقصة بيانات (وتعرض تنبيه مناسب)
         function buildOrderText(plain) {
             if (cart.length === 0) { showCustomAlert('تنبيه', 'السلة فارغة!', true); return null; }
  
@@ -950,7 +944,6 @@
             window.open(`https://wa.me/9647724700027?text=${encodeURIComponent(text)}`, '_blank');
         }
  
-        // ينسخ نص الطلب للحافظة (Clipboard)، مع بديل احتياطي للمتصفحات القديمة
         function copyTextToClipboard(text) {
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 return navigator.clipboard.writeText(text);
@@ -971,7 +964,6 @@
             });
         }
  
-        // إتمام الطلب عبر انستكرام: ينسخ تفاصيل الطلب وينبّه الزبونة بضرورة لصقها داخل المحادثة قبل فتح انستكرام
         const INSTAGRAM_USERNAME = 'athar_cosmetic';
         function checkoutViaInstagram() {
             const text = buildOrderText(true);
@@ -987,8 +979,6 @@
             });
         }
  
-        // يفتح محادثة الانستكرام المباشرة (الدايركت) مع البيج
-        // يعمل على الهاتف (يفتح التطبيق) وعلى الكمبيوتر (يفتح المتصفح)
         function openInstagramApp() {
             window.open(`https://ig.me/m/${INSTAGRAM_USERNAME}`, '_blank');
         }
@@ -1006,7 +996,7 @@
  
             if (!subs.length) {
                 currentSubcategory = 'الكل';
-                wrap.classList.remove('open');   // يبقى المحتوى القديم أثناء الإغلاق حتى ما يومض
+                wrap.classList.remove('open');
                 return;
             }
             if (currentSubcategory !== 'الكل' && !subs.includes(currentSubcategory)) currentSubcategory = 'الكل';
@@ -1109,7 +1099,6 @@
             }
         }
  
-        // جداول الإدارة تنرسم فقط وقت تكون اللوحة مفتوحة (قبل كانت تنرسم مع كل ضغطة/بحث)
         function renderAdminTables() {
             if (!adminOpen) return;
             $('admin-products-table').innerHTML = products.map((p) => `
@@ -1142,7 +1131,7 @@
                 </tr>`).join('');
         }
  
-        /* ================= صورة المنتج: اختيار من الهاتف/الاستديو أو رابط ================= */
+        /* ================= صورة المنتج ================= */
         function showImagePreview(src) {
             const img = $('p-image-preview');
             const icon = $('p-image-preview-icon');
@@ -1161,13 +1150,10 @@
             showImagePreview($('p-image').value.trim());
         }
         
-        // تحويل الصورة إلى Base64 وحفظها مباشرة داخل Firestore — بدون Firebase Storage
         async function imageFileToBase64(file, options = {}) {
             if (!file || !file.type.startsWith('image/')) throw new Error('invalid-image');
             const maxDim = options.maxDim || 700;
             let quality = options.quality || 0.62;
-            // Firestore يفرض حداً يقارب 1 MiB للمستند؛ نترك مساحة لباقي بيانات المنتج.
-            // إذا كانت الصورة كبيرة، نعيد ضغطها تلقائياً حتى تدخل بأمان داخل المستند.
             for (let i = 0; i < 5; i++) {
                 const { dataUrl } = await compressImageFile(file, {
                     maxDim: Math.max(450, maxDim - (i * 70)),
@@ -1179,8 +1165,6 @@
             throw new Error('image-too-large-for-firestore');
         }
 
-        // يحوّل خلفية الصورة (المتصلة بحوافها الخارجية ومتقاربة اللون) إلى اللون الأبيض تلقائياً،
-        // مع ترك المنتج نفسه بدون تغيير (يشتغل زين مع خلفيات الاستديو الموحدة اللون)
         function whitenBackground(canvas, tolerance = 42) {
             const ctx = canvas.getContext('2d');
             const w = canvas.width, h = canvas.height;
@@ -1204,7 +1188,7 @@
                 visited[p] = 1;
                 const i = p * 4;
                 const dr = data[i] - bg[0], dg = data[i + 1] - bg[1], db = data[i + 2] - bg[2];
-                if (Math.sqrt(dr * dr + dg * dg + db * db) > tolerance) continue;   // لون مختلف = حافة المنتج، نوقف هنا
+                if (Math.sqrt(dr * dr + dg * dg + db * db) > tolerance) continue;
  
                 data[i] = 255; data[i + 1] = 255; data[i + 2] = 255; data[i + 3] = 255;
                 const x = p % w, y = (p / w) | 0;
@@ -1216,7 +1200,6 @@
             ctx.putImageData(imgData, 0, 0);
         }
  
-        // تصغير/ضغط الصورة داخل المتصفح قبل تحويلها إلى Base64 حتى تصير الأحجام مناسبة (خصوصاً صور الكاميرا)
         function compressImageFile(file, { maxDim = 1000, quality = 0.82, whitenBg = false } = {}) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -1246,17 +1229,13 @@
             const file = e.target.files && e.target.files[0];
             if (!file) return;
             imageUploadBusy = true;
-            // إظهار الصورة الأصلية فوراً من الهاتف بدون انتظار التحويل إلى Base64.
-            // هذا يمنع ظهور شاشة التحميل فوق المعاينة؛ التحويل إلى Base64 يحصل بالخلفية.
             const localPreview = URL.createObjectURL(file);
             showImagePreview(localPreview);
             const loader = $('p-image-uploading');
             if (loader) loader.classList.add('hidden');
             try {
-                // تجهيز الصورة لا يعتمد على Firebase نهائياً: تتحول إلى Base64 محلياً أولاً.
                 const dataUrl = await imageFileToBase64(file, { maxDim: 700, quality: 0.62, whitenBg: false });
                 $('p-image').value = dataUrl;
-                // نستبدل المعاينة المحلية بالنسخة النهائية فقط بعد اكتمال التحويل.
                 showImagePreview(dataUrl);
                 showToast('تم تجهيز الصورة ✓');
             } catch (err) {
@@ -1321,7 +1300,6 @@
             }
         }
 
-        // الحفظ بدون انتظار السيرفر: فايربيس يحدّث الواجهة فوراً من النسخة المحلية
         function saveError(err) {
             console.error('Save failed:', err);
             lastDbError = err || lastDbError;
@@ -1392,11 +1370,10 @@
                 subcategory: $('p-subcategory').value,
                 price: parseFloat($('p-price').value),
                 image,
-                description: $('p-desc').value,
+                description: $('p-desc').value || '',
             };
             if (!id) data.createdAt = Date.now();
  
-            // إذا كان Firebase ما زال يتحمل، ننتظره حتى لا يتحول الحفظ بالغلط إلى محلي.
             if (!db && firebaseInitPromise) {
                 try { await Promise.race([firebaseInitPromise, new Promise(resolve => setTimeout(resolve, 12000))]); } catch (_) {}
             }
@@ -1429,7 +1406,7 @@
             $('p-price').value = p.price;
             $('p-image').value = p.image;
             showImagePreview(p.image);
-            $('p-desc').value = p.description;
+            $('p-desc').value = p.description || '';
             $('cancel-edit-btn').classList.remove('hidden');
             $('product-form-title').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
@@ -1548,7 +1525,6 @@
  
         let alertConfirmAction = null;
  
-        // options: { steps: [نص1, نص2, ...], confirmText: 'حسناً', onConfirm: fn }
         function showCustomAlert(title, message, isError, options) {
             options = options || {};
             $('alert-title').textContent = title;
@@ -1596,7 +1572,7 @@
             if (action) action();
         }
  
-        /* ================= فايربيس (يتحمل بالخلفية) ================= */
+        /* ================= فايربيس ================= */
         function markReady(key) {
             ready[key] = true;
             if (loading && ready.categories && ready.products) {
@@ -1606,7 +1582,6 @@
             }
         }
  
-        // إذا تأخر الاتصال كثير، لا نخلي الزبونة تشوف skeleton للأبد
         function finishLoadingFallback() {
             if (!loading) return;
             loading = false;
@@ -1637,7 +1612,7 @@
                     authError = authErr;
                     console.error('Anonymous sign-in failed:', authErr);
                 }
-                initFirestoreListeners();   // نبدأ القراءة حتى لو فشل الدخول المجهول (إذا القواعد تسمح بالقراءة العامة)
+                initFirestoreListeners();
             } catch (err) {
                 console.error('Firebase init failed:', err);
                 lastDbError = err;
@@ -1646,7 +1621,6 @@
         }
  
         function initFirestoreListeners() {
-            // الإعدادات (الشعار والخصم)
             fb.onSnapshot(fb.doc(db, 'store_settings', 'general'), (snap) => {
                 if (!snap.exists()) return;
                 const d = snap.data();
@@ -1662,7 +1636,6 @@
                 }
             }, (err) => { lastDbError = err; console.error(err); });
  
-            // التصنيفات
             fb.onSnapshot(fb.collection(db, 'categories'), (snap) => {
                 let list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
                 if (!list.find((c) => c.name === 'الكل')) list.unshift({ id: 'cat-all', name: 'الكل', image: svgAll });
@@ -1678,7 +1651,6 @@
                 markReady('categories');
             }, (err) => { lastDbError = err; console.error(err); markReady('categories'); });
  
-            // المنتجات
             fb.onSnapshot(fb.collection(db, 'products'), (snap) => {
                 const list = snap.docs.filter((d) => !d.id.startsWith('__')).map((d) => ({ id: d.id, ...d.data() }));
                 const changed = JSON.stringify(list) !== JSON.stringify(products);

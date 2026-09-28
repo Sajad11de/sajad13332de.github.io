@@ -21,7 +21,10 @@
  
     <link rel="preload" href="https://cdn.tailwindcss.com" as="script">
     <script src="https://cdn.tailwindcss.com"></script>
- 
+<script type="module"> import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js'; import { getFirestore } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js'; import { getStorage } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js';
+const firebaseConfig = { apiKey: "AIzaSyB0eBszeXRhwAOC80ixGiWzSeRX4ks_ipQ", authDomain: "athar-e00bf.firebaseapp.com", projectId: "athar-e00bf", storageBucket: "athar-e00bf.firebasestorage.app", messagingSenderId: "264890265095", appId: "1:264890265095:web:24e706e7e5fa8570d044a2", measurementId: "G-2FMK3EBME5" };
+const app = initializeApp(firebaseConfig); const db = getFirestore(app); const storage = getStorage(app); </script>
+
     <!-- Font Awesome وخط Cairo: تحميل غير معيق (async) حتى ما يأخرون أول ظهور للواجهة -->
     <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" onload="this.onload=null;this.rel='stylesheet'">

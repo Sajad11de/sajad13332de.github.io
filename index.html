@@ -339,14 +339,145 @@
                                         </div>
                                     </div>
                                     <div class="flex-grow w-full space-y-2">
-                                        <label class="w-full flex items-center justify-center gap-2 bg-white border border-dashed border-pink-300 hover:bg-pink-50 text-pink-700 font-bold text-xs py-2.5 rounded-xl cursor-pointer transition-all active:scale-95">
-                                            <i class="fa-solid fa-cloud-arrow-up"></i> رفع الصورة إلى Firebase Storage
-                                            <input type="file" id="p-image-file" accept="image/*" class="hidden" onchange="handleImageFileSelect(event)">
-                                        </label>
-                                        <input type="hidden" id="p-image" value="">
-                                        <p class="text-[11px] text-stone-400">الصورة تُرفع إلى Firebase Storage، ويُحفظ رابطها فقط داخل Firestore. لا يتم حفظ Base64 في المنتج الجديد.</p>
-                                    </div>
-                                </div>
+                                    <!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>رفع الصور وتحويلها لروابط</title>
+    <style>
+        body { font-family: Tahoma, Arial, sans-serif; padding: 20px; }
+        .upload-container { max-width: 400px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; text-align: center; }
+        #preview-img { max-width: 100%; margin-top: 15px; border-radius: 10px; display: none; }
+        #result-url { width: 100%; margin-top: 10px; padding: 10px; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+
+    <div class="upload-container">
+        <h3>ارفع صورة للحصول على رابط مباشر</h3>
+        
+        <!-- زر اختيار الصورة -->
+        <input type="file" id="image-file" accept="image/*">
+        
+        <p id="status-text"></p>
+        
+        <!-- لعرض الصورة بعد الرفع -->
+        <img id="preview-img" src="">
+        
+        <!-- حقل نصي لنسخ الرابط المباشر -->
+        <input type="text" id="result-url" placeholder="سيظهر الرابط هنا..." readonly>
+    </div>
+
+    <!-- استخدام النوع module لاستيراد مكتبات فايربيس -->
+    <script type="module">
+        // 1. استيراد مكتبات فايربيس للإصدار 11.6.1 كما في الملف المرجعي
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+
+        // 2. إعدادات مشروع فايربيس (مأخوذة من الملف المرفق)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBOeBszexRWhAOC80ixGiWZseRX4ks_ipQ",
+            authDomain: "athar-e00bf.firebaseapp.com",
+            projectId: "athar-e00bf",
+            storageBucket: "athar-e00bf.firebasestorage.app",
+            messagingSenderId: "264890265095",
+            appId: "1:264890265095:web:24e706e7e5fa8570d044a2",
+            measurementId: "G-2FMK3EBME5"
+        };
+
+        // 3. تهيئة فايربيس و Storage
+        const app = initializeApp(firebaseConfig);
+        const fbStorage = getStorage(app);
+
+        // 4. دالة ضغط الصورة محلياً باستخدام Canvas (مستخرجة من الملف المرفق)
+        function compressImageFile(file, { maxDim = 1200, quality = 0.84 } = {}) {
+            return new Promise((resolve, reject) => {
+                const objectUrl = URL.createObjectURL(file);
+                const img = new Image();
+                const cleanup = () => URL.revokeObjectURL(objectUrl);
+
+                img.onload = () => {
+                    try {
+                        let { width, height } = img;
+                        if (width > maxDim || height > maxDim) {
+                            if (width > height) {
+                                height = Math.round(height * maxDim / width);
+                                width = maxDim;
+                            } else {
+                                width = Math.round(width * maxDim / height);
+                                height = maxDim;
+                            }
+                        }
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d', { alpha: true });
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        canvas.toBlob((blob) => {
+                            cleanup();
+                            if (!blob) return reject(new Error('فشل ضغط الصورة'));
+                            resolve({ blob });
+                        }, 'image/jpeg', quality);
+                    } catch (err) {
+                        cleanup();
+                        reject(err);
+                    }
+                };
+                img.onerror = () => { cleanup(); reject(new Error('صورة غير صالحة')); };
+                img.src = objectUrl;
+            });
+        }
+
+        // 5. دالة رفع الصورة إلى Firebase Storage والحصول على الرابط (مستخرجة من الملف المرفق)
+        async function uploadImageToStorage(file) {
+            // ضغط الصورة قبل الرفع
+            const { blob } = await compressImageFile(file, { maxDim: 1200, quality: 0.84 });
+            
+            // إنشاء مسار واسم فريد للصورة
+            const path = `uploads/${Date.now()}-${Math.random().toString(36).slice(2, 10)}.jpg`;
+            const storageRef = ref(fbStorage, path);
+            
+            // رفع الملف
+            await uploadBytes(storageRef, blob, { contentType: 'image/jpeg', cacheControl: 'public,max-age=31536000' });
+            
+            // جلب الرابط المباشر
+            const url = await getDownloadURL(storageRef);
+            return url;
+        }
+
+        // 6. ربط حدث اختيار الصورة بالرفع
+        document.getElementById('image-file').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const statusText = document.getElementById('status-text');
+            const previewImg = document.getElementById('preview-img');
+            const resultUrl = document.getElementById('result-url');
+
+            statusText.innerText = 'جارٍ رفع الصورة... الرجاء الانتظار.';
+            previewImg.style.display = 'none';
+            resultUrl.value = '';
+
+            try {
+                // استدعاء دالة الرفع
+                const url = await uploadImageToStorage(file);
+                
+                // عرض النتائج
+                statusText.innerText = 'تم رفع الصورة بنجاح!';
+                previewImg.src = url;
+                previewImg.style.display = 'block';
+                resultUrl.value = url;
+                
+            } catch (error) {
+                console.error('فشل الرفع:', error);
+                statusText.innerText = 'حدث خطأ أثناء الرفع. تأكد من إعدادات وصلاحيات Firebase.';
+            }
+        });
+    </script>
+</body>
+</html>
                             </div>
                             <div class="sm:col-span-2 lg:col-span-3">
                                 <label class="block text-xs font-bold text-stone-700 mb-1">وصف المنتج:</label>

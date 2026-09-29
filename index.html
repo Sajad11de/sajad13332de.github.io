@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>متجر كماليات اثار / شارع40 - عالم العناية والتجميل</title>
+    <title>متجر كوزمتك اثار / الجمعية - عالم العناية والتجميل</title>
  
     <!-- تسريع الاتصال بالخدمات الخارجية -->
     <link rel="preconnect" href="https://cdn.tailwindcss.com">
@@ -28,8 +28,24 @@
     <noscript>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap">
     </noscript>
     <style>
+        /* خط أنيق خاص بقسم إضافة/تعديل المنتجات فقط */
+        #product-form {
+            font-family: 'Tajawal', 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;
+        }
+        #product-form label,
+        #product-form input,
+        #product-form select,
+        #product-form textarea,
+        #product-form button {
+            font-family: inherit;
+        }
+        #product-form-title {
+            font-family: 'Tajawal', 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;
+        }
+
         html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
         body { font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif; background-color: #fffafb; color: #44383a; }
         body.no-scroll { overflow: hidden; }
@@ -93,10 +109,10 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             <div id="store-logo-container" class="flex items-center gap-3 cursor-pointer select-none transition-all duration-200 active:scale-95" onclick="goToHome()" title="انقر مرتين للوصول للوحة التحكم">
                 <div class="w-12 h-12 rounded-2xl bg-pink-100 flex items-center justify-center overflow-hidden border border-pink-200 shadow-sm">
-                    <img id="store-logo-img" width="48" height="48" decoding="async" onerror="imgErr(this,'logo')" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23fce7f3'/><text x='50%' y='55%' font-family='Arial' font-weight='bold' font-size='28' fill='%23db2777' text-anchor='middle' dominant-baseline='middle'>آثار</text></svg>" alt="شعار كماليات اثار / شارع40" class="w-full h-full object-cover">
+                    <img id="store-logo-img" width="48" height="48" decoding="async" onerror="imgErr(this,'logo')" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23fce7f3'/><text x='50%' y='55%' font-family='Arial' font-weight='bold' font-size='28' fill='%23db2777' text-anchor='middle' dominant-baseline='middle'>آثار</text></svg>" alt="شعار كوزمتك اثار / الجمعية" class="w-full h-full object-cover">
                 </div>
                 <div>
-                    <h1 class="text-xl font-black text-stone-900 tracking-tight">كماليات اثار / شارع40</h1>
+                    <h1 class="text-xl font-black text-stone-900 tracking-tight">كوزمتك اثار / الجمعية</h1>
                     <p class="text-xs text-pink-600 font-semibold">عالم العناية والتجميل الأصلي</p>
                 </div>
             </div>
@@ -166,9 +182,9 @@
  
     <footer class="bg-white border-t border-pink-100 mt-16 py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h3 class="text-lg font-black text-stone-900">كماليات اثار / شارع40</h3>
+            <h3 class="text-lg font-black text-stone-900">كوزمتك اثار / الجمعية</h3>
             <p class="text-stone-500 text-sm mt-1">وجهتك الأولى لكل ما تحتاجه العناية والجمال الرائع.</p>
-            <p class="text-xs text-stone-400 mt-4">&copy; 2026 جميع الحقوق محفوظة لمتجر كماليات اثار / شارع40.</p>
+            <p class="text-xs text-stone-400 mt-4">&copy; 2026 جميع الحقوق محفوظة لمتجر كوزمتك اثار / الجمعية.</p>
         </div>
     </footer>
  
@@ -251,7 +267,10 @@
                     <span>الإجمالي الكلي النهائي:</span>
                     <span id="cart-total-price" class="text-pink-700 text-xl">0 د.ع</span>
                 </div>
-                <div class="grid grid-cols-1 gap-2 mt-2">
+                <div class="grid grid-cols-2 gap-2 mt-2">
+                    <button onclick="checkoutViaWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all duration-200 active:scale-95 shadow-lg shadow-emerald-600/20">
+                        <i class="fa-brands fa-whatsapp text-xl"></i> واتساب
+                    </button>
                     <button onclick="checkoutViaInstagram()" class="w-full text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all duration-200 active:scale-95 shadow-lg" style="background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);box-shadow:0 10px 15px -3px rgba(188,24,136,.25)">
                         <i class="fa-brands fa-instagram text-xl"></i> انستكرام
                     </button>
@@ -285,7 +304,7 @@
             <div class="p-5 border-b border-stone-200 flex items-center justify-between bg-stone-900 text-white">
                 <div class="flex items-center gap-3">
                     <i class="fa-solid fa-sliders text-pink-400 text-xl"></i>
-                    <h3 class="text-lg font-black">لوحة تحكم كماليات اثار / شارع40</h3>
+                    <h3 class="text-lg font-black">لوحة تحكم كوزمتك اثار / الجمعية</h3>
                 </div>
                 <button onclick="closeAdminDashboard()" class="w-9 h-9 bg-stone-800 hover:bg-stone-700 text-white rounded-full flex items-center justify-center">
                     <i class="fa-solid fa-xmark"></i>
@@ -341,7 +360,7 @@
                                             <input type="file" id="p-image-file" accept="image/*" class="hidden" onchange="handleImageFileSelect(event)">
                                         </label>
                                         <input type="hidden" id="p-image" value="">
-                                        <p class="text-[11px] text-stone-400">الصورة تُرفع مباشرة إلى Cloudinary، ويُحفظ الرابط فقط داخل Firestore. لا يتم حفظ Base64.</p>
+                                        <p class="text-[11px] text-stone-400">الصورة تُرفع مباشرة إلى Cloudinary، ويُحفظ رابطها فقط داخل Firestore.</p>
                                     </div>
                                 </div>
                             </div>
@@ -477,13 +496,13 @@
                             <div>
                                 <label class="block text-xs font-bold text-stone-700 mb-1">رفع شعار المتجر:</label>
                                 <label class="w-full flex items-center justify-center gap-2 bg-white border border-dashed border-pink-300 hover:bg-pink-50 text-pink-700 font-bold text-xs py-2.5 rounded-xl cursor-pointer transition-all active:scale-95">
-                                    <i class="fa-solid fa-cloud-arrow-up"></i> اختيار ورفع الشعار إلى Firebase Storage
+                                    <i class="fa-solid fa-cloud-arrow-up"></i> اختيار ورفع الشعار إلى Cloudinary
                                     <input type="file" id="store-logo-file" accept="image/*" class="hidden" onchange="handleStoreLogoFileSelect(event)">
                                 </label>
                                 <input type="hidden" id="store-logo-url-input" value="">
                                 <div class="mt-2 flex items-center gap-2">
                                     <img id="store-logo-upload-preview" src="" class="hidden w-14 h-14 rounded-2xl object-contain border border-stone-200 bg-stone-50">
-                                    <span id="store-logo-status" class="text-[11px] text-stone-400">الصورة ستُرفع إلى Firebase Storage ويُحفظ الرابط في إعدادات المتجر.</span>
+                                    <span id="store-logo-status" class="text-[11px] text-stone-400">الصورة ستُرفع إلى Cloudinary ويُحفظ الرابط في إعدادات المتجر.</span>
                                 </div>
                             </div>
                             <button onclick="updateStoreLogo()" class="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow">حفظ الشعار</button>
@@ -493,7 +512,7 @@
                         <h4 class="text-base font-black text-stone-900 mb-2 flex items-center gap-2">
                             <i class="fa-solid fa-stethoscope text-pink-600"></i> فحص الاتصال بقاعدة البيانات
                         </h4>
-                        <p class="text-xs text-stone-500 mb-4 max-w-xl">يفحص: الدخول المجهول، قراءة المنتجات من السيرفر، صلاحية الكتابة والحذف، وتجهيز Firebase Storage لرفع الصور.</p>
+                        <p class="text-xs text-stone-500 mb-4 max-w-xl">يفحص: الدخول المجهول، قراءة المنتجات من السيرفر، صلاحية الكتابة والحذف، وتجهيز اتصال Firebase وحفظ روابط صور Cloudinary.</p>
                         <button onclick="runDiagnostics(this)" class="bg-stone-900 hover:bg-stone-800 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow">ابدأ الفحص</button>
                     </div>
                 </div>
@@ -521,41 +540,6 @@
     <script>
         /* ================= الإعدادات والأدوات ================= */
         // إعدادات مشروع فايربيس الجديد (athar-e00bf)
-        // إعدادات Cloudinary - ضع القيم الخاصة بحسابك هنا
-        const CLOUDINARY_CLOUD_NAME = 'dnqgbond';
-        const CLOUDINARY_UPLOAD_PRESET = 'athar_upload';
-
-        async function uploadImageToCloudinary(file, options = {}) {
-            if (!file) throw new Error('no-file');
-            if (!file.type.startsWith('image/')) throw new Error('invalid-image-type');
-            if (file.size > 10 * 1024 * 1024) throw new Error('image-too-large');
-            // لا تعتبر القيم الفعلية الخاصة بحسابك ناقصة.
-            // يجب فقط رفض القيم الفارغة أو القيم التجريبية غير المستبدلة.
-            if (!CLOUDINARY_CLOUD_NAME ||
-                !CLOUDINARY_UPLOAD_PRESET ||
-                CLOUDINARY_CLOUD_NAME === 'YOUR_CLOUD_NAME' ||
-                CLOUDINARY_UPLOAD_PRESET === 'YOUR_UNSIGNED_UPLOAD_PRESET') {
-                throw new Error('cloudinary-config-missing');
-            }
-
-            const { blob } = await compressImageFile(file, options);
-            const formData = new FormData();
-            formData.append('file', blob, 'product.jpg');
-            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-            formData.append('folder', options.folder || 'athar/products');
-
-            const response = await fetch(
-                `https://api.cloudinary.com/v1_1/${encodeURIComponent(CLOUDINARY_CLOUD_NAME)}/image/upload`,
-                { method: 'POST', body: formData }
-            );
-            const data = await response.json();
-            if (!response.ok || !data.secure_url) {
-                console.error('Cloudinary upload failed:', data);
-                throw new Error(data?.error?.message || 'cloudinary-upload-failed');
-            }
-            return { url: data.secure_url, publicId: data.public_id || '' };
-        }
-
         const firebaseConfig = {
             apiKey: "AIzaSyBOeBszexRWhAOC80ixGiWZseRX4ks_ipQ",
             authDomain: "athar-e00bf.firebaseapp.com",
@@ -565,6 +549,11 @@
             appId: "1:264890265095:web:24e706e7e5fa8570d044a2",
             measurementId: "G-2FMK3EBME5"
         };
+
+        // Cloudinary: رفع الصور مباشرة من جهاز المستخدم بدون Firebase Storage
+        const CLOUDINARY_CLOUD_NAME = "dnqgbond";
+        const CLOUDINARY_UPLOAD_PRESET = "athar_upload";
+        const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
  
         const $ = (id) => document.getElementById(id);
         const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -583,7 +572,7 @@
         const defaultLogo = makeSvg('آثار', 100, 28);
         const svgProd1 = makeSvg('سيروم فيتامين C');
         const svgProd2 = makeSvg('أحمر شفاه مات');
-        const svgFallback = makeSvg('كماليات اثار / شارع40');
+        const svgFallback = makeSvg('كوزمتك اثار / الجمعية');
  
         function imgErr(img, kind) {
             img.onerror = null;
@@ -978,7 +967,7 @@
             const total = Math.max(0, subtotal + getShippingFee() - discount);
  
             const b = plain ? '' : '*';
-            let text = `${b}🛍️ طلب جديد من كماليات اثار / شارع40${b}\n\n${b}👤 الزبون:${b} ${name}\n${b}📞 الهاتف:${b} ${phone}\n${b}📍 العنوان:${b} ${prov} - ${area}\n\n${b}🛒 المنتجات:${b}\n`;
+            let text = `${b}🛍️ طلب جديد من كوزمتك اثار / الجمعية${b}\n\n${b}👤 الزبون:${b} ${name}\n${b}📞 الهاتف:${b} ${phone}\n${b}📍 العنوان:${b} ${prov} - ${area}\n\n${b}🛒 المنتجات:${b}\n`;
             cart.forEach((i) => { text += `▪️ ${i.name} (العدد: ${i.quantity}) - ${(i.price * i.quantity).toLocaleString()} د.ع\n`; });
             if (discount > 0) text += `\n${b}🏷️ الخصم (${storeDiscount.title}):${b} -${discount.toLocaleString()} د.ع`;
             text += `\n${b}💰 الإجمالي الكلي:${b} ${total.toLocaleString()} د.ع`;
@@ -1013,7 +1002,7 @@
         }
  
         // إتمام الطلب عبر انستكرام: ينسخ تفاصيل الطلب وينبّه الزبونة بضرورة لصقها داخل المحادثة قبل فتح انستكرام
-        const INSTAGRAM_USERNAME = 'athar.40';
+        const INSTAGRAM_USERNAME = 'athar_cosmetic';
         function checkoutViaInstagram() {
             const text = buildOrderText(true);
             if (!text) return;
@@ -1122,6 +1111,7 @@
                 closeAdminLoginModal();
                 adminOpen = true;
                 $('admin-dashboard-modal').classList.remove('hidden');
+                switchAdminTab('products');
                 syncScrollLock();
                 renderAdminTables();
                 showDbStatusIfProblem();
@@ -1283,11 +1273,35 @@
             });
         }
 
-        async function ensureStorageReady() {
-            if (!storage || !fbStorage) await initFirebase();
-            if (!storage || !fbStorage) {
-                throw new Error('firebase-storage-not-ready');
+        async function uploadImageToCloudinary(file, folder, options = {}) {
+            if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
+                throw new Error('cloudinary-config-missing');
             }
+            if (!file || !file.type.startsWith('image/')) {
+                throw new Error('invalid-image');
+            }
+            if (file.size > 10 * 1024 * 1024) {
+                throw new Error('image-too-large');
+            }
+
+            const { blob } = await compressImageFile(file, options);
+            const formData = new FormData();
+            formData.append('file', blob, `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            formData.append('folder', `athar/${folder || 'uploads'}`);
+
+            const response = await withTimeout(
+                fetch(CLOUDINARY_UPLOAD_URL, { method: 'POST', body: formData }),
+                30000
+            );
+            const data = await response.json();
+
+            if (!response.ok || !data.secure_url) {
+                const message = data?.error?.message || 'cloudinary-upload-failed';
+                throw new Error(message);
+            }
+
+            return { url: data.secure_url, publicId: data.public_id || '' };
         }
 
         async function handleImageFileSelect(e) {
@@ -1298,7 +1312,7 @@
             showImagePreview(localPreview);
             $('p-image-uploading').classList.remove('hidden');
             try {
-                const result = await uploadImageToCloudinary(file, { maxDim: 1200, quality: 0.84, whitenBg: false, folder: 'athar/products' });
+                const result = await uploadImageToCloudinary(file, 'products', { maxDim: 1200, quality: 0.84, whitenBg: false });
                 $('p-image').value = result.url;
                 showImagePreview(result.url);
                 showToast('تم رفع الصورة إلى Cloudinary ✓');
@@ -1307,13 +1321,14 @@
                 $('p-image').value = '';
                 e.target.value = '';
                 resetImagePreview();
-                const messages = {
-                    'cloudinary-config-missing': 'أدخل Cloud Name وUnsigned Upload Preset في إعدادات Cloudinary داخل الكود.',
-                    'image-too-large': 'حجم الصورة كبير جداً. الحد الأقصى 10MB.',
-                    'invalid-image-type': 'الملف المختار ليس صورة صالحة.',
-                    'timeout': 'انتهت مهلة رفع الصورة. تحقق من الإنترنت وحاول مرة أخرى.'
-                };
-                showCustomAlert('خطأ في رفع الصورة', messages[err.message] || 'تعذر رفع الصورة إلى Cloudinary. تحقق من إعدادات Upload Preset والاتصال بالإنترنت.', true);
+                const msg = err.message === 'cloudinary-config-missing'
+                    ? 'إعدادات Cloudinary غير موجودة في الكود.'
+                    : err.message === 'image-too-large'
+                        ? 'حجم الصورة كبير جداً. الحد الأقصى 10MB.'
+                        : err.message === 'invalid-image'
+                            ? 'الملف المختار ليس صورة صالحة.'
+                            : `تعذر رفع الصورة إلى Cloudinary: ${err.message || 'تحققي من الاتصال وإعدادات Upload Preset athar_upload.'}`;
+                showCustomAlert('خطأ في رفع الصورة', msg, true);
             } finally {
                 URL.revokeObjectURL(localPreview);
                 imageUploadBusy = false;
@@ -1332,18 +1347,18 @@
             preview.classList.remove('hidden');
             status.textContent = 'جارٍ رفع الصورة إلى Cloudinary...';
             try {
-                const result = await uploadImageToStorage(file, 'categories', { maxDim: 900, quality: 0.82, whitenBg: false });
+                const result = await uploadImageToCloudinary(file, 'categories', { maxDim: 900, quality: 0.82, whitenBg: false });
                 $('cat-image-input').value = result.url;
                 preview.src = result.url;
                 status.textContent = 'تم رفع الصورة بنجاح ✓';
             } catch (err) {
-                console.error('Firebase Storage category image upload failed:', err);
+                console.error('Cloudinary category image upload failed:', err);
                 $('cat-image-input').value = '';
                 e.target.value = '';
                 preview.src = '';
                 preview.classList.add('hidden');
                 status.textContent = 'تعذر رفع الصورة.';
-                showCustomAlert('خطأ في رفع الصورة', 'تعذر رفع صورة التصنيف إلى Firebase Storage. تأكدي من تفعيل Storage وقواعد الرفع.', true);
+                showCustomAlert('خطأ في رفع الصورة', 'تعذر رفع صورة التصنيف إلى Cloudinary. تأكدي من أن Upload Preset باسم athar_upload مضبوط على Unsigned.', true);
             } finally {
                 URL.revokeObjectURL(localPreview);
                 imageUploadBusy = false;
@@ -1359,20 +1374,20 @@
             const status = $('store-logo-status');
             preview.src = localPreview;
             preview.classList.remove('hidden');
-            status.textContent = 'جارٍ رفع الشعار إلى Firebase Storage...';
+            status.textContent = 'جارٍ رفع الشعار إلى Cloudinary...';
             try {
-                const result = await uploadImageToStorage(file, 'store', { maxDim: 900, quality: 0.84, whitenBg: false });
+                const result = await uploadImageToCloudinary(file, 'store', { maxDim: 900, quality: 0.84, whitenBg: false });
                 $('store-logo-url-input').value = result.url;
                 preview.src = result.url;
                 status.textContent = 'تم رفع الشعار بنجاح ✓';
             } catch (err) {
-                console.error('Firebase Storage logo upload failed:', err);
+                console.error('Cloudinary logo upload failed:', err);
                 $('store-logo-url-input').value = '';
                 e.target.value = '';
                 preview.src = '';
                 preview.classList.add('hidden');
                 status.textContent = 'تعذر رفع الشعار.';
-                showCustomAlert('خطأ في رفع الشعار', 'تعذر رفع الشعار إلى Firebase Storage. تأكدي من تفعيل Storage وقواعد الرفع.', true);
+                showCustomAlert('خطأ في رفع الشعار', 'تعذر رفع الشعار إلى Cloudinary. تأكدي من أن Upload Preset باسم athar_upload مضبوط على Unsigned.', true);
             } finally {
                 URL.revokeObjectURL(localPreview);
                 imageUploadBusy = false;
@@ -1536,18 +1551,18 @@
         function saveCategory(e) {
             e.preventDefault();
             if (imageUploadBusy) {
-                showCustomAlert('انتظري قليلاً', 'الصورة لسا قيد الرفع إلى Firebase Storage.', true);
+                showCustomAlert('انتظري قليلاً', 'الصورة لسا قيد الرفع إلى Cloudinary.', true);
                 return;
             }
             const image = $('cat-image-input').value.trim();
             if (!image) {
-                showCustomAlert('الصورة مطلوبة', 'اختاري صورة للتصنيف وسيتم رفعها إلى Firebase Storage أولاً.', true);
+                showCustomAlert('الصورة مطلوبة', 'اختاري صورة للتصنيف وسيتم رفعها إلى Cloudinary أولاً.', true);
                 return;
             }
             const maxOrder = categories.reduce((m, c) => Math.max(m, Number(c.order) || 0), 0);
             const data = { name: $('cat-name-input').value.trim(), image, order: maxOrder + 1 };
             if (isOfflineMode || !db) {
-                showCustomAlert('لا يمكن حفظ الصورة الآن', 'رفع الصور يحتاج اتصالاً بـ Firebase Storage. بعد عودة الاتصال أعيدي رفع الصورة ثم احفظي التصنيف.', true);
+                showCustomAlert('لا يمكن حفظ الصورة الآن', 'رفع الصور يحتاج اتصالاً بالإنترنت وCloudinary. أعيدي رفع الصورة ثم احفظي التصنيف.', true);
                 return;
             }
             fb.addDoc(fb.collection(db, 'categories'), data).then(() => {
@@ -1606,16 +1621,16 @@
         }
         function updateStoreLogo() {
             if (imageUploadBusy) {
-                showCustomAlert('انتظري قليلاً', 'الشعار لسا قيد الرفع إلى Firebase Storage.', true);
+                showCustomAlert('انتظري قليلاً', 'الشعار لسا قيد الرفع إلى Cloudinary.', true);
                 return;
             }
             const url = $('store-logo-url-input').value.trim();
             if (!url) {
-                showCustomAlert('الشعار غير محدد', 'اختاري شعاراً من الجهاز ليتم رفعه إلى Firebase Storage.', true);
+                showCustomAlert('الشعار غير محدد', 'اختاري شعاراً من الجهاز ليتم رفعه إلى Cloudinary.', true);
                 return;
             }
             if (isOfflineMode || !db) {
-                showCustomAlert('لا يمكن حفظ الشعار الآن', 'حفظ رابط الشعار يحتاج اتصالاً بـ Firebase. بعد عودة الاتصال أعيدي حفظ الشعار.', true);
+                showCustomAlert('لا يمكن حفظ الشعار الآن', 'حفظ رابط الشعار يحتاج اتصالاً بـ Firebase. بعد رفع الصورة إلى Cloudinary أعيدي حفظ الشعار.', true);
                 return;
             }
             logoUrl = url;

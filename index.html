@@ -1535,28 +1535,7 @@
                 ]);
                 fb = fsM;
                 const app = appM.initializeApp(firebaseConfig);
-             async function initFirebase() {
-            try {
-                const B = 'https://www.gstatic.com/firebasejs/11.6.1/';
-                const [appM, authM, fsM] = await Promise.all([
-                    import(B + 'firebase-app.js'),
-                    import(B + 'firebase-auth.js'),
-                    import(B + 'firebase-firestore.js'),
-                ]);
-                fb = fsM;
-                const app = appM.initializeApp(firebaseConfig);
-                
-                // --- التعديل هنا: تفعيل التخزين المؤقت المحلي (Offline Cache) ---
-                db = fsM.initializeFirestore(app, {
-                    localCache: fsM.persistentLocalCache({
-                        tabManager: fsM.persistentMultipleTabManager()
-                    })
-                });
-                // --------------------------------------------------------
-
-                try {
-                    await authM.signInAnonymously(authM.getAuth(app));
-                    authOk = true;
+                db = fsM.getFirestore(app);
                 try {
                     await authM.signInAnonymously(authM.getAuth(app));
                     authOk = true;
@@ -1625,19 +1604,6 @@
         renderProducts();
         updateCartUI();
         initFirebase();
-       applyLogo();
-        renderCategories();
-        renderProducts();
-        updateCartUI();
-        
-        // تأخير تحميل الخدمات غير الضرورية (Firebase) لتقليل وقت التحميل الأولي
-        // يتم الانتظار حتى يكتمل تحميل الواجهة ثم يتصل بالسيرفر لجلب التحديثات
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                initFirebase();
-            }, 500); // تأخير نصف ثانية إضافي لضمان سلاسة الأداء
-        });
-
         setTimeout(finishLoadingFallback, 8000);
     </script>
 </body>

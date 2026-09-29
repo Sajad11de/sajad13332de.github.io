@@ -17,6 +17,7 @@
     <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js">
     <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js">
     <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js">
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.6.1/REMOVED-firebase-storage.js">
  
     <link rel="preload" href="https://cdn.tailwindcss.com" as="script">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -84,7 +85,6 @@
         .bump { animation: bump .25s ease; }
         @keyframes bump { 50% { transform: scale(1.35); } }
     </style>
-<meta name="athar-image-mode" content="firestore-base64-only-v2">
 </head>
 <body class="min-h-screen flex flex-col bg-[#fffafb]">
  
@@ -334,7 +334,7 @@
                                     <div class="shrink-0 relative w-20 h-20 rounded-xl overflow-hidden bg-stone-100 border border-stone-200 flex items-center justify-center">
                                         <img id="p-image-preview" src="" class="hidden w-full h-full object-contain">
                                         <i id="p-image-preview-icon" class="fa-solid fa-image text-stone-300 text-2xl"></i>
-                                        <div id="p-image-uploading" class="hidden !hidden absolute inset-0 bg-white/70 flex items-center justify-center">
+                                        <div id="p-image-uploading" class="hidden absolute inset-0 bg-white/70 flex items-center justify-center">
                                             <i class="fa-solid fa-spinner fa-spin text-pink-600 text-lg"></i>
                                         </div>
                                     </div>
@@ -343,14 +343,14 @@
                                             <i class="fa-solid fa-camera"></i> اختيار صورة من الاستديو أو الهاتف
                                             <input type="file" id="p-image-file" accept="image/*" class="hidden" onchange="handleImageFileSelect(event)">
                                         </label>
-                                        <input type="hidden" id="p-image" required>
+                                        <input type="hidden" id="p-image" value="">
                                         <p class="text-[11px] text-stone-400">سيتم تحويل الصورة إلى Base64 وحفظها مباشرة داخل Firestore بدون Storage أو مواقع خارجية.</p>
                                     </div>
                                 </div>
                             </div>
                             <div class="sm:col-span-2 lg:col-span-3">
-                                <label class="block text-xs font-bold text-stone-700 mb-1">وصف وتفاصيل المنتج (اختياري):</label>
-                                <input type="text" id="p-desc" placeholder="وصف موجز للمنتج ومميزاته (يمكن تركه فارغاً)..." class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm">
+                                <label class="block text-xs font-bold text-stone-700 mb-1">وصف المنتج:</label>
+                                <input type="text" id="p-desc" placeholder="وصف موجز للمنتج ومميزاته..." class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm">
                             </div>
                             <div class="sm:col-span-3 flex gap-3 mt-2">
                                 <button type="submit" class="bg-pink-600 hover:bg-pink-700 disabled:opacity-60 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow">حفظ المنتج</button>
@@ -390,13 +390,8 @@
                                 <input type="text" id="cat-name-input" placeholder="مثال: عناية بالبشرة" class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm" required>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-stone-700 mb-1">صورة التصنيف:</label>
-                                <label class="w-full flex items-center justify-center gap-2 bg-white border border-dashed border-pink-300 hover:bg-pink-50 text-pink-700 font-bold text-xs py-2.5 rounded-xl cursor-pointer transition-all active:scale-95">
-                                    <i class="fa-solid fa-camera"></i> اختيار صورة من الاستديو أو الهاتف
-                                    <input type="file" id="cat-image-file" accept="image/*" class="hidden" onchange="handleCategoryImageSelect(event)">
-                                </label>
-                                <input type="hidden" id="cat-image-input" required>
-                                <div id="cat-image-status" class="text-[11px] text-stone-400 mt-1">لم يتم اختيار صورة بعد</div>
+                                <label class="block text-xs font-bold text-stone-700 mb-1">رابط صورة التصنيف:</label>
+                                <input type="url" id="cat-image-input" placeholder="https://example.com/category.jpg" class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm" required>
                             </div>
                             <div class="sm:col-span-2">
                                 <button type="submit" class="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow">حفظ التصنيف الجديد</button>
@@ -475,13 +470,8 @@
                         </h4>
                         <div class="space-y-4 max-w-xl">
                             <div>
-                                <label class="block text-xs font-bold text-stone-700 mb-1">صورة شعار المتجر:</label>
-                                <label class="w-full flex items-center justify-center gap-2 bg-white border border-dashed border-pink-300 hover:bg-pink-50 text-pink-700 font-bold text-xs py-2.5 rounded-xl cursor-pointer transition-all active:scale-95">
-                                    <i class="fa-solid fa-camera"></i> اختيار الشعار من الاستديو أو الهاتف
-                                    <input type="file" id="store-logo-file" accept="image/*" class="hidden" onchange="handleLogoFileSelect(event)">
-                                </label>
-                                <input type="hidden" id="store-logo-url-input" value="">
-                                <div id="store-logo-upload-status" class="text-[11px] text-stone-400 mt-1">لم يتم اختيار شعار جديد</div>
+                                <label class="block text-xs font-bold text-stone-700 mb-1">رابط صورة الشعار:</label>
+                                <input type="url" id="store-logo-url-input" class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm">
                             </div>
                             <button onclick="updateStoreLogo()" class="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow">حفظ الشعار</button>
                         </div>
@@ -490,7 +480,7 @@
                         <h4 class="text-base font-black text-stone-900 mb-2 flex items-center gap-2">
                             <i class="fa-solid fa-stethoscope text-pink-600"></i> فحص الاتصال بقاعدة البيانات
                         </h4>
-                        <p class="text-xs text-stone-500 mb-4 max-w-xl">يفحص: الدخول المجهول، قراءة المنتجات من السيرفر (وعددها الفعلي)، صلاحية الكتابة والحذف، ورفع الصور لمخزن فايربيس.</p>
+                        <p class="text-xs text-stone-500 mb-4 max-w-xl">يفحص: الدخول المجهول، قراءة المنتجات من السيرفر (وعددها الفعلي)، صلاحية الكتابة والحذف، وحفظ الصور داخل Firestore بصيغة Base64.</p>
                         <button onclick="runDiagnostics(this)" class="bg-stone-900 hover:bg-stone-800 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow">ابدأ الفحص</button>
                     </div>
                 </div>
@@ -510,6 +500,11 @@
         </div>
     </div>
  
+    <!--
+        ملاحظة مهمة: الكود صار سكربت عادي (مو module) حتى تشتغل كل الأزرار فوراً.
+        قبل كان كل شيء ينتظر تحميل مكتبات فايربيس، وهذا سبب "الضغط ما يستجيب" بالبداية.
+        الآن فايربيس يتحمل بالخلفية بـ import() ولا يوقف الواجهة.
+    -->
     <script>
         /* ================= الإعدادات والأدوات ================= */
         // إعدادات مشروع فايربيس الجديد (athar-e00bf)
@@ -528,7 +523,7 @@
             .replace(/[\u064B-\u065F\u0670\u0640]/g, '')
             .replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي');
  
-        // صور بديلة آمنة
+        // صور بديلة آمنة (مشفّرة بشكل صحيح، عكس النسخة القديمة اللي كان يخرب فيها الـ onerror)
         const makeSvg = (text, size = 300, fs = 26) => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
             `<svg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}' viewBox='0 0 ${size} ${size}'><rect width='${size}' height='${size}' fill='#fce7f3'/><text x='50%' y='52%' font-family='Arial' font-weight='bold' font-size='${fs}' fill='#db2777' text-anchor='middle' dominant-baseline='middle'>${text}</text></svg>`
         );
@@ -547,13 +542,13 @@
             img.classList.add('loaded');
         }
  
-        /* ================= الكاش المحلي ================= */
+        /* ================= الكاش المحلي (أول عرض فوري) ================= */
         const CACHE_KEY = 'athar_cache_v1';
         let cache = {};
         try { cache = JSON.parse(localStorage.getItem(CACHE_KEY)) || {}; } catch (e) { cache = {}; }
         function persist(key, val) {
             cache[key] = val;
-            try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch (e) { }
+            try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch (e) { /* التخزين ممتلئ أو ممنوع */ }
         }
  
         /* ================= الحالة ================= */
@@ -583,7 +578,7 @@
         let storeDiscount = cache.discount || { type: 'none', value: 0, title: 'خصم خاص' };
         let logoUrl = cache.logo || '';
  
-        let loading = !hasCache;
+        let loading = !hasCache;              // إذا ماكو كاش نعرض skeleton لحد ما توصل البيانات
         const ready = { categories: false, products: false };
         let cart = [];
         let cartOpen = false;
@@ -593,19 +588,18 @@
         let searchQuery = '';
         let isOfflineMode = false;
         let db = null;
-        let firebaseInitPromise = null;
-        let fb = null;
+        let fb = null;                         // دوال فايربيس بعد التحميل
         let imageUploadBusy = false;
-        let authOk = false;
-        let authError = null;
-        let lastDbError = null;
+        let authOk = false;                    // نجح الدخول المجهول؟
+        let authError = null;                  // سبب فشل الدخول المجهول (إن وُجد)
+        let lastDbError = null;                // آخر خطأ من قاعدة البيانات
         let localWarned = false;
         const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
         const searchIndex = new Map();
  
         function rebuildIndex() {
             searchIndex.clear();
-            products.forEach((p) => searchIndex.set(p.id, norm(`${p.name} ${p.description || ''} ${p.category} ${p.subcategory || ''}`)));
+            products.forEach((p) => searchIndex.set(p.id, norm(`${p.name} ${p.description} ${p.category} ${p.subcategory || ''}`)));
         }
         rebuildIndex();
  
@@ -690,6 +684,7 @@
             fillSubParentSelect();
         }
  
+        // للصور اللي تكون جاهزة من الكاش قبل ما يشتغل onload
         function markLoadedImages(root) {
             root.querySelectorAll('img.img-fade').forEach((i) => { if (i.complete && i.naturalWidth > 0) i.classList.add('loaded'); });
         }
@@ -728,17 +723,15 @@
                 priceHtml = `<span class="text-[10px] text-stone-400 line-through leading-4">${price.toLocaleString()} د.ع</span><span class="font-black text-red-600 text-sm leading-5">${np.toLocaleString()} د.ع</span>`;
             }
  
-            const descText = p.description ? esc(p.description) : '';
- 
             return `
                 <div class="bg-white rounded-2xl p-3 border border-pink-100 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full relative">
-                    <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-3 bg-white">
+                    <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-3 bg-pink-50">
                         ${badge}
                         <img src="${esc(p.image || svgFallback)}" alt="${esc(p.name)}" width="380" height="380" loading="lazy" decoding="async" class="img-fade w-full h-full object-contain" onload="this.classList.add('loaded')" onerror="imgErr(this,'prod')">
                         <div class="absolute top-2 right-2 bg-white/90 text-pink-600 text-[10px] font-bold px-2 py-1 rounded-md shadow-sm">${esc(p.category)}</div>
                     </div>
                     <h3 class="font-bold text-stone-800 text-sm mb-1 leading-tight min-h-[35px]" title="${esc(p.name)}">${esc(p.name)}</h3>
-                    <p class="text-[10px] text-stone-500 mb-3 flex-grow min-h-[30px]" title="${descText}">${descText}</p>
+                    <p class="text-[10px] text-stone-500 mb-3 flex-grow min-h-[30px]" title="${esc(p.description)}">${esc(p.description)}</p>
                     <div class="flex items-center justify-between mt-auto pt-2 border-t border-stone-50">
                         <div class="h-9 flex flex-col justify-center">${priceHtml}</div>
                         <button type="button" data-add="${esc(p.id)}" class="bg-pink-600 hover:bg-pink-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 active:scale-95 shadow-sm shadow-pink-200 flex items-center gap-1.5">
@@ -784,7 +777,7 @@
             searchQuery = val;
             $('clear-search-btn').classList.toggle('hidden', val.length === 0);
             clearTimeout(searchTimer);
-            searchTimer = setTimeout(renderProducts, 120);
+            searchTimer = setTimeout(renderProducts, 120);   // تأخير بسيط حتى ما نعيد الرسم مع كل حرف
         }
         function clearSearch() {
             $('main-search-input').value = '';
@@ -804,10 +797,11 @@
             currentSelectedCategory = name;
             currentSubcategory = 'الكل';
             updateCategoryActive();
-            renderSubcategories();
+            renderSubcategories();   // تحديث الحالة فقط بدون إعادة بناء التصنيفات
             renderProducts();
         }
  
+        // Event delegation: مستمع واحد بدل عشرات الأزرار
         $('categories-container').addEventListener('click', (e) => {
             const b = e.target.closest('[data-cat]');
             if (b) selectCategory(b.dataset.cat);
@@ -839,7 +833,7 @@
             else cart.push({ id: prod.id, name: prod.name, price: Number(prod.price) || 0, image: prod.image, quantity: 1 });
             updateBadge(true);
             if (cartOpen) updateCartUI();
-            showToast(`تمت إضافة ${prod.name} للسلة`);
+            showToast(`تمت إضافة ${prod.name} للسلة`);   // إشعار خفيف بدل نافذة تحتاج ضغطة "حسناً"
         }
  
         function updateQuantity(id, delta) {
@@ -917,6 +911,7 @@
             syncScrollLock();
         }
  
+        // تتحقق من بيانات الزبونة وترجع نص الطلب الكامل، أو null إذا ناقصة بيانات (وتعرض تنبيه مناسب)
         function buildOrderText(plain) {
             if (cart.length === 0) { showCustomAlert('تنبيه', 'السلة فارغة!', true); return null; }
  
@@ -944,6 +939,7 @@
             window.open(`https://wa.me/9647724700027?text=${encodeURIComponent(text)}`, '_blank');
         }
  
+        // ينسخ نص الطلب للحافظة (Clipboard)، مع بديل احتياطي للمتصفحات القديمة
         function copyTextToClipboard(text) {
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 return navigator.clipboard.writeText(text);
@@ -964,29 +960,26 @@
             });
         }
  
+        // إتمام الطلب عبر انستكرام: ينسخ تفاصيل الطلب وينبّه الزبونة بضرورة لصقها داخل المحادثة قبل فتح انستكرام
         const INSTAGRAM_USERNAME = 'athar_cosmetic';
         function checkoutViaInstagram() {
             const text = buildOrderText(true);
             if (!text) return;
-            
-            // نسخ النص ثم التحويل مباشرة بدون رسائل تأكيد مزعجة
             copyTextToClipboard(text).then(() => {
-                showToast('✅ تم نسخ الطلب، جارِ التحويل للخاص...');
-                setTimeout(openInstagramApp, 1000);
+                showCustomAlert('تم نسخ تفاصيل الطلب ✅', '', false, {
+                    warn: 'مهم جداً: تم نسخ تفاصيل طلبك تلقائياً، يجب لصقه (Paste) داخل محادثة الانستكرام بعد فتحها حتى يصل الطلب بشكل صحيح.',
+                    confirmText: 'فتح تطبيق الانستكرام الآن',
+                    onConfirm: openInstagramApp
+                });
             }).catch(() => {
-                showToast('جارِ التحويل للانستكرام...');
-                setTimeout(openInstagramApp, 1000);
+                showCustomAlert('تنبيه', `تعذر نسخ الطلب تلقائياً. يرجى مراسلتنا مباشرة على انستكرام ${INSTAGRAM_USERNAME}@ وكتابة طلبك يدوياً.`, true);
             });
         }
  
+        // يفتح محادثة الانستكرام المباشرة (الدايركت) مع البيج
+        // يعمل على الهاتف (يفتح التطبيق) وعلى الكمبيوتر (يفتح المتصفح)
         function openInstagramApp() {
-            // الرابط العالمي الرسمي من ميتا لفتح محادثة دايركت مباشرة
-            window.location.href = `https://ig.me/m/${INSTAGRAM_USERNAME}`;
-            
-            // رابط احتياطي لضمان فتح التطبيق في بعض الأجهزة القديمة أو أنظمة iOS
-            setTimeout(() => {
-                window.location.href = `instagram://user?username=${INSTAGRAM_USERNAME}`;
-            }, 500);
+            window.open(`https://ig.me/m/${INSTAGRAM_USERNAME}`, '_blank');
         }
  
         /* ================= التصنيفات الفرعية ================= */
@@ -1002,7 +995,7 @@
  
             if (!subs.length) {
                 currentSubcategory = 'الكل';
-                wrap.classList.remove('open');
+                wrap.classList.remove('open');   // يبقى المحتوى القديم أثناء الإغلاق حتى ما يومض
                 return;
             }
             if (currentSubcategory !== 'الكل' && !subs.includes(currentSubcategory)) currentSubcategory = 'الكل';
@@ -1105,6 +1098,7 @@
             }
         }
  
+        // جداول الإدارة تنرسم فقط وقت تكون اللوحة مفتوحة (قبل كانت تنرسم مع كل ضغطة/بحث)
         function renderAdminTables() {
             if (!adminOpen) return;
             $('admin-products-table').innerHTML = products.map((p) => `
@@ -1137,7 +1131,7 @@
                 </tr>`).join('');
         }
  
-        /* ================= صورة المنتج ================= */
+        /* ================= صورة المنتج: اختيار من الهاتف/الاستديو أو رابط ================= */
         function showImagePreview(src) {
             const img = $('p-image-preview');
             const icon = $('p-image-preview-icon');
@@ -1152,25 +1146,11 @@
             img.classList.add('hidden');
             $('p-image-preview-icon').classList.remove('hidden');
         }
-        function onManualImageUrlInput() {
-            showImagePreview($('p-image').value.trim());
-        }
-        
-        async function imageFileToBase64(file, options = {}) {
-            if (!file || !file.type.startsWith('image/')) throw new Error('invalid-image');
-            const maxDim = options.maxDim || 700;
-            let quality = options.quality || 0.62;
-            for (let i = 0; i < 5; i++) {
-                const { dataUrl } = await compressImageFile(file, {
-                    maxDim: Math.max(450, maxDim - (i * 70)),
-                    quality: Math.max(0.42, quality - (i * 0.06)),
-                    whitenBg: !!options.whitenBg
-                });
-                if (dataUrl.length <= 700000) return dataUrl;
-            }
-            throw new Error('image-too-large-for-firestore');
-        }
+        function onManualImageUrlInput() { }
 
+ 
+        // يحوّل خلفية الصورة (المتصلة بحوافها الخارجية ومتقاربة اللون) إلى اللون الأبيض تلقائياً،
+        // مع ترك المنتج نفسه بدون تغيير (يشتغل زين مع خلفيات الاستديو الموحدة اللون)
         function whitenBackground(canvas, tolerance = 42) {
             const ctx = canvas.getContext('2d');
             const w = canvas.width, h = canvas.height;
@@ -1194,7 +1174,7 @@
                 visited[p] = 1;
                 const i = p * 4;
                 const dr = data[i] - bg[0], dg = data[i + 1] - bg[1], db = data[i + 2] - bg[2];
-                if (Math.sqrt(dr * dr + dg * dg + db * db) > tolerance) continue;
+                if (Math.sqrt(dr * dr + dg * dg + db * db) > tolerance) continue;   // لون مختلف = حافة المنتج، نوقف هنا
  
                 data[i] = 255; data[i + 1] = 255; data[i + 2] = 255; data[i + 3] = 255;
                 const x = p % w, y = (p / w) | 0;
@@ -1206,6 +1186,7 @@
             ctx.putImageData(imgData, 0, 0);
         }
  
+        // تصغير/ضغط الصورة داخل المتصفح قبل الرفع حتى تصير الأحجام مناسبة (خصوصاً صور الكاميرا)
         function compressImageFile(file, { maxDim = 1000, quality = 0.82, whitenBg = false } = {}) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -1221,7 +1202,7 @@
                         canvas.width = width; canvas.height = height;
                         canvas.getContext('2d').drawImage(img, 0, 0, width, height);
                         if (whitenBg) whitenBackground(canvas);
-                        resolve({ dataUrl: canvas.toDataURL('image/jpeg', quality) });
+                        canvas.toBlob((blob) => resolve({ blob, dataUrl: canvas.toDataURL('image/jpeg', quality) }), 'image/jpeg', quality);
                     };
                     img.onerror = reject;
                     img.src = reader.result;
@@ -1237,75 +1218,30 @@
             imageUploadBusy = true;
             const localPreview = URL.createObjectURL(file);
             showImagePreview(localPreview);
-            const loader = $('p-image-uploading');
-            if (loader) loader.classList.add('hidden');
+            $('p-image-uploading').classList.add('hidden');
             try {
-                const dataUrl = await imageFileToBase64(file, { maxDim: 700, quality: 0.62, whitenBg: false });
-                $('p-image').value = dataUrl;
-                showImagePreview(dataUrl);
+                // تحويل الصورة مباشرة إلى Base64 محلياً — لا Firebase Storage ولا روابط خارجية.
+                let d = (await compressImageFile(file, { maxDim: 900, quality: 0.72, whitenBg: false })).dataUrl;
+                if (d.length > 700000) {
+                    d = (await compressImageFile(file, { maxDim: 650, quality: 0.58, whitenBg: false })).dataUrl;
+                }
+                if (d.length > 950000) throw new Error('image-too-large-for-firestore');
+                $('p-image').value = d;
+                showImagePreview(d);
                 showToast('تم تجهيز الصورة ✓');
             } catch (err) {
                 console.error('Base64 image conversion failed:', err);
                 $('p-image').value = '';
                 e.target.value = '';
                 resetImagePreview();
-                const msg = err.message === 'image-too-large-for-firestore'
-                    ? 'الصورة كبيرة على حد Firestore. اختر صورة أصغر أو سيتم تصغيرها تلقائياً.'
-                    : 'تعذر تجهيز الصورة. حاولي مرة أخرى.';
-                showCustomAlert('تعذر تجهيز الصورة', msg, true);
+                showCustomAlert('خطأ', err.message === 'image-too-large-for-firestore' ? 'الصورة كبيرة جداً لقاعدة البيانات. اختاري صورة أصغر.' : 'تعذرت معالجة الصورة، جربي صورة أخرى.', true);
             } finally {
-                URL.revokeObjectURL(localPreview);
                 imageUploadBusy = false;
-                if (loader) loader.classList.add('hidden');
+                $('p-image-uploading').classList.add('hidden');
             }
         }
-
-        async function handleCategoryImageSelect(e) {
-            const file = e.target.files && e.target.files[0];
-            if (!file) return;
-            const status = $('cat-image-status');
-            try {
-                status.textContent = 'جارٍ تحويل الصورة إلى Base64...';
-                const dataUrl = await imageFileToBase64(file, { maxDim: 550, quality: 0.58, whitenBg: false });
-                $('cat-image-input').value = dataUrl;
-                status.textContent = 'تم تجهيز الصورة ✓ وستُحفظ مباشرة في Firestore';
-                status.className = 'text-[11px] text-emerald-600 mt-1 font-bold';
-            } catch (err) {
-                console.error(err);
-                $('cat-image-input').value = '';
-                e.target.value = '';
-                status.textContent = 'تعذر تجهيز الصورة';
-                status.className = 'text-[11px] text-red-600 mt-1 font-bold';
-                showCustomAlert('تعذر تجهيز الصورة', 'حاولي اختيار صورة أصغر.', true);
-            }
-        }
-
-        async function handleLogoFileSelect(e) {
-            const file = e.target.files && e.target.files[0];
-            if (!file) return;
-            const status = $('store-logo-upload-status');
-            try {
-                status.textContent = 'جارٍ تحويل الشعار إلى Base64...';
-                const dataUrl = await imageFileToBase64(file, { maxDim: 500, quality: 0.62, whitenBg: true });
-                $('store-logo-url-input').value = dataUrl;
-                status.textContent = 'تم تجهيز الشعار ✓ وسيُحفظ مباشرة في Firestore';
-                status.className = 'text-[11px] text-emerald-600 mt-1 font-bold';
-                logoUrl = dataUrl;
-                persist('logo', dataUrl);
-                applyLogo();
-                if (!isOfflineMode && db) {
-                    await fb.setDoc(fb.doc(db, 'store_settings', 'general'), { logoUrl: dataUrl }, { merge: true });
-                }
-                showToast('تم تحويل الشعار وحفظه داخل قاعدة البيانات');
-            } catch (err) {
-                console.error(err);
-                status.textContent = 'تعذر تجهيز الشعار';
-                status.className = 'text-[11px] text-red-600 mt-1 font-bold';
-                e.target.value = '';
-                showCustomAlert('تعذر تجهيز الشعار', 'حاولي اختيار صورة أصغر.', true);
-            }
-        }
-
+ 
+        // الحفظ بدون انتظار السيرفر: فايربيس يحدّث الواجهة فوراً من النسخة المحلية
         function saveError(err) {
             console.error('Save failed:', err);
             lastDbError = err || lastDbError;
@@ -1358,31 +1294,23 @@
             showCustomAlert('نتيجة فحص قاعدة البيانات', '', lines.some((l) => l.startsWith('❌')), { steps: lines });
         }
  
-        async function saveProduct(e) {
+        function saveProduct(e) {
             e.preventDefault();
-            if (imageUploadBusy) { showCustomAlert('انتظري قليلاً', 'الصورة ما زالت قيد التجهيز، حاولي الحفظ بعد لحظات.', true); return; }
+            if (imageUploadBusy) { showCustomAlert('انتظري قليلاً', 'الصورة لسا قيد الرفع، حاولي الحفظ بعد لحظات.', true); return; }
             const btn = e.submitter;
             if (btn) { btn.disabled = true; setTimeout(() => { btn.disabled = false; }, 700); }
  
             const id = $('edit-product-id').value;
-            const image = $('p-image').value.trim();
-            if (!image) {
-                showCustomAlert('الصورة مطلوبة', 'اختاري صورة من الاستديو وانتظري حتى يتم تجهيزها كـ Base64.', true);
-                return;
-            }
             const data = {
                 name: $('p-name').value,
                 category: $('p-category').value,
                 subcategory: $('p-subcategory').value,
                 price: parseFloat($('p-price').value),
-                image,
-                description: $('p-desc').value || '',
+                image: $('p-image').value,
+                description: $('p-desc').value,
             };
             if (!id) data.createdAt = Date.now();
  
-            if (!db && firebaseInitPromise) {
-                try { await Promise.race([firebaseInitPromise, new Promise(resolve => setTimeout(resolve, 12000))]); } catch (_) {}
-            }
             if (isOfflineMode || !db) {
                 if (id) { const idx = products.findIndex((x) => x.id === id); if (idx > -1) products[idx] = { ...products[idx], id, ...data }; }
                 else products.push({ id: 'p-' + Date.now(), ...data });
@@ -1412,7 +1340,7 @@
             $('p-price').value = p.price;
             $('p-image').value = p.image;
             showImagePreview(p.image);
-            $('p-desc').value = p.description || '';
+            $('p-desc').value = p.description;
             $('cancel-edit-btn').classList.remove('hidden');
             $('product-form-title').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
@@ -1463,12 +1391,7 @@
         function saveCategory(e) {
             e.preventDefault();
             const maxOrder = categories.reduce((m, c) => Math.max(m, Number(c.order) || 0), 0);
-            const image = $('cat-image-input').value.trim();
-            if (!image) {
-                showCustomAlert('الصورة مطلوبة', 'اختاري صورة من الاستديو ليتم تحويلها إلى Base64 وحفظها في Firestore.', true);
-                return;
-            }
-            const data = { name: $('cat-name-input').value.trim(), image, order: maxOrder + 1 };
+            const data = { name: $('cat-name-input').value.trim(), image: $('cat-image-input').value, order: maxOrder + 1 };
             if (isOfflineMode || !db) {
                 categories.push({ id: 'c-' + Date.now(), ...data });
                 persist('categories', categories);
@@ -1531,6 +1454,7 @@
  
         let alertConfirmAction = null;
  
+        // options: { steps: [نص1, نص2, ...], confirmText: 'حسناً', onConfirm: fn }
         function showCustomAlert(title, message, isError, options) {
             options = options || {};
             $('alert-title').textContent = title;
@@ -1578,7 +1502,7 @@
             if (action) action();
         }
  
-        /* ================= فايربيس ================= */
+        /* ================= فايربيس (يتحمل بالخلفية) ================= */
         function markReady(key) {
             ready[key] = true;
             if (loading && ready.categories && ready.products) {
@@ -1588,6 +1512,7 @@
             }
         }
  
+        // إذا تأخر الاتصال كثير، لا نخلي الزبونة تشوف skeleton للأبد
         function finishLoadingFallback() {
             if (!loading) return;
             loading = false;
@@ -1603,7 +1528,7 @@
         async function initFirebase() {
             try {
                 const B = 'https://www.gstatic.com/firebasejs/11.6.1/';
-                const [appM, authM, fsM] = await Promise.all([
+                const [appM, authM, fsM, storM] = await Promise.all([
                     import(B + 'firebase-app.js'),
                     import(B + 'firebase-auth.js'),
                     import(B + 'firebase-firestore.js'),
@@ -1618,7 +1543,7 @@
                     authError = authErr;
                     console.error('Anonymous sign-in failed:', authErr);
                 }
-                initFirestoreListeners();
+                initFirestoreListeners();   // نبدأ القراءة حتى لو فشل الدخول المجهول (إذا القواعد تسمح بالقراءة العامة)
             } catch (err) {
                 console.error('Firebase init failed:', err);
                 lastDbError = err;
@@ -1627,6 +1552,7 @@
         }
  
         function initFirestoreListeners() {
+            // الإعدادات (الشعار والخصم)
             fb.onSnapshot(fb.doc(db, 'store_settings', 'general'), (snap) => {
                 if (!snap.exists()) return;
                 const d = snap.data();
@@ -1642,6 +1568,7 @@
                 }
             }, (err) => { lastDbError = err; console.error(err); });
  
+            // التصنيفات
             fb.onSnapshot(fb.collection(db, 'categories'), (snap) => {
                 let list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
                 if (!list.find((c) => c.name === 'الكل')) list.unshift({ id: 'cat-all', name: 'الكل', image: svgAll });
@@ -1657,6 +1584,7 @@
                 markReady('categories');
             }, (err) => { lastDbError = err; console.error(err); markReady('categories'); });
  
+            // المنتجات
             fb.onSnapshot(fb.collection(db, 'products'), (snap) => {
                 const list = snap.docs.filter((d) => !d.id.startsWith('__')).map((d) => ({ id: d.id, ...d.data() }));
                 const changed = JSON.stringify(list) !== JSON.stringify(products);
@@ -1675,7 +1603,7 @@
         renderCategories();
         renderProducts();
         updateCartUI();
-        firebaseInitPromise = initFirebase();
+        initFirebase();
         setTimeout(finishLoadingFallback, 8000);
     </script>
 </body>

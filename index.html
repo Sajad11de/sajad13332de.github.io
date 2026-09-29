@@ -1625,6 +1625,19 @@
         renderProducts();
         updateCartUI();
         initFirebase();
+       applyLogo();
+        renderCategories();
+        renderProducts();
+        updateCartUI();
+        
+        // تأخير تحميل الخدمات غير الضرورية (Firebase) لتقليل وقت التحميل الأولي
+        // يتم الانتظار حتى يكتمل تحميل الواجهة ثم يتصل بالسيرفر لجلب التحديثات
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                initFirebase();
+            }, 500); // تأخير نصف ثانية إضافي لضمان سلاسة الأداء
+        });
+
         setTimeout(finishLoadingFallback, 8000);
     </script>
 </body>

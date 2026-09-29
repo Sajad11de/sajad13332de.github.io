@@ -1535,7 +1535,28 @@
                 ]);
                 fb = fsM;
                 const app = appM.initializeApp(firebaseConfig);
-                db = fsM.getFirestore(app);
+             async function initFirebase() {
+            try {
+                const B = 'https://www.gstatic.com/firebasejs/11.6.1/';
+                const [appM, authM, fsM] = await Promise.all([
+                    import(B + 'firebase-app.js'),
+                    import(B + 'firebase-auth.js'),
+                    import(B + 'firebase-firestore.js'),
+                ]);
+                fb = fsM;
+                const app = appM.initializeApp(firebaseConfig);
+                
+                // --- التعديل هنا: تفعيل التخزين المؤقت المحلي (Offline Cache) ---
+                db = fsM.initializeFirestore(app, {
+                    localCache: fsM.persistentLocalCache({
+                        tabManager: fsM.persistentMultipleTabManager()
+                    })
+                });
+                // --------------------------------------------------------
+
+                try {
+                    await authM.signInAnonymously(authM.getAuth(app));
+                    authOk = true;
                 try {
                     await authM.signInAnonymously(authM.getAuth(app));
                     authOk = true;

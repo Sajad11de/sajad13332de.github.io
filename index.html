@@ -17,7 +17,7 @@
     <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js">
     <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js">
     <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js">
-    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.6.1/REMOVED-firebase-storage.js">
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js">
  
     <link rel="preload" href="https://cdn.tailwindcss.com" as="script">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -340,11 +340,11 @@
                                     </div>
                                     <div class="flex-grow w-full space-y-2">
                                         <label class="w-full flex items-center justify-center gap-2 bg-white border border-dashed border-pink-300 hover:bg-pink-50 text-pink-700 font-bold text-xs py-2.5 rounded-xl cursor-pointer transition-all active:scale-95">
-                                            <i class="fa-solid fa-camera"></i> اختيار صورة من الاستديو أو الهاتف
+                                            <i class="fa-solid fa-cloud-arrow-up"></i> رفع الصورة إلى Firebase Storage
                                             <input type="file" id="p-image-file" accept="image/*" class="hidden" onchange="handleImageFileSelect(event)">
                                         </label>
                                         <input type="hidden" id="p-image" value="">
-                                        <p class="text-[11px] text-stone-400">سيتم تحويل الصورة إلى Base64 وحفظها مباشرة داخل Firestore بدون Storage أو مواقع خارجية.</p>
+                                        <p class="text-[11px] text-stone-400">الصورة تُرفع إلى Firebase Storage، ويُحفظ رابطها فقط داخل Firestore. لا يتم حفظ Base64 في المنتج الجديد.</p>
                                     </div>
                                 </div>
                             </div>
@@ -390,8 +390,16 @@
                                 <input type="text" id="cat-name-input" placeholder="مثال: عناية بالبشرة" class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm" required>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-stone-700 mb-1">رابط صورة التصنيف:</label>
-                                <input type="url" id="cat-image-input" placeholder="https://example.com/category.jpg" class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm" required>
+                                <label class="block text-xs font-bold text-stone-700 mb-1">صورة التصنيف:</label>
+                                <label class="w-full flex items-center justify-center gap-2 bg-white border border-dashed border-pink-300 hover:bg-pink-50 text-pink-700 font-bold text-xs py-2.5 rounded-xl cursor-pointer transition-all active:scale-95">
+                                    <i class="fa-solid fa-cloud-arrow-up"></i> اختيار ورفع الصورة
+                                    <input type="file" id="cat-image-file" accept="image/*" class="hidden" onchange="handleCategoryImageFileSelect(event)">
+                                </label>
+                                <input type="hidden" id="cat-image-input" value="">
+                                <div class="mt-2 flex items-center gap-2">
+                                    <img id="cat-image-preview" src="" class="hidden w-12 h-12 rounded-xl object-cover border border-stone-200 bg-stone-50">
+                                    <span id="cat-image-status" class="text-[11px] text-stone-400">سيتم رفع الصورة إلى Firebase Storage.</span>
+                                </div>
                             </div>
                             <div class="sm:col-span-2">
                                 <button type="submit" class="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow">حفظ التصنيف الجديد</button>
@@ -470,8 +478,16 @@
                         </h4>
                         <div class="space-y-4 max-w-xl">
                             <div>
-                                <label class="block text-xs font-bold text-stone-700 mb-1">رابط صورة الشعار:</label>
-                                <input type="url" id="store-logo-url-input" class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm">
+                                <label class="block text-xs font-bold text-stone-700 mb-1">رفع شعار المتجر:</label>
+                                <label class="w-full flex items-center justify-center gap-2 bg-white border border-dashed border-pink-300 hover:bg-pink-50 text-pink-700 font-bold text-xs py-2.5 rounded-xl cursor-pointer transition-all active:scale-95">
+                                    <i class="fa-solid fa-cloud-arrow-up"></i> اختيار ورفع الشعار إلى Firebase Storage
+                                    <input type="file" id="store-logo-file" accept="image/*" class="hidden" onchange="handleStoreLogoFileSelect(event)">
+                                </label>
+                                <input type="hidden" id="store-logo-url-input" value="">
+                                <div class="mt-2 flex items-center gap-2">
+                                    <img id="store-logo-upload-preview" src="" class="hidden w-14 h-14 rounded-2xl object-contain border border-stone-200 bg-stone-50">
+                                    <span id="store-logo-status" class="text-[11px] text-stone-400">الصورة ستُرفع إلى Firebase Storage ويُحفظ الرابط في إعدادات المتجر.</span>
+                                </div>
                             </div>
                             <button onclick="updateStoreLogo()" class="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow">حفظ الشعار</button>
                         </div>
@@ -480,7 +496,7 @@
                         <h4 class="text-base font-black text-stone-900 mb-2 flex items-center gap-2">
                             <i class="fa-solid fa-stethoscope text-pink-600"></i> فحص الاتصال بقاعدة البيانات
                         </h4>
-                        <p class="text-xs text-stone-500 mb-4 max-w-xl">يفحص: الدخول المجهول، قراءة المنتجات من السيرفر (وعددها الفعلي)، صلاحية الكتابة والحذف، وحفظ الصور داخل Firestore بصيغة Base64.</p>
+                        <p class="text-xs text-stone-500 mb-4 max-w-xl">يفحص: الدخول المجهول، قراءة المنتجات من السيرفر، صلاحية الكتابة والحذف، وتجهيز Firebase Storage لرفع الصور.</p>
                         <button onclick="runDiagnostics(this)" class="bg-stone-900 hover:bg-stone-800 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow">ابدأ الفحص</button>
                     </div>
                 </div>
@@ -512,6 +528,7 @@
             apiKey: "AIzaSyBOeBszexRWhAOC80ixGiWZseRX4ks_ipQ",
             authDomain: "athar-e00bf.firebaseapp.com",
             projectId: "athar-e00bf",
+            storageBucket: "athar-e00bf.firebasestorage.app",
             messagingSenderId: "264890265095",
             appId: "1:264890265095:web:24e706e7e5fa8570d044a2",
             measurementId: "G-2FMK3EBME5"
@@ -543,7 +560,7 @@
         }
  
         /* ================= الكاش المحلي (أول عرض فوري) ================= */
-        const CACHE_KEY = 'athar_cache_v1';
+        const CACHE_KEY = 'athar_cache_v2';
         let cache = {};
         try { cache = JSON.parse(localStorage.getItem(CACHE_KEY)) || {}; } catch (e) { cache = {}; }
         function persist(key, val) {
@@ -563,9 +580,12 @@
             { id: 'prod-2', name: 'مجموعة أحمر شفاه مات فخمة', category: 'المكياج والتجميل', price: 15000, image: svgProd2, description: 'درجات ثابتة ومقاومة للماء تدوم طوال اليوم دون أن تسبب جفاف الشفاه.' }
         ];
  
-        const hasCache = Array.isArray(cache.products) && Array.isArray(cache.categories) && cache.categories.length > 0;
-        let categories = hasCache ? cache.categories : [...defaultCategories];
-        let products = hasCache ? cache.products : [...defaultProducts];
+        // لا نعتبر كاش المنتجات صالحاً إذا كان مصفوفة فارغة، حتى لا يختفي المحتوى بسبب كاش قديم.
+        const hasCategoriesCache = Array.isArray(cache.categories) && cache.categories.length > 0;
+        const hasProductsCache = Array.isArray(cache.products) && cache.products.length > 0;
+        const hasCache = hasCategoriesCache && hasProductsCache;
+        let categories = hasCategoriesCache ? cache.categories : [...defaultCategories];
+        let products = hasProductsCache ? cache.products : [];
  
         function sortCategories(list) {
             return [...list].sort((a, b) => {
@@ -1131,7 +1151,7 @@
                 </tr>`).join('');
         }
  
-        /* ================= صورة المنتج: اختيار من الهاتف/الاستديو أو رابط ================= */
+        /* ================= رفع الصور إلى Firebase Storage ================= */
         function showImagePreview(src) {
             const img = $('p-image-preview');
             const icon = $('p-image-preview-icon');
@@ -1146,8 +1166,6 @@
             img.classList.add('hidden');
             $('p-image-preview-icon').classList.remove('hidden');
         }
-        function onManualImageUrlInput() { }
-
  
         // يحوّل خلفية الصورة (المتصلة بحوافها الخارجية ومتقاربة اللون) إلى اللون الأبيض تلقائياً،
         // مع ترك المنتج نفسه بدون تغيير (يشتغل زين مع خلفيات الاستديو الموحدة اللون)
@@ -1186,61 +1204,162 @@
             ctx.putImageData(imgData, 0, 0);
         }
  
-        // تصغير/ضغط الصورة داخل المتصفح قبل الرفع حتى تصير الأحجام مناسبة (خصوصاً صور الكاميرا)
-        function compressImageFile(file, { maxDim = 1000, quality = 0.82, whitenBg = false } = {}) {
+        // تصغير/ضغط الصورة داخل المتصفح قبل الرفع، من دون تحويلها إلى Base64.
+        function compressImageFile(file, { maxDim = 1200, quality = 0.84, whitenBg = false } = {}) {
             return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => {
-                    const img = new Image();
-                    img.onload = () => {
+                const objectUrl = URL.createObjectURL(file);
+                const img = new Image();
+                const cleanup = () => URL.revokeObjectURL(objectUrl);
+
+                img.onload = () => {
+                    try {
                         let { width, height } = img;
                         if (width > maxDim || height > maxDim) {
-                            if (width > height) { height = Math.round(height * maxDim / width); width = maxDim; }
-                            else { width = Math.round(width * maxDim / height); height = maxDim; }
+                            if (width > height) {
+                                height = Math.round(height * maxDim / width);
+                                width = maxDim;
+                            } else {
+                                width = Math.round(width * maxDim / height);
+                                height = maxDim;
+                            }
                         }
+
                         const canvas = document.createElement('canvas');
-                        canvas.width = width; canvas.height = height;
-                        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d', { alpha: true });
+                        if (!ctx) throw new Error('canvas-unavailable');
+                        ctx.drawImage(img, 0, 0, width, height);
                         if (whitenBg) whitenBackground(canvas);
-                        canvas.toBlob((blob) => resolve({ blob, dataUrl: canvas.toDataURL('image/jpeg', quality) }), 'image/jpeg', quality);
-                    };
-                    img.onerror = reject;
-                    img.src = reader.result;
+
+                        canvas.toBlob((blob) => {
+                            cleanup();
+                            if (!blob) return reject(new Error('image-compression-failed'));
+                            resolve({ blob });
+                        }, 'image/jpeg', quality);
+                    } catch (err) {
+                        cleanup();
+                        reject(err);
+                    }
                 };
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
+
+                img.onerror = () => {
+                    cleanup();
+                    reject(new Error('invalid-image'));
+                };
+                img.src = objectUrl;
             });
         }
- 
+
+        async function ensureStorageReady() {
+            if (!storage || !fbStorage) await initFirebase();
+            if (!storage || !fbStorage) {
+                throw new Error('firebase-storage-not-ready');
+            }
+        }
+
+        async function uploadImageToStorage(file, folder, options = {}) {
+            await ensureStorageReady();
+            const { blob } = await compressImageFile(file, options);
+            const safeExt = 'jpg';
+            const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${safeExt}`;
+            const storageRef = fbStorage.ref(storage, path);
+            await withTimeout(
+                fbStorage.uploadBytes(storageRef, blob, { contentType: 'image/jpeg', cacheControl: 'public,max-age=31536000' }),
+                30000
+            );
+            const url = await withTimeout(fbStorage.getDownloadURL(storageRef), 15000);
+            return { url, path };
+        }
+
         async function handleImageFileSelect(e) {
             const file = e.target.files && e.target.files[0];
             if (!file) return;
             imageUploadBusy = true;
             const localPreview = URL.createObjectURL(file);
             showImagePreview(localPreview);
-            $('p-image-uploading').classList.add('hidden');
+            $('p-image-uploading').classList.remove('hidden');
             try {
-                // تحويل الصورة مباشرة إلى Base64 محلياً — لا Firebase Storage ولا روابط خارجية.
-                let d = (await compressImageFile(file, { maxDim: 900, quality: 0.72, whitenBg: false })).dataUrl;
-                if (d.length > 700000) {
-                    d = (await compressImageFile(file, { maxDim: 650, quality: 0.58, whitenBg: false })).dataUrl;
-                }
-                if (d.length > 950000) throw new Error('image-too-large-for-firestore');
-                $('p-image').value = d;
-                showImagePreview(d);
-                showToast('تم تجهيز الصورة ✓');
+                const result = await uploadImageToStorage(file, 'products', { maxDim: 1200, quality: 0.84, whitenBg: false });
+                $('p-image').value = result.url;
+                showImagePreview(result.url);
+                showToast('تم رفع الصورة إلى Firebase Storage ✓');
             } catch (err) {
-                console.error('Base64 image conversion failed:', err);
+                console.error('Firebase Storage product image upload failed:', err);
                 $('p-image').value = '';
                 e.target.value = '';
                 resetImagePreview();
-                showCustomAlert('خطأ', err.message === 'image-too-large-for-firestore' ? 'الصورة كبيرة جداً لقاعدة البيانات. اختاري صورة أصغر.' : 'تعذرت معالجة الصورة، جربي صورة أخرى.', true);
+                const msg = err.message === 'firebase-storage-not-ready'
+                    ? 'Firebase Storage غير جاهز. تأكدي من تفعيل Storage وقواعده ثم حاولي مرة أخرى.'
+                    : (err.code === 'storage/unauthorized' || err.code === 'storage/permission-denied')
+                        ? 'تم رفض رفع الصورة. راجعي Firebase Storage Rules واسمحِي للمستخدم المجهول Anonymous بالرفع.'
+                        : 'تعذر رفع الصورة إلى Firebase Storage، جربي صورة أخرى أو تحققي من الاتصال بالإنترنت.';
+                showCustomAlert('خطأ في رفع الصورة', msg, true);
             } finally {
+                URL.revokeObjectURL(localPreview);
                 imageUploadBusy = false;
                 $('p-image-uploading').classList.add('hidden');
             }
         }
- 
+
+        async function handleCategoryImageFileSelect(e) {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            imageUploadBusy = true;
+            const localPreview = URL.createObjectURL(file);
+            const preview = $('cat-image-preview');
+            const status = $('cat-image-status');
+            preview.src = localPreview;
+            preview.classList.remove('hidden');
+            status.textContent = 'جارٍ رفع الصورة إلى Firebase Storage...';
+            try {
+                const result = await uploadImageToStorage(file, 'categories', { maxDim: 900, quality: 0.82, whitenBg: false });
+                $('cat-image-input').value = result.url;
+                preview.src = result.url;
+                status.textContent = 'تم رفع الصورة بنجاح ✓';
+            } catch (err) {
+                console.error('Firebase Storage category image upload failed:', err);
+                $('cat-image-input').value = '';
+                e.target.value = '';
+                preview.src = '';
+                preview.classList.add('hidden');
+                status.textContent = 'تعذر رفع الصورة.';
+                showCustomAlert('خطأ في رفع الصورة', 'تعذر رفع صورة التصنيف إلى Firebase Storage. تأكدي من تفعيل Storage وقواعد الرفع.', true);
+            } finally {
+                URL.revokeObjectURL(localPreview);
+                imageUploadBusy = false;
+            }
+        }
+
+        async function handleStoreLogoFileSelect(e) {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            imageUploadBusy = true;
+            const localPreview = URL.createObjectURL(file);
+            const preview = $('store-logo-upload-preview');
+            const status = $('store-logo-status');
+            preview.src = localPreview;
+            preview.classList.remove('hidden');
+            status.textContent = 'جارٍ رفع الشعار إلى Firebase Storage...';
+            try {
+                const result = await uploadImageToStorage(file, 'store', { maxDim: 900, quality: 0.84, whitenBg: false });
+                $('store-logo-url-input').value = result.url;
+                preview.src = result.url;
+                status.textContent = 'تم رفع الشعار بنجاح ✓';
+            } catch (err) {
+                console.error('Firebase Storage logo upload failed:', err);
+                $('store-logo-url-input').value = '';
+                e.target.value = '';
+                preview.src = '';
+                preview.classList.add('hidden');
+                status.textContent = 'تعذر رفع الشعار.';
+                showCustomAlert('خطأ في رفع الشعار', 'تعذر رفع الشعار إلى Firebase Storage. تأكدي من تفعيل Storage وقواعد الرفع.', true);
+            } finally {
+                URL.revokeObjectURL(localPreview);
+                imageUploadBusy = false;
+            }
+        }
+
         // الحفظ بدون انتظار السيرفر: فايربيس يحدّث الواجهة فوراً من النسخة المحلية
         function saveError(err) {
             console.error('Save failed:', err);
@@ -1275,6 +1394,12 @@
         async function runDiagnostics(btn) {
             if (btn) { btn.disabled = true; btn.textContent = 'جارٍ الفحص...'; }
             const lines = [];
+            try {
+                if (!storage || !fbStorage) await initFirebase();
+                lines.push(storage && fbStorage ? '✅ Firebase Storage جاهز لرفع الصور' : '❌ Firebase Storage غير مهيأ');
+            } catch (e) {
+                lines.push(`❌ تهيئة Firebase Storage فشلت: ${e.code || e.message}`);
+            }
             lines.push(isOfflineMode ? '❌ وضع الأوفلاين (فايربيس غير متصل)' : '✅ تم تحميل فايربيس');
             lines.push(authOk ? '✅ الدخول المجهول (Anonymous) شغال' : `❌ الدخول المجهول فشل: ${authError ? (authError.code || authError.message) : 'لم يكتمل'}`);
             if (db && fb) {
@@ -1363,6 +1488,7 @@
             fillAdminSubSelect('');
             $('edit-product-id').value = '';
             $('cancel-edit-btn').classList.add('hidden');
+            $('p-image').value = '';
             resetImagePreview();
         }
  
@@ -1390,18 +1516,29 @@
  
         function saveCategory(e) {
             e.preventDefault();
-            const maxOrder = categories.reduce((m, c) => Math.max(m, Number(c.order) || 0), 0);
-            const data = { name: $('cat-name-input').value.trim(), image: $('cat-image-input').value, order: maxOrder + 1 };
-            if (isOfflineMode || !db) {
-                categories.push({ id: 'c-' + Date.now(), ...data });
-                persist('categories', categories);
-                renderCategories();
-                renderAdminTables();
-            } else {
-                fb.addDoc(fb.collection(db, 'categories'), data).catch(saveError);
+            if (imageUploadBusy) {
+                showCustomAlert('انتظري قليلاً', 'الصورة لسا قيد الرفع إلى Firebase Storage.', true);
+                return;
             }
-            e.target.reset();
-            showToast('تم حفظ التصنيف');
+            const image = $('cat-image-input').value.trim();
+            if (!image) {
+                showCustomAlert('الصورة مطلوبة', 'اختاري صورة للتصنيف وسيتم رفعها إلى Firebase Storage أولاً.', true);
+                return;
+            }
+            const maxOrder = categories.reduce((m, c) => Math.max(m, Number(c.order) || 0), 0);
+            const data = { name: $('cat-name-input').value.trim(), image, order: maxOrder + 1 };
+            if (isOfflineMode || !db) {
+                showCustomAlert('لا يمكن حفظ الصورة الآن', 'رفع الصور يحتاج اتصالاً بـ Firebase Storage. بعد عودة الاتصال أعيدي رفع الصورة ثم احفظي التصنيف.', true);
+                return;
+            }
+            fb.addDoc(fb.collection(db, 'categories'), data).then(() => {
+                e.target.reset();
+                $('cat-image-input').value = '';
+                $('cat-image-preview').src = '';
+                $('cat-image-preview').classList.add('hidden');
+                $('cat-image-status').textContent = 'سيتم رفع الصورة إلى Firebase Storage.';
+                showToast('تم حفظ التصنيف');
+            }).catch(saveError);
         }
  
         function deleteCategory(id) {
@@ -1438,18 +1575,36 @@
         }
  
         function applyLogo() {
-            if (logoUrl) $('store-logo-img').src = logoUrl;
+            if (!logoUrl) return;
+            $('store-logo-img').src = logoUrl;
+            const preview = $('store-logo-upload-preview');
+            if (preview) {
+                preview.src = logoUrl;
+                preview.classList.remove('hidden');
+            }
+            const status = $('store-logo-status');
+            if (status) status.textContent = 'هذا هو الشعار الحالي المحفوظ.';
         }
         function updateStoreLogo() {
+            if (imageUploadBusy) {
+                showCustomAlert('انتظري قليلاً', 'الشعار لسا قيد الرفع إلى Firebase Storage.', true);
+                return;
+            }
             const url = $('store-logo-url-input').value.trim();
-            if (!url) return;
+            if (!url) {
+                showCustomAlert('الشعار غير محدد', 'اختاري شعاراً من الجهاز ليتم رفعه إلى Firebase Storage.', true);
+                return;
+            }
+            if (isOfflineMode || !db) {
+                showCustomAlert('لا يمكن حفظ الشعار الآن', 'حفظ رابط الشعار يحتاج اتصالاً بـ Firebase. بعد عودة الاتصال أعيدي حفظ الشعار.', true);
+                return;
+            }
             logoUrl = url;
             persist('logo', url);
             applyLogo();
-            if (!isOfflineMode && db) {
-                fb.setDoc(fb.doc(db, 'store_settings', 'general'), { logoUrl: url }, { merge: true }).catch(saveError);
-            }
-            showCustomAlert('نجاح', 'تم تحديث الشعار.', false);
+            fb.setDoc(fb.doc(db, 'store_settings', 'general'), { logoUrl: url }, { merge: true })
+                .then(() => showCustomAlert('نجاح', 'تم رفع الشعار وحفظه بنجاح.', false))
+                .catch(saveError);
         }
  
         let alertConfirmAction = null;
@@ -1502,7 +1657,7 @@
             if (action) action();
         }
  
-        /* ================= فايربيس (يتحمل بالخلفية) ================= */
+        /* ================= فايربيس (كاش محلي + تحديث بالخلفية) ================= */
         function markReady(key) {
             ready[key] = true;
             if (loading && ready.categories && ready.products) {
@@ -1511,47 +1666,91 @@
                 renderProducts();
             }
         }
- 
-        // إذا تأخر الاتصال كثير، لا نخلي الزبونة تشوف skeleton للأبد
+
         function finishLoadingFallback() {
             if (!loading) return;
             loading = false;
+            // في حال انقطع الاتصال قبل وصول Firestore، لا نخلي شبكة المنتجات فارغة تماماً.
+            // عند وصول البيانات الحقيقية لاحقاً سيستبدلها listener مباشرة.
+            if (products.length === 0) {
+                products = [...defaultProducts];
+                rebuildIndex();
+            }
             renderCategories();
             renderProducts();
         }
- 
+
         function goOffline() {
             isOfflineMode = true;
             finishLoadingFallback();
         }
- 
+
+        let firebaseStarted = false;
+        let firebasePromise = null;
+        let storage = null;
+        let fbStorage = null;
+
         async function initFirebase() {
-            try {
-                const B = 'https://www.gstatic.com/firebasejs/11.6.1/';
-                const [appM, authM, fsM, storM] = await Promise.all([
-                    import(B + 'firebase-app.js'),
-                    import(B + 'firebase-auth.js'),
-                    import(B + 'firebase-firestore.js'),
-                ]);
-                fb = fsM;
-                const app = appM.initializeApp(firebaseConfig);
-                db = fsM.getFirestore(app);
+            if (firebasePromise) return firebasePromise;
+            firebaseStarted = true;
+
+            firebasePromise = (async () => {
                 try {
-                    await authM.signInAnonymously(authM.getAuth(app));
-                    authOk = true;
-                } catch (authErr) {
-                    authError = authErr;
-                    console.error('Anonymous sign-in failed:', authErr);
+                    const B = 'https://www.gstatic.com/firebasejs/11.6.1/';
+                    const [appM, authM, fsM] = await Promise.all([
+                        import(B + 'firebase-app.js'),
+                        import(B + 'firebase-auth.js'),
+                        import(B + 'firebase-firestore.js')
+                    ]);
+
+                    fb = fsM;
+                    const app = appM.initializeApp(firebaseConfig);
+
+                    // تفعيل Offline Cache بشكل آمن. إذا المتصفح لا يدعمه، نستخدم Firestore العادي.
+                    try {
+                        db = fsM.initializeFirestore(app, {
+                            localCache: fsM.persistentLocalCache({
+                                tabManager: fsM.persistentMultipleTabManager()
+                            })
+                        });
+                    } catch (cacheErr) {
+                        console.warn('Persistent Firestore cache unavailable; using normal Firestore:', cacheErr);
+                        db = fsM.getFirestore(app);
+                    }
+
+                    // Storage اختياري عند بدء التشغيل: إذا فشل تحميل الموديول، لا نمنع Firestore من العمل.
+                    try {
+                        const storM = await import(B + 'firebase-storage.js');
+                        fbStorage = storM;
+                        storage = storM.getStorage(app);
+                    } catch (storageErr) {
+                        console.error('Firebase Storage init failed:', storageErr);
+                        fbStorage = null;
+                        storage = null;
+                    }
+
+                    try {
+                        await authM.signInAnonymously(authM.getAuth(app));
+                        authOk = true;
+                    } catch (authErr) {
+                        authError = authErr;
+                        console.error('Anonymous sign-in failed:', authErr);
+                    }
+
+                    initFirestoreListeners();
+                } catch (err) {
+                    console.error('Firebase init failed:', err);
+                    lastDbError = err;
+                    goOffline();
                 }
-                initFirestoreListeners();   // نبدأ القراءة حتى لو فشل الدخول المجهول (إذا القواعد تسمح بالقراءة العامة)
-            } catch (err) {
-                console.error('Firebase init failed:', err);
-                lastDbError = err;
-                goOffline();
-            }
+            })();
+
+            return firebasePromise;
         }
- 
+
         function initFirestoreListeners() {
+            if (!db || !fb) return;
+
             // الإعدادات (الشعار والخصم)
             fb.onSnapshot(fb.doc(db, 'store_settings', 'general'), (snap) => {
                 if (!snap.exists()) return;
@@ -1567,43 +1766,109 @@
                     if (!loading) applyDiscountUI();
                 }
             }, (err) => { lastDbError = err; console.error(err); });
- 
+
             // التصنيفات
             fb.onSnapshot(fb.collection(db, 'categories'), (snap) => {
-                let list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-                if (!list.find((c) => c.name === 'الكل')) list.unshift({ id: 'cat-all', name: 'الكل', image: svgAll });
+                const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+                if (!list.find((c) => c.name === 'الكل')) {
+                    list.unshift({ id: 'cat-all', name: 'الكل', image: svgAll });
+                }
                 list.sort((a, b) => (a.name === 'الكل' ? -1 : 0) - (b.name === 'الكل' ? -1 : 0));
- 
-                const changed = JSON.stringify(list) !== JSON.stringify(categories);
-                if (changed) {
+
+                // لا نقارن الصور Base64 كاملة؛ يكفي مقارنة العدد والـ IDs والأسماء والترتيب.
+                const signature = list.map(c => `${c.id}|${c.name}|${c.order || 0}`).join('~~');
+                const currentSignature = categories.map(c => `${c.id}|${c.name}|${c.order || 0}`).join('~~');
+
+                if (signature !== currentSignature) {
                     categories = list;
                     persist('categories', list);
                     if (!categories.some((c) => c.name === currentSelectedCategory)) currentSelectedCategory = 'الكل';
-                    if (!loading) { renderCategories(); renderProducts(); renderAdminTables(); }
+                    renderCategories();
+                    if (!loading) renderProducts();
+                    renderAdminTables();
                 }
                 markReady('categories');
-            }, (err) => { lastDbError = err; console.error(err); markReady('categories'); });
- 
+            }, (err) => {
+                lastDbError = err;
+                console.error(err);
+                markReady('categories');
+            });
+
             // المنتجات
-            fb.onSnapshot(fb.collection(db, 'products'), (snap) => {
-                const list = snap.docs.filter((d) => !d.id.startsWith('__')).map((d) => ({ id: d.id, ...d.data() }));
-                const changed = JSON.stringify(list) !== JSON.stringify(products);
-                if (changed) {
+            // نقرأ من الكاش أولاً، ثم نطلب نسخة من السيرفر حتى لا يبقى الموقع عالقاً
+            // على Snapshot محلي قديم وفارغ بعد تفعيل Persistent Cache.
+            const applyProductsSnapshot = (snap, source = 'snapshot') => {
+                const list = snap.docs
+                    .filter((d) => !d.id.startsWith('__'))
+                    .map((d) => ({ id: d.id, ...d.data() }));
+
+                // إذا كان أول Snapshot فارغاً وهو من الكاش المحلي، لا نمسح المنتجات الموجودة
+                // بذاكرة الصفحة؛ ننتظر نتيجة السيرفر.
+                if (list.length === 0 && snap.metadata && snap.metadata.fromCache && products.length > 0) {
+                    markReady('products');
+                    return;
+                }
+
+                const same = list.length === products.length && list.every((p) => {
+                    const old = products.find(x => x.id === p.id);
+                    return old && old.name === p.name && old.price === p.price &&
+                        old.category === p.category && old.subcategory === p.subcategory &&
+                        old.description === p.description && old.image === p.image;
+                });
+
+                if (!same) {
                     products = list;
                     rebuildIndex();
                     persist('products', list);
-                    if (!loading) { renderProducts(); renderAdminTables(); }
+                    renderProducts();
+                    renderAdminTables();
                 }
                 markReady('products');
-            }, (err) => { lastDbError = err; console.error(err); markReady('products'); });
+            };
+
+            fb.onSnapshot(fb.collection(db, 'products'), (snap) => {
+                applyProductsSnapshot(snap, 'onSnapshot');
+            }, (err) => {
+                lastDbError = err;
+                console.error('Products listener failed:', err);
+                markReady('products');
+                // حتى مع فشل listener، نحاول إجبار قراءة مباشرة من السيرفر.
+                try {
+                    fb.getDocsFromServer(fb.collection(db, 'products'))
+                        .then((serverSnap) => applyProductsSnapshot(serverSnap, 'server-fallback'))
+                        .catch((serverErr) => { lastDbError = serverErr; console.error('Products server read failed:', serverErr); });
+                } catch (serverCallErr) {
+                    console.error('getDocsFromServer unavailable:', serverCallErr);
+                }
+            });
+
+            // قراءة سيرفر صريحة بعد بدء الـ listener، للتأكد أن الكاش المحلي لا يخفي المنتجات القديمة.
+            setTimeout(() => {
+                if (!fb || !db) return;
+                try {
+                    fb.getDocsFromServer(fb.collection(db, 'products'))
+                        .then((serverSnap) => applyProductsSnapshot(serverSnap, 'server-direct'))
+                        .catch((err) => {
+                            lastDbError = err;
+                            console.warn('Direct products server read skipped/failed:', err);
+                        });
+                } catch (err) {
+                    console.warn('Direct products server read unavailable:', err);
+                }
+            }, 1200);
         }
- 
+
         /* ================= التشغيل ================= */
         applyLogo();
         renderCategories();
         renderProducts();
         updateCartUI();
+
+        // ابدأ Firebase مباشرة بعد رسم الواجهة. لا يوجد تأخير إضافي؛
+        // وإذا كان هناك كاش محلي فـ Firestore يقرأه أولاً.
         initFirebase();
+
+        // لا نُبقي Skeleton للأبد عند انقطاع الشبكة.
         setTimeout(finishLoadingFallback, 8000);
     </script>
 </body>

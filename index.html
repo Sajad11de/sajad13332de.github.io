@@ -325,29 +325,12 @@
                         </h4>
                         <form id="product-form" onsubmit="saveProduct(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             <input type="hidden" id="edit-product-id">
-                            <div>
-                                <label class="block text-xs font-bold text-stone-700 mb-1">اسم المنتج:</label>
-                                <input type="text" id="p-name" class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm" required>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-stone-700 mb-1">التصنيف:</label>
-                                <select id="p-category" onchange="fillAdminSubSelect()" class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm" required>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-stone-700 mb-1">التصنيف الفرعي (اختياري):</label>
-                                <select id="p-subcategory" class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm">
-                                    <option value="">بدون تصنيف فرعي</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-stone-700 mb-1">السعر (د.ع):</label>
-                                <input type="number" id="p-price" class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm" required>
-                            </div>
+
+                            <!-- صورة المنتج أولاً -->
                             <div class="sm:col-span-2 lg:col-span-3">
                                 <label class="block text-xs font-bold text-stone-700 mb-1">صورة المنتج:</label>
                                 <div class="flex flex-col sm:flex-row gap-3 items-start">
-                                    <div class="shrink-0 relative w-20 h-20 rounded-xl overflow-hidden bg-stone-100 border border-stone-200 flex items-center justify-center">
+                                    <div class="shrink-0 relative w-36 h-36 sm:w-40 sm:h-40 rounded-2xl overflow-hidden bg-stone-100 border border-stone-200 flex items-center justify-center shadow-sm">
                                         <img id="p-image-preview" src="" class="hidden w-full h-full object-contain">
                                         <i id="p-image-preview-icon" class="fa-solid fa-image text-stone-300 text-2xl"></i>
                                         <div id="p-image-uploading" class="hidden absolute inset-0 bg-white/70 flex items-center justify-center">
@@ -364,10 +347,40 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- اسم المنتج ثانياً -->
+                            <div class="sm:col-span-2 lg:col-span-3">
+                                <label class="block text-sm font-black text-stone-800 mb-1.5" style="font-family:'Tajawal',sans-serif">اسم المنتج:</label>
+                                <input type="text" id="p-name" class="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-base font-bold" style="font-family:'Cairo',sans-serif" required>
+                            </div>
+
+                            <!-- وصف المنتج ثالثاً -->
                             <div class="sm:col-span-2 lg:col-span-3">
                                 <label class="block text-xs font-bold text-stone-700 mb-1">وصف المنتج:</label>
-                                <input type="text" id="p-desc" placeholder="وصف موجز للمنتج ومميزاته..." class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm">
+                                <input type="text" id="p-desc" placeholder="وصف موجز للمنتج ومميزاته..." class="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-base font-bold" style="font-family:'Cairo',sans-serif" required>
                             </div>
+
+                            <!-- التصنيف رابعاً -->
+                            <div>
+                                <label class="block text-xs font-bold text-stone-700 mb-1">التصنيف:</label>
+                                <select id="p-category" onchange="fillAdminSubSelect()" class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm" required>
+                                </select>
+                            </div>
+
+                            <!-- التصنيف الفرعي خامساً -->
+                            <div>
+                                <label class="block text-xs font-bold text-stone-700 mb-1">التصنيف الفرعي:</label>
+                                <select id="p-subcategory" class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm">
+                                    <option value="">بدون تصنيف فرعي</option>
+                                </select>
+                            </div>
+
+                            <!-- السعر بعد الحقول المطلوبة -->
+                            <div>
+                                <label class="block text-xs font-bold text-stone-700 mb-1">السعر (د.ع):</label>
+                                <input type="text" id="p-price" inputmode="numeric" autocomplete="off" class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm" required placeholder="مثال: 25,000">
+                            </div>
+
                             <div class="sm:col-span-3 flex gap-3 mt-2">
                                 <button type="submit" class="bg-pink-600 hover:bg-pink-700 disabled:opacity-60 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow">حفظ المنتج</button>
                                 <button type="button" id="cancel-edit-btn" onclick="resetProductForm()" class="hidden bg-stone-200 hover:bg-stone-300 text-stone-700 px-5 py-2.5 rounded-xl font-bold text-sm">إلغاء التعديل</button>
@@ -719,8 +732,11 @@
             const prev = sel.value;
             const opts = categories.filter((c) => c.name !== 'الكل')
                 .map((c) => `<option value="${esc(c.name)}">${esc(c.name)}</option>`).join('');
-            sel.innerHTML = opts || '<option value="">— أضيفي تصنيفاً أولاً من تبويب إدارة التصنيفات —</option>';
-            if (prev) sel.value = prev;
+            sel.innerHTML = opts
+                ? '<option value="">اختر التصنيف</option>' + opts
+                : '<option value="">— أضيفي تصنيفاً أولاً من تبويب إدارة التصنيفات —</option>';
+            if (prev && categories.some((c) => c.name === prev && c.name !== 'الكل')) sel.value = prev;
+            else sel.value = '';
             fillAdminSubSelect();
             fillSubParentSelect();
         }
@@ -766,9 +782,9 @@
  
             return `
                 <div class="bg-white rounded-2xl p-3 border border-pink-100 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full relative">
-                    <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-3 bg-pink-50">
+                    <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-3 bg-white">
                         ${badge}
-                        <img src="${esc(p.image || svgFallback)}" alt="${esc(p.name)}" width="380" height="380" loading="lazy" decoding="async" class="img-fade w-full h-full object-contain" onload="this.classList.add('loaded')" onerror="imgErr(this,'prod')">
+                        <img src="${esc(p.image || svgFallback)}" alt="${esc(p.name)}" width="380" height="380" loading="lazy" decoding="async" class="img-fade w-full h-full object-contain bg-white" onload="this.classList.add('loaded')" onerror="imgErr(this,'prod')">
                         <div class="absolute top-2 right-2 bg-white/90 text-pink-600 text-[10px] font-bold px-2 py-1 rounded-md shadow-sm">${esc(p.category)}</div>
                     </div>
                     <h3 class="font-bold text-stone-800 text-sm mb-1 leading-tight min-h-[35px]" title="${esc(p.name)}">${esc(p.name)}</h3>
@@ -1053,7 +1069,7 @@
             if (!sel) return;
             const subs = subsOf($('p-category').value);
             const prev = typeof selected === 'string' ? selected : sel.value;
-            sel.innerHTML = '<option value="">بدون تصنيف فرعي</option>' +
+            sel.innerHTML = `<option value="">${subs.length ? 'اختر التصنيف الفرعي' : 'لا يوجد تصنيف فرعي'}</option>` +
                 subs.map((s) => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
             sel.value = subs.includes(prev) ? prev : '';
         }
@@ -1145,7 +1161,7 @@
             if (!adminOpen) return;
             $('admin-products-table').innerHTML = products.map((p) => `
                 <tr>
-                    <td class="p-3"><img src="${esc(p.image || svgFallback)}" width="40" height="40" loading="lazy" decoding="async" class="w-10 h-10 rounded object-cover bg-stone-100" onerror="imgErr(this,'prod')"></td>
+                    <td class="p-3"><img src="${esc(p.image || svgFallback)}" width="80" height="80" loading="lazy" decoding="async" class="w-20 h-20 rounded-xl object-contain bg-stone-100" onerror="imgErr(this,'prod')"></td>
                     <td class="p-3 font-bold">${esc(p.name)}</td>
                     <td class="p-3">${esc(p.category)}</td>
                     <td class="p-3">${(Number(p.price) || 0).toLocaleString()} د.ع</td>
@@ -1191,32 +1207,45 @@
  
         // يحوّل خلفية الصورة (المتصلة بحوافها الخارجية ومتقاربة اللون) إلى اللون الأبيض تلقائياً،
         // مع ترك المنتج نفسه بدون تغيير (يشتغل زين مع خلفيات الاستديو الموحدة اللون)
-        function whitenBackground(canvas, tolerance = 42) {
+        function whitenBackground(canvas, tolerance = 95) {
             const ctx = canvas.getContext('2d');
             const w = canvas.width, h = canvas.height;
             const imgData = ctx.getImageData(0, 0, w, h);
             const data = imgData.data;
- 
-            const sampleAt = (x, y) => { const i = (y * w + x) * 4; return [data[i], data[i + 1], data[i + 2]]; };
-            const corners = [sampleAt(0, 0), sampleAt(w - 1, 0), sampleAt(0, h - 1), sampleAt(w - 1, h - 1)];
-            const bg = [0, 0, 0];
-            corners.forEach((c) => { bg[0] += c[0] / 4; bg[1] += c[1] / 4; bg[2] += c[2] / 4; });
- 
+
+            // نحول الخلفيات الفاتحة/الرمادية المتصلة بحواف الصورة إلى أبيض،
+            // من دون لمس ألوان المنتج في المنتصف.
+            const isBackgroundPixel = (i) => {
+                const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
+                if (a < 20) return true;
+                const max = Math.max(r, g, b), min = Math.min(r, g, b);
+                const brightness = (r + g + b) / 3;
+                const saturation = max - min;
+                return brightness >= 175 && saturation <= 55;
+            };
+
             const visited = new Uint8Array(w * h);
             const queue = [];
-            for (let x = 0; x < w; x++) { queue.push(x); queue.push((h - 1) * w + x); }
-            for (let y = 0; y < h; y++) { queue.push(y * w); queue.push(y * w + (w - 1)); }
- 
+            for (let x = 0; x < w; x++) {
+                queue.push(x, (h - 1) * w + x);
+            }
+            for (let y = 0; y < h; y++) {
+                queue.push(y * w, y * w + (w - 1));
+            }
+
             let qi = 0;
             while (qi < queue.length) {
                 const p = queue[qi++];
                 if (visited[p]) continue;
                 visited[p] = 1;
                 const i = p * 4;
-                const dr = data[i] - bg[0], dg = data[i + 1] - bg[1], db = data[i + 2] - bg[2];
-                if (Math.sqrt(dr * dr + dg * dg + db * db) > tolerance) continue;   // لون مختلف = حافة المنتج، نوقف هنا
- 
-                data[i] = 255; data[i + 1] = 255; data[i + 2] = 255; data[i + 3] = 255;
+                if (!isBackgroundPixel(i)) continue;
+
+                data[i] = 255;
+                data[i + 1] = 255;
+                data[i + 2] = 255;
+                data[i + 3] = 255;
+
                 const x = p % w, y = (p / w) | 0;
                 if (x > 0) queue.push(p - 1);
                 if (x < w - 1) queue.push(p + 1);
@@ -1225,9 +1254,51 @@
             }
             ctx.putImageData(imgData, 0, 0);
         }
- 
+
+        // قص الفراغات البيضاء من أطراف صورة المنتج مع إبقاء المنتج كاملًا.
+        // لا يتم القص إذا لم توجد مساحة بيضاء واضحة حول الصورة.
+        function trimWhiteMargins(canvas, threshold = 245, padding = 12) {
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width, h = canvas.height;
+            const data = ctx.getImageData(0, 0, w, h).data;
+            let minX = w, minY = h, maxX = -1, maxY = -1;
+
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    const i = (y * w + x) * 4;
+                    const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
+                    // اعتبر البكسل جزءًا من المنتج إذا كان غير شفاف وغير أبيض بوضوح.
+                    if (a > 12 && !(r >= threshold && g >= threshold && b >= threshold)) {
+                        if (x < minX) minX = x;
+                        if (x > maxX) maxX = x;
+                        if (y < minY) minY = y;
+                        if (y > maxY) maxY = y;
+                    }
+                }
+            }
+
+            if (maxX < 0 || maxY < 0) return canvas;
+
+            minX = Math.max(0, minX - padding);
+            minY = Math.max(0, minY - padding);
+            maxX = Math.min(w - 1, maxX + padding);
+            maxY = Math.min(h - 1, maxY + padding);
+
+            const cropW = maxX - minX + 1;
+            const cropH = maxY - minY + 1;
+            // تجنب قص الصور التي لا تحتوي فعليًا على فراغات كبيرة.
+            if (cropW > w * 0.96 && cropH > h * 0.96) return canvas;
+
+            const cropped = document.createElement('canvas');
+            cropped.width = cropW;
+            cropped.height = cropH;
+            const cctx = cropped.getContext('2d', { alpha: true });
+            cctx.drawImage(canvas, minX, minY, cropW, cropH, 0, 0, cropW, cropH);
+            return cropped;
+        }
+
         // تصغير/ضغط الصورة داخل المتصفح قبل الرفع، من دون تحويلها إلى Base64.
-        function compressImageFile(file, { maxDim = 1200, quality = 0.84, whitenBg = false } = {}) {
+        function compressImageFile(file, { maxDim = 1200, quality = 0.84, whitenBg = false, trimWhite = false, squareWhite = false } = {}) {
             return new Promise((resolve, reject) => {
                 const objectUrl = URL.createObjectURL(file);
                 const img = new Image();
@@ -1235,7 +1306,11 @@
 
                 img.onload = () => {
                     try {
-                        let { width, height } = img;
+                        const originalWidth = img.naturalWidth || img.width;
+                        const originalHeight = img.naturalHeight || img.height;
+                        let width = originalWidth;
+                        let height = originalHeight;
+
                         if (width > maxDim || height > maxDim) {
                             if (width > height) {
                                 height = Math.round(height * maxDim / width);
@@ -1246,15 +1321,34 @@
                             }
                         }
 
+                        // صور المنتجات تُحفظ داخل لوحة/متجر على مساحة مربعة بيضاء،
+                        // مع الحفاظ على الصورة كاملة بدون قص أو تمديد.
                         const canvas = document.createElement('canvas');
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d', { alpha: true });
-                        if (!ctx) throw new Error('canvas-unavailable');
-                        ctx.drawImage(img, 0, 0, width, height);
-                        if (whitenBg) whitenBackground(canvas);
+                        if (squareWhite) {
+                            canvas.width = maxDim;
+                            canvas.height = maxDim;
+                        } else {
+                            canvas.width = width;
+                            canvas.height = height;
+                        }
 
-                        canvas.toBlob((blob) => {
+                        const ctx = canvas.getContext('2d', { alpha: false });
+                        if (!ctx) throw new Error('canvas-unavailable');
+
+                        if (squareWhite) {
+                            ctx.fillStyle = '#ffffff';
+                            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                            const x = Math.round((canvas.width - width) / 2);
+                            const y = Math.round((canvas.height - height) / 2);
+                            ctx.drawImage(img, x, y, width, height);
+                        } else {
+                            ctx.drawImage(img, 0, 0, width, height);
+                            if (whitenBg) whitenBackground(canvas);
+                        }
+
+                        const finalCanvas = trimWhite && !squareWhite ? trimWhiteMargins(canvas) : canvas;
+
+                        finalCanvas.toBlob((blob) => {
                             cleanup();
                             if (!blob) return reject(new Error('image-compression-failed'));
                             resolve({ blob });
@@ -1312,7 +1406,7 @@
             showImagePreview(localPreview);
             $('p-image-uploading').classList.remove('hidden');
             try {
-                const result = await uploadImageToCloudinary(file, 'products', { maxDim: 1200, quality: 0.84, whitenBg: false });
+                const result = await uploadImageToCloudinary(file, 'products', { maxDim: 1200, quality: 0.84, whitenBg: false, trimWhite: false, squareWhite: false });
                 $('p-image').value = result.url;
                 showImagePreview(result.url);
                 showToast('تم رفع الصورة إلى Cloudinary ✓');
@@ -1453,6 +1547,26 @@
             showCustomAlert('نتيجة فحص قاعدة البيانات', '', lines.some((l) => l.startsWith('❌')), { steps: lines });
         }
  
+        // تنسيق السعر تلقائياً بفواصل الآلاف أثناء الكتابة: 1000 ← 1,000
+        function formatAdminPrice(value) {
+            const digits = String(value || '').replace(/[^0-9]/g, '');
+            return digits ? Number(digits).toLocaleString('en-US') : '';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const priceInput = $('p-price');
+            if (priceInput) {
+                priceInput.addEventListener('input', (e) => {
+                    const start = e.target.selectionStart;
+                    const oldLength = e.target.value.length;
+                    e.target.value = formatAdminPrice(e.target.value);
+                    const newLength = e.target.value.length;
+                    const pos = Math.max(0, (start || newLength) + (newLength - oldLength));
+                    try { e.target.setSelectionRange(pos, pos); } catch (_) {}
+                });
+            }
+        });
+
         function saveProduct(e) {
             e.preventDefault();
             if (imageUploadBusy) { showCustomAlert('انتظري قليلاً', 'الصورة لسا قيد الرفع، حاولي الحفظ بعد لحظات.', true); return; }
@@ -1460,13 +1574,38 @@
             if (btn) { btn.disabled = true; setTimeout(() => { btn.disabled = false; }, 700); }
  
             const id = $('edit-product-id').value;
+            const category = $('p-category').value.trim();
+            const subcategory = $('p-subcategory').value.trim();
+            const description = $('p-desc').value.trim();
+            const availableSubs = subsOf(category);
+
+            if (!description) {
+                showCustomAlert('اكتب وصف المنتج', 'يجب كتابة وصف المنتج قبل حفظه.', true);
+                $('p-desc').focus();
+                if (btn) btn.disabled = false;
+                return;
+            }
+
+            if (!category) {
+                showCustomAlert('اختر التصنيف', 'يجب اختيار تصنيف للمنتج قبل الحفظ.', true);
+                if (btn) btn.disabled = false;
+                return;
+            }
+
+            if (availableSubs.length && !subcategory) {
+                showCustomAlert('اختر التصنيف الفرعي', 'هذا التصنيف يحتوي على تصنيفات فرعية، لذلك يجب اختيار التصنيف الفرعي قبل حفظ المنتج.', true);
+                $('p-subcategory').focus();
+                if (btn) btn.disabled = false;
+                return;
+            }
+
             const data = {
                 name: $('p-name').value,
-                category: $('p-category').value,
-                subcategory: $('p-subcategory').value,
-                price: parseFloat($('p-price').value),
+                category,
+                subcategory,
+                price: Number(($('p-price').value || '').replace(/,/g, '')) || 0,
                 image: $('p-image').value,
-                description: $('p-desc').value,
+                description,
             };
             if (!id) data.createdAt = Date.now();
  
@@ -1496,7 +1635,7 @@
             $('p-name').value = p.name;
             $('p-category').value = p.category;
             fillAdminSubSelect(p.subcategory || '');
-            $('p-price').value = p.price;
+            $('p-price').value = Number(p.price || 0).toLocaleString('en-US');
             $('p-image').value = p.image;
             showImagePreview(p.image);
             $('p-desc').value = p.description;

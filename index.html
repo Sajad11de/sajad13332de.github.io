@@ -529,8 +529,12 @@
             if (!file) throw new Error('no-file');
             if (!file.type.startsWith('image/')) throw new Error('invalid-image-type');
             if (file.size > 10 * 1024 * 1024) throw new Error('image-too-large');
-            if (!CLOUDINARY_CLOUD_NAME || CLOUDINARY_CLOUD_NAME === 'dnqgbond' ||
-                !CLOUDINARY_UPLOAD_PRESET || CLOUDINARY_UPLOAD_PRESET === 'athar_upload') {
+            // لا تعتبر القيم الفعلية الخاصة بحسابك ناقصة.
+            // يجب فقط رفض القيم الفارغة أو القيم التجريبية غير المستبدلة.
+            if (!CLOUDINARY_CLOUD_NAME ||
+                !CLOUDINARY_UPLOAD_PRESET ||
+                CLOUDINARY_CLOUD_NAME === 'YOUR_CLOUD_NAME' ||
+                CLOUDINARY_UPLOAD_PRESET === 'YOUR_UNSIGNED_UPLOAD_PRESET') {
                 throw new Error('cloudinary-config-missing');
             }
 

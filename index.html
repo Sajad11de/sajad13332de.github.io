@@ -381,6 +381,13 @@
                                 <input type="text" id="p-price" inputmode="numeric" autocomplete="off" class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm" required placeholder="مثال: 25,000">
                             </div>
 
+                            <!-- الكمية المتوفرة -->
+                            <div>
+                                <label class="block text-xs font-bold text-stone-700 mb-1">الكمية المتوفرة:</label>
+                                <input type="number" id="p-stock" min="0" step="1" inputmode="numeric" class="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm" placeholder="مثال: 20 (اتركيه فارغاً لعدم التتبع)">
+                                <p class="text-[11px] text-stone-400 mt-1">عند وصول الكمية إلى 5 أو أقل تظهر للزبونة "باقي X قطع فقط"، وعند 0 تظهر "نفدت الكمية".</p>
+                            </div>
+
                             <div class="sm:col-span-3 flex gap-3 mt-2">
                                 <button type="submit" class="bg-pink-600 hover:bg-pink-700 disabled:opacity-60 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow">حفظ المنتج</button>
                                 <button type="button" id="cancel-edit-btn" onclick="resetProductForm()" class="hidden bg-stone-200 hover:bg-stone-300 text-stone-700 px-5 py-2.5 rounded-xl font-bold text-sm">إلغاء التعديل</button>
@@ -676,6 +683,13 @@
             const sel = $('customer-province');
             return parseInt(sel.options[sel.selectedIndex].getAttribute('data-fee')) || 0;
         }
+
+        // الكمية المتوفرة: null = بدون تتبع (المنتجات القديمة)، رقم = الكمية الفعلية
+        function getStock(p) {
+            if (!p || p.stock === undefined || p.stock === null || p.stock === '') return null;
+            const n = Number(p.stock);
+            return isNaN(n) ? null : Math.max(0, n);
+        }
  
         /* ================= الإشعار السريع ================= */
         let toastTimer;
@@ -779,21 +793,33 @@
                 badge = `<div class="absolute top-2 left-2 bg-red-600 text-white text-[11px] font-black px-2.5 py-1.5 rounded-md shadow-lg z-10 flex items-center gap-1"><i class="fa-solid fa-tags text-[9px]"></i> خصم ${dv}%</div>`;
                 priceHtml = `<span class="text-[10px] text-stone-400 line-through leading-4">${price.toLocaleString()} د.ع</span><span class="font-black text-red-600 text-sm leading-5">${np.toLocaleString()} د.ع</span>`;
             }
+
+            // شارة الكمية: 5 أو أقل = "باقي X قطع فقط"، 0 = "نفدت الكمية"
+            const stock = getStock(p);
+            const soldOut = stock !== null && stock <= 0;
+            let stockBadge = '';
+            if (soldOut) {
+                stockBadge = `<div class="absolute bottom-2 right-2 bg-stone-800 text-white text-[10px] font-black px-2 py-1 rounded-md shadow z-10">نفدت الكمية</div>`;
+            } else if (stock !== null && stock <= 5) {
+                stockBadge = `<div class="absolute bottom-2 right-2 bg-amber-500 text-white text-[10px] font-black px-2 py-1 rounded-md shadow z-10 flex items-center gap-1"><i class="fa-solid fa-fire text-[9px]"></i> باقي ${stock} ${stock === 1 ? 'قطعة' : 'قطع'} فقط</div>`;
+            }
+            const addBtn = soldOut
+                ? `<button type="button" disabled class="bg-stone-300 text-white px-3 py-1.5 rounded-lg text-xs font-bold cursor-not-allowed flex items-center gap-1.5"><i class="fa-solid fa-cart-plus text-[10px]"></i> نفدت</button>`
+                : `<button type="button" data-add="${esc(p.id)}" class="bg-pink-600 hover:bg-pink-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 active:scale-95 shadow-sm shadow-pink-200 flex items-center gap-1.5"><i class="fa-solid fa-cart-plus text-[10px]"></i> أضف</button>`;
  
             return `
                 <div class="bg-white rounded-2xl p-3 border border-pink-100 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full relative">
                     <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-3 bg-white">
                         ${badge}
-                        <img src="${esc(p.image || svgFallback)}" alt="${esc(p.name)}" width="380" height="380" loading="lazy" decoding="async" class="img-fade w-full h-full object-contain bg-white" onload="this.classList.add('loaded')" onerror="imgErr(this,'prod')">
+                        ${stockBadge}
+                        <img src="${esc(p.image || svgFallback)}" alt="${esc(p.name)}" width="380" height="380" loading="lazy" decoding="async" class="img-fade w-full h-full object-contain bg-white${soldOut ? ' opacity-60' : ''}" onload="this.classList.add('loaded')" onerror="imgErr(this,'prod')">
                         <div class="absolute top-2 right-2 bg-white/90 text-pink-600 text-[10px] font-bold px-2 py-1 rounded-md shadow-sm">${esc(p.category)}</div>
                     </div>
                     <h3 class="font-bold text-stone-800 text-sm mb-1 leading-tight min-h-[35px]" title="${esc(p.name)}">${esc(p.name)}</h3>
                     <p class="text-[10px] text-stone-500 mb-3 flex-grow min-h-[30px]" title="${esc(p.description)}">${esc(p.description)}</p>
                     <div class="flex items-center justify-between mt-auto pt-2 border-t border-stone-50">
                         <div class="h-9 flex flex-col justify-center">${priceHtml}</div>
-                        <button type="button" data-add="${esc(p.id)}" class="bg-pink-600 hover:bg-pink-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 active:scale-95 shadow-sm shadow-pink-200 flex items-center gap-1.5">
-                            <i class="fa-solid fa-cart-plus text-[10px]"></i> أضف
-                        </button>
+                        ${addBtn}
                     </div>
                 </div>`;
         }
@@ -885,7 +911,16 @@
         function addToCart(id) {
             const prod = products.find((p) => p.id === id);
             if (!prod) return;
+            const stock = getStock(prod);
             const existing = cart.find((i) => i.id === id);
+            const inCart = existing ? existing.quantity : 0;
+
+            // لا نسمح بتجاوز الكمية المتوفرة
+            if (stock !== null && inCart + 1 > stock) {
+                showToast(stock <= 0 ? 'هذا المنتج نفدت كميته' : `المتوفر فقط ${stock} من هذا المنتج`);
+                return;
+            }
+
             if (existing) existing.quantity += 1;
             else cart.push({ id: prod.id, name: prod.name, price: Number(prod.price) || 0, image: prod.image, quantity: 1 });
             updateBadge(true);
@@ -896,6 +931,14 @@
         function updateQuantity(id, delta) {
             const item = cart.find((i) => i.id === id);
             if (item) {
+                if (delta > 0) {
+                    const prod = products.find((p) => p.id === id);
+                    const stock = prod ? getStock(prod) : null;
+                    if (stock !== null && item.quantity + delta > stock) {
+                        showToast(`المتوفر فقط ${stock} من هذا المنتج`);
+                        return;
+                    }
+                }
                 item.quantity += delta;
                 if (item.quantity <= 0) cart = cart.filter((i) => i.id !== id);
             }
@@ -994,6 +1037,38 @@
             const text = buildOrderText(false);
             if (!text) return;
             window.open(`https://wa.me/9647724700027?text=${encodeURIComponent(text)}`, '_blank');
+            deductStockForCart();
+        }
+
+        // ينقص كمية كل منتج في السلة تلقائياً بعد إتمام الطلب، ثم يفرّغ السلة (حتى لا ينقص مرتين)
+        async function deductStockForCart() {
+            const items = cart.map((i) => ({ id: i.id, qty: i.quantity }));
+            for (const it of items) {
+                const p = products.find((x) => x.id === it.id);
+                if (!p || getStock(p) === null) continue;   // منتجات بدون تتبع للكمية تُتجاهل
+                try {
+                    if (isOfflineMode || !db) {
+                        p.stock = Math.max(0, getStock(p) - it.qty);
+                    } else {
+                        const ref = fb.doc(db, 'products', it.id);
+                        await fb.runTransaction(db, async (tx) => {
+                            const snap = await tx.get(ref);
+                            if (!snap.exists()) return;
+                            const cur = snap.data().stock;
+                            if (cur === undefined || cur === null) return;
+                            tx.update(ref, { stock: Math.max(0, Number(cur) - it.qty) });
+                        });
+                    }
+                } catch (err) {
+                    console.error('Stock deduction failed for', it.id, err);
+                }
+            }
+            if (isOfflineMode || !db) persist('products', products);
+            cart = [];
+            updateBadge(false);
+            updateCartUI();
+            closeCartModal();
+            renderProducts();
         }
  
         // ينسخ نص الطلب للحافظة (Clipboard)، مع بديل احتياطي للمتصفحات القديمة
@@ -1023,6 +1098,7 @@
             const text = buildOrderText(true);
             if (!text) return;
             copyTextToClipboard(text).then(() => {
+                deductStockForCart();
                 showCustomAlert('تم نسخ تفاصيل الطلب ✅', '', false, {
                     warn: 'مهم جداً: تم نسخ تفاصيل طلبك تلقائياً، يجب لصقه (Paste) داخل محادثة الانستكرام بعد فتحها حتى يصل الطلب بشكل صحيح.',
                     confirmText: 'فتح تطبيق الانستكرام الآن',
@@ -1159,17 +1235,21 @@
         // جداول الإدارة تنرسم فقط وقت تكون اللوحة مفتوحة (قبل كانت تنرسم مع كل ضغطة/بحث)
         function renderAdminTables() {
             if (!adminOpen) return;
-            $('admin-products-table').innerHTML = products.map((p) => `
+            $('admin-products-table').innerHTML = products.map((p) => {
+                const st = getStock(p);
+                const stClass = st !== null && st <= 5 ? 'text-red-600 font-bold' : 'text-stone-400';
+                return `
                 <tr>
                     <td class="p-3"><img src="${esc(p.image || svgFallback)}" width="80" height="80" loading="lazy" decoding="async" class="w-20 h-20 rounded-xl object-contain bg-stone-100" onerror="imgErr(this,'prod')"></td>
                     <td class="p-3 font-bold">${esc(p.name)}</td>
                     <td class="p-3">${esc(p.category)}</td>
-                    <td class="p-3">${(Number(p.price) || 0).toLocaleString()} د.ع</td>
+                    <td class="p-3">${(Number(p.price) || 0).toLocaleString()} د.ع<div class="text-[11px] ${stClass}">الكمية: ${st === null ? '—' : st}</div></td>
                     <td class="p-3 text-center">
                         <button type="button" onclick="editProduct('${esc(p.id)}')" class="text-blue-500 mx-1 p-2"><i class="fa-solid fa-pen"></i></button>
                         <button type="button" onclick="deleteProduct('${esc(p.id)}')" class="text-red-500 mx-1 p-2"><i class="fa-solid fa-trash"></i></button>
                     </td>
-                </tr>`).join('');
+                </tr>`;
+            }).join('');
  
             const sortedCats = sortCategories(categories).filter((c) => c.name !== 'الكل');
             $('admin-categories-table').innerHTML = sortedCats.map((c, idx) => `
@@ -1599,11 +1679,13 @@
                 return;
             }
 
+            const stockRaw = $('p-stock').value.trim();
             const data = {
                 name: $('p-name').value,
                 category,
                 subcategory,
                 price: Number(($('p-price').value || '').replace(/,/g, '')) || 0,
+                stock: stockRaw === '' ? null : Math.max(0, parseInt(stockRaw, 10) || 0),
                 image: $('p-image').value,
                 description,
             };
@@ -1636,6 +1718,7 @@
             $('p-category').value = p.category;
             fillAdminSubSelect(p.subcategory || '');
             $('p-price').value = Number(p.price || 0).toLocaleString('en-US');
+            $('p-stock').value = getStock(p) === null ? '' : getStock(p);
             $('p-image').value = p.image;
             showImagePreview(p.image);
             $('p-desc').value = p.description;
@@ -1984,7 +2067,7 @@
 
                 const same = list.length === products.length && list.every((p) => {
                     const old = products.find(x => x.id === p.id);
-                    return old && old.name === p.name && old.price === p.price &&
+                    return old && old.name === p.name && old.price === p.price && old.stock === p.stock &&
                         old.category === p.category && old.subcategory === p.subcategory &&
                         old.description === p.description && old.image === p.image;
                 });

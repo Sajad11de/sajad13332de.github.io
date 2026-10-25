@@ -169,6 +169,8 @@
  
             <div id="products-grid" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4"></div>
  
+            <div id="products-sentinel" class="h-1"></div>
+
             <div id="no-products-found" class="hidden text-center py-20">
                 <div class="w-16 h-16 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
                     <i class="fa-solid fa-box-open"></i>
@@ -326,26 +328,11 @@
                         <form id="product-form" onsubmit="saveProduct(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             <input type="hidden" id="edit-product-id">
 
-                            <!-- صورة المنتج أولاً -->
+                            <!-- صور المنتج (حتى 3) -->
                             <div class="sm:col-span-2 lg:col-span-3">
-                                <label class="block text-xs font-bold text-stone-700 mb-1">صورة المنتج:</label>
-                                <div class="flex flex-col sm:flex-row gap-3 items-start">
-                                    <div class="shrink-0 relative w-36 h-36 sm:w-40 sm:h-40 rounded-2xl overflow-hidden bg-stone-100 border border-stone-200 flex items-center justify-center shadow-sm">
-                                        <img id="p-image-preview" src="" class="hidden w-full h-full object-contain">
-                                        <i id="p-image-preview-icon" class="fa-solid fa-image text-stone-300 text-2xl"></i>
-                                        <div id="p-image-uploading" class="hidden absolute inset-0 bg-white/70 flex items-center justify-center">
-                                            <i class="fa-solid fa-spinner fa-spin text-pink-600 text-lg"></i>
-                                        </div>
-                                    </div>
-                                    <div class="flex-grow w-full space-y-2">
-                                        <label class="w-full flex items-center justify-center gap-2 bg-white border border-dashed border-pink-300 hover:bg-pink-50 text-pink-700 font-bold text-xs py-2.5 rounded-xl cursor-pointer transition-all active:scale-95">
-                                            <i class="fa-solid fa-cloud-arrow-up"></i> رفع الصورة إلى Cloudinary
-                                            <input type="file" id="p-image-file" accept="image/*" class="hidden" onchange="handleImageFileSelect(event)">
-                                        </label>
-                                        <input type="hidden" id="p-image" value="">
-                                        <p class="text-[11px] text-stone-400">الصورة تُرفع مباشرة إلى Cloudinary، ويُحفظ رابطها فقط داخل Firestore.</p>
-                                    </div>
-                                </div>
+                                <label class="block text-xs font-bold text-stone-700 mb-1">صور المنتج (حتى 5 صور):</label>
+                                <div id="p-image-slots" class="grid grid-cols-3 sm:grid-cols-5 gap-3 max-w-2xl"></div>
+                                <p class="text-[11px] text-stone-400 mt-2">الصورة الأولى هي الرئيسية وتظهر في واجهة المتجر والسلة. تُرفع الصور إلى Cloudinary.</p>
                             </div>
 
                             <!-- اسم المنتج ثانياً -->
@@ -594,7 +581,22 @@
         const svgProd2 = makeSvg('أحمر شفاه مات');
         const svgFallback = makeSvg('كوزمتك اثار / الجمعية');
  
+        // يصغّر صور Cloudinary تلقائياً (حجم أقل + صيغة أحدث) بتغيير الرابط فقط. الروابط الأخرى تبقى كما هي.
+        function cldUrl(url, w) {
+            if (typeof url !== 'string') return url;
+            const m = url.match(/^(https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.+)$/);
+            if (!m || /(^|\/)(f_|q_|w_)/.test(m[2])) return url;
+            return `${m[1]}f_auto,q_auto,w_${w},c_limit/${m[2]}`;
+        }
+
         function imgErr(img, kind) {
+            // إذا فشلت النسخة المصغّرة نجرب الرابط الأصلي أولاً قبل الصورة البديلة
+            if (img.dataset.orig) {
+                const o = img.dataset.orig;
+                img.dataset.orig = '';
+                img.src = o;
+                return;
+            }
             img.onerror = null;
             img.src = kind === 'cat' ? svgAll : kind === 'logo' ? defaultLogo : svgFallback;
             img.classList.add('loaded');
@@ -724,7 +726,7 @@
             c.innerHTML = sorted.map((cat) => `
                 <button type="button" class="cat-btn flex flex-col items-center min-w-[80px] max-w-[92px] gap-2" data-cat="${esc(cat.name)}">
                     <div class="cat-thumb w-16 h-16 rounded-2xl overflow-hidden shadow-sm bg-pink-100">
-                        <img src="${esc(cat.image || svgAll)}" alt="${esc(cat.name)}" width="64" height="64" decoding="async" class="img-fade w-full h-full object-cover" onload="this.classList.add('loaded')" onerror="imgErr(this,'cat')">
+                        <img src="${esc(cldUrl(cat.image || svgAll, 160))}" data-orig="${esc(cat.image || svgAll)}" alt="${esc(cat.name)}" width="64" height="64" decoding="async" class="img-fade w-full h-full object-cover" onload="this.classList.add('loaded')" onerror="imgErr(this,'cat')">
                     </div>
                     <span class="cat-label text-[10px] font-bold leading-4 text-center break-words w-full px-1">${esc(cat.name)}</span>
                 </button>`).join('');
@@ -807,14 +809,21 @@
                 ? `<button type="button" disabled class="bg-stone-300 text-white px-3 py-1.5 rounded-lg text-xs font-bold cursor-not-allowed flex items-center gap-1.5"><i class="fa-solid fa-cart-plus text-[10px]"></i> نفدت</button>`
                 : `<button type="button" data-add="${esc(p.id)}" class="bg-pink-600 hover:bg-pink-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 active:scale-95 shadow-sm shadow-pink-200 flex items-center gap-1.5"><i class="fa-solid fa-cart-plus text-[10px]"></i> أضف</button>`;
  
+            const imgs = getImages(p);
+            const mainImg = imgs[0] || svgFallback;
+            const thumbs = imgs.length > 1
+                ? `<div class="flex gap-1 mb-3 justify-center">${imgs.map((u, i) => `<button type="button" data-thumb="${esc(u)}" class="flex-1 max-w-[40px] aspect-square rounded-lg overflow-hidden border-2 ${i === 0 ? 'border-pink-500' : 'border-stone-200'} bg-white"><img src="${esc(cldUrl(u, 100))}" data-orig="${esc(u)}" width="40" height="40" loading="lazy" decoding="async" class="w-full h-full object-contain" onerror="imgErr(this,'prod')"></button>`).join('')}</div>`
+                : '';
+
             return `
-                <div class="bg-white rounded-2xl p-3 border border-pink-100 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full relative">
+                <div class="prod-card bg-white rounded-2xl p-3 border border-pink-100 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full relative">
                     <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-3 bg-white">
                         ${badge}
                         ${stockBadge}
-                        <img src="${esc(p.image || svgFallback)}" alt="${esc(p.name)}" width="380" height="380" loading="lazy" decoding="async" class="img-fade w-full h-full object-contain bg-white${soldOut ? ' opacity-60' : ''}" onload="this.classList.add('loaded')" onerror="imgErr(this,'prod')">
+                        <img src="${esc(cldUrl(mainImg, 600))}" data-orig="${esc(mainImg)}" alt="${esc(p.name)}" width="380" height="380" loading="lazy" decoding="async" class="main-img img-fade w-full h-full object-contain bg-white${soldOut ? ' opacity-60' : ''}" onload="this.classList.add('loaded')" onerror="imgErr(this,'prod')">
                         <div class="absolute top-2 right-2 bg-white/90 text-pink-600 text-[10px] font-bold px-2 py-1 rounded-md shadow-sm">${esc(p.category)}</div>
                     </div>
+                    ${thumbs}
                     <h3 class="font-bold text-stone-800 text-sm mb-1 leading-tight min-h-[35px]" title="${esc(p.name)}">${esc(p.name)}</h3>
                     <p class="text-[10px] text-stone-500 mb-3 flex-grow min-h-[30px]" title="${esc(p.description)}">${esc(p.description)}</p>
                     <div class="flex items-center justify-between mt-auto pt-2 border-t border-stone-50">
@@ -848,10 +857,46 @@
                 filtered = filtered.filter((p) => (searchIndex.get(p.id) || '').includes(q));
             }
  
+            // تغيير التصنيف/البحث يرجّع العرض لأول دفعة، أما تحديثات الخصم والكمية فتحافظ على ما هو ظاهر
+            const filterKey = `${currentSelectedCategory}|${currentSubcategory}|${q}`;
+            if (filterKey !== lastFilterKey) { lastFilterKey = filterKey; visibleCount = PAGE_SIZE; }
+            lastFiltered = filtered;
+
             countBadge.textContent = filtered.length;
             noProducts.classList.toggle('hidden', filtered.length > 0);
-            grid.innerHTML = filtered.map(productCard).join('');
+            const limit = 'IntersectionObserver' in window ? visibleCount : filtered.length;
+            grid.innerHTML = filtered.slice(0, limit).map(productCard).join('');
             markLoadedImages(grid);
+            watchSentinel();
+        }
+
+        /* ===== التحميل الكسول للمنتجات: نعرض دفعة (12) وكل ما تقرب الزبونة من النهاية نضيف دفعة ثانية ===== */
+        const PAGE_SIZE = 12;
+        let visibleCount = PAGE_SIZE;
+        let lastFilterKey = '';
+        let lastFiltered = [];
+        let sentinelObserver = null;
+
+        function watchSentinel() {
+            if (!('IntersectionObserver' in window)) return;
+            const s = $('products-sentinel');
+            if (!sentinelObserver) {
+                sentinelObserver = new IntersectionObserver((entries) => {
+                    if (entries.some((en) => en.isIntersecting)) loadMoreProducts();
+                }, { rootMargin: '600px 0px' });
+            }
+            sentinelObserver.unobserve(s);   // إعادة المراقبة تعيد فحص الموقع الحالي
+            sentinelObserver.observe(s);
+        }
+
+        function loadMoreProducts() {
+            if (loading || visibleCount >= lastFiltered.length) return;
+            const grid = $('products-grid');
+            const from = visibleCount;
+            visibleCount += PAGE_SIZE;
+            grid.insertAdjacentHTML('beforeend', lastFiltered.slice(from, visibleCount).map(productCard).join(''));
+            markLoadedImages(grid);
+            watchSentinel();
         }
  
         /* ================= البحث والتنقل ================= */
@@ -899,6 +944,18 @@
         $('products-grid').addEventListener('click', (e) => {
             const b = e.target.closest('[data-add]');
             if (b) addToCart(b.dataset.add);
+            const t = e.target.closest('[data-thumb]');
+            if (t) {
+                const card = t.closest('.prod-card');
+                const main = card.querySelector('.main-img');
+                main.classList.add('loaded');
+                main.dataset.orig = t.dataset.thumb;
+                main.src = cldUrl(t.dataset.thumb, 600);
+                card.querySelectorAll('[data-thumb]').forEach((x) => {
+                    x.classList.toggle('border-pink-500', x === t);
+                    x.classList.toggle('border-stone-200', x !== t);
+                });
+            }
         });
  
         /* ================= السلة ================= */
@@ -964,7 +1021,7 @@
                     }
                     return `
                         <div class="py-3 flex gap-3">
-                            <img src="${esc(item.image || svgFallback)}" width="64" height="64" decoding="async" class="w-16 h-16 rounded-xl object-contain bg-stone-50" onerror="imgErr(this,'prod')">
+                            <img src="${esc(cldUrl(item.image || svgFallback, 160))}" data-orig="${esc(item.image || svgFallback)}" width="64" height="64" loading="lazy" decoding="async" class="w-16 h-16 rounded-xl object-contain bg-stone-50" onerror="imgErr(this,'prod')">
                             <div class="flex-grow">
                                 <h4 class="font-bold text-sm text-stone-800 line-clamp-1">${esc(item.name)}</h4>
                                 <div class="${priceClass} font-bold text-xs mt-1">${original}<span>${displayPrice.toLocaleString()} د.ع</span></div>
@@ -1100,7 +1157,7 @@
             copyTextToClipboard(text).then(() => {
                 deductStockForCart();
                 showCustomAlert('تم نسخ تفاصيل الطلب ✅', '', false, {
-                    warn: 'مهم جداً: تم نسخ تفاصيل طلبك تلقائياً، يجب لصقه (Paste) داخل محادثة الانستكرام بعد فتحها حتى يصل الطلب بشكل صحيح.',
+                    warn: 'مهم جداً: تم نسخ تفاصيل طلبك تلقائياً، بعد ما تنفتح محادثة البيج، ألصقي الطلب (Paste) داخل المحادثة وأرسليه حتى يصل بشكل صحيح.',
                     confirmText: 'فتح تطبيق الانستكرام الآن',
                     onConfirm: openInstagramApp
                 });
@@ -1112,7 +1169,36 @@
         // يفتح محادثة الانستكرام المباشرة (الدايركت) مع البيج
         // يعمل على الهاتف (يفتح التطبيق) وعلى الكمبيوتر (يفتح المتصفح)
         function openInstagramApp() {
-            window.open(`https://ig.me/m/${INSTAGRAM_USERNAME}`, '_blank');
+            const user = INSTAGRAM_USERNAME;
+            const webProfile = `https://www.instagram.com/${user}/`;
+            const ua = navigator.userAgent || '';
+            const isAndroid = /Android/i.test(ua);
+            const isIOS = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+            // الكمبيوتر: نفتح محادثة الويب مباشرة
+            if (!isAndroid && !isIOS) {
+                window.open(`https://ig.me/m/${user}`, '_blank');
+                return;
+            }
+
+            // الموبايل: نفتح محادثة البيج داخل التطبيق مباشرة، ثم تلصق الزبونة الطلب
+            // وإذا ما انفتح التطبيق خلال ثانيتين (مو منصّب) نفتح الصفحة على الويب
+            let opened = false;
+            const onHide = () => { if (document.hidden) opened = true; };
+            document.addEventListener('visibilitychange', onHide);
+            window.addEventListener('pagehide', () => { opened = true; }, { once: true });
+            setTimeout(() => {
+                document.removeEventListener('visibilitychange', onHide);
+                if (!opened && !document.hidden) window.location.href = webProfile;
+            }, 2000);
+
+            if (isAndroid) {
+                // يفتح تطبيق انستكرام على محادثة البيج مباشرة (نفس رابط ig.me لكن مسلَّم للتطبيق)
+                window.location.href = `intent://ig.me/m/${user}#Intent;package=com.instagram.android;scheme=https;S.browser_fallback_url=${encodeURIComponent(webProfile)};end`;
+            } else {
+                // آيفون: التنقل بنفس الصفحة (مو نافذة جديدة) حتى يسلّمه النظام لتطبيق انستكرام
+                window.location.href = `https://ig.me/m/${user}`;
+            }
         }
  
         /* ================= التصنيفات الفرعية ================= */
@@ -1240,7 +1326,7 @@
                 const stClass = st !== null && st <= 5 ? 'text-red-600 font-bold' : 'text-stone-400';
                 return `
                 <tr>
-                    <td class="p-3"><img src="${esc(p.image || svgFallback)}" width="80" height="80" loading="lazy" decoding="async" class="w-20 h-20 rounded-xl object-contain bg-stone-100" onerror="imgErr(this,'prod')"></td>
+                    <td class="p-3"><img src="${esc(cldUrl(p.image || svgFallback, 200))}" data-orig="${esc(p.image || svgFallback)}" width="80" height="80" loading="lazy" decoding="async" class="w-20 h-20 rounded-xl object-contain bg-stone-100" onerror="imgErr(this,'prod')"></td>
                     <td class="p-3 font-bold">${esc(p.name)}</td>
                     <td class="p-3">${esc(p.category)}</td>
                     <td class="p-3">${(Number(p.price) || 0).toLocaleString()} د.ع<div class="text-[11px] ${stClass}">الكمية: ${st === null ? '—' : st}</div></td>
@@ -1254,7 +1340,7 @@
             const sortedCats = sortCategories(categories).filter((c) => c.name !== 'الكل');
             $('admin-categories-table').innerHTML = sortedCats.map((c, idx) => `
                 <tr>
-                    <td class="p-3"><img src="${esc(c.image || svgAll)}" width="40" height="40" loading="lazy" decoding="async" class="w-10 h-10 rounded object-cover bg-stone-100" onerror="imgErr(this,'cat')"></td>
+                    <td class="p-3"><img src="${esc(cldUrl(c.image || svgAll, 100))}" data-orig="${esc(c.image || svgAll)}" width="40" height="40" loading="lazy" decoding="async" class="w-10 h-10 rounded object-cover bg-stone-100" onerror="imgErr(this,'cat')"></td>
                     <td class="p-3 font-bold">${esc(c.name)}</td>
                     <td class="p-3">
                         <div class="flex flex-wrap gap-1.5">
@@ -1270,19 +1356,68 @@
         }
  
         /* ================= رفع الصور إلى Firebase Storage ================= */
-        function showImagePreview(src) {
-            const img = $('p-image-preview');
-            const icon = $('p-image-preview-icon');
-            if (!src) { resetImagePreview(); return; }
-            img.src = src;
-            img.classList.remove('hidden');
-            icon.classList.add('hidden');
+        const MAX_IMAGES = 5;
+        let productImages = Array(MAX_IMAGES).fill('');
+        let uploadingSlots = Array(MAX_IMAGES).fill(false);
+
+        function padImages(arr) {
+            const a = arr.filter(Boolean).slice(0, MAX_IMAGES);
+            while (a.length < MAX_IMAGES) a.push('');
+            return a;
         }
-        function resetImagePreview() {
-            const img = $('p-image-preview');
-            img.src = '';
-            img.classList.add('hidden');
-            $('p-image-preview-icon').classList.remove('hidden');
+
+        function renderImageSlots() {
+            const host = $('p-image-slots');
+            if (!host) return;
+            host.innerHTML = productImages.map((src, i) => `
+                <div>
+                    <div class="relative aspect-square rounded-2xl overflow-hidden bg-stone-100 border border-stone-200 flex items-center justify-center shadow-sm">
+                        ${src ? `<img src="${esc(cldUrl(src, 300))}" data-orig="${esc(src)}" onerror="imgErr(this,'prod')" class="w-full h-full object-contain">` : `<i class="fa-solid fa-image text-stone-300 text-2xl"></i>`}
+                        ${uploadingSlots[i] ? `<div class="absolute inset-0 bg-white/70 flex items-center justify-center"><i class="fa-solid fa-spinner fa-spin text-pink-600 text-lg"></i></div>` : ''}
+                        ${src && !uploadingSlots[i] ? `<button type="button" onclick="removeImageSlot(${i})" class="absolute top-1 left-1 w-6 h-6 bg-red-600 text-white rounded-full text-[10px] flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>` : ''}
+                        <span class="absolute bottom-1 right-1 bg-white/90 text-pink-700 text-[10px] font-bold px-1.5 py-0.5 rounded">${i === 0 ? 'رئيسية' : i + 1}</span>
+                    </div>
+                    <label class="mt-2 w-full flex items-center justify-center gap-1.5 bg-white border border-dashed border-pink-300 hover:bg-pink-50 text-pink-700 font-bold text-xs py-2 rounded-xl cursor-pointer active:scale-95">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> ${src ? 'تغيير' : 'رفع'}
+                        <input type="file" accept="image/*" class="hidden" onchange="handleImageFileSelect(event, ${i})">
+                    </label>
+                </div>`).join('');
+        }
+
+        function removeImageSlot(i) {
+            productImages[i] = '';
+            productImages = padImages(productImages);
+            renderImageSlots();
+        }
+
+        // ترجع صور المنتج (تدعم المنتجات القديمة اللي عندها صورة وحدة)
+        function getImages(p) {
+            const arr = Array.isArray(p.images) && p.images.length ? p.images : (p.image ? [p.image] : []);
+            return arr.filter(Boolean).slice(0, MAX_IMAGES);
+        }
+
+        async function handleImageFileSelect(e, idx) {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            uploadingSlots[idx] = true;
+            imageUploadBusy = true;
+            renderImageSlots();
+            try {
+                const result = await uploadImageToCloudinary(file, 'products', { maxDim: 1200, quality: 0.84, whitenBg: false, trimWhite: false, squareWhite: false });
+                productImages[idx] = result.url;
+                showToast('تم رفع الصورة إلى Cloudinary ✓');
+            } catch (err) {
+                console.error('Cloudinary product image upload failed:', err);
+                const msg = err.message === 'cloudinary-config-missing' ? 'إعدادات Cloudinary غير موجودة في الكود.'
+                    : err.message === 'image-too-large' ? 'حجم الصورة كبير جداً. الحد الأقصى 10MB.'
+                    : err.message === 'invalid-image' ? 'الملف المختار ليس صورة صالحة.'
+                    : `تعذر رفع الصورة إلى Cloudinary: ${err.message || 'تحققي من الاتصال وإعدادات Upload Preset athar_upload.'}`;
+                showCustomAlert('خطأ في رفع الصورة', msg, true);
+            } finally {
+                uploadingSlots[idx] = false;
+                imageUploadBusy = uploadingSlots.some(Boolean);
+                renderImageSlots();
+            }
         }
  
         // يحوّل خلفية الصورة (المتصلة بحوافها الخارجية ومتقاربة اللون) إلى اللون الأبيض تلقائياً،
@@ -1478,38 +1613,6 @@
             return { url: data.secure_url, publicId: data.public_id || '' };
         }
 
-        async function handleImageFileSelect(e) {
-            const file = e.target.files && e.target.files[0];
-            if (!file) return;
-            imageUploadBusy = true;
-            const localPreview = URL.createObjectURL(file);
-            showImagePreview(localPreview);
-            $('p-image-uploading').classList.remove('hidden');
-            try {
-                const result = await uploadImageToCloudinary(file, 'products', { maxDim: 1200, quality: 0.84, whitenBg: false, trimWhite: false, squareWhite: false });
-                $('p-image').value = result.url;
-                showImagePreview(result.url);
-                showToast('تم رفع الصورة إلى Cloudinary ✓');
-            } catch (err) {
-                console.error('Cloudinary product image upload failed:', err);
-                $('p-image').value = '';
-                e.target.value = '';
-                resetImagePreview();
-                const msg = err.message === 'cloudinary-config-missing'
-                    ? 'إعدادات Cloudinary غير موجودة في الكود.'
-                    : err.message === 'image-too-large'
-                        ? 'حجم الصورة كبير جداً. الحد الأقصى 10MB.'
-                        : err.message === 'invalid-image'
-                            ? 'الملف المختار ليس صورة صالحة.'
-                            : `تعذر رفع الصورة إلى Cloudinary: ${err.message || 'تحققي من الاتصال وإعدادات Upload Preset athar_upload.'}`;
-                showCustomAlert('خطأ في رفع الصورة', msg, true);
-            } finally {
-                URL.revokeObjectURL(localPreview);
-                imageUploadBusy = false;
-                $('p-image-uploading').classList.add('hidden');
-            }
-        }
-
         async function handleCategoryImageFileSelect(e) {
             const file = e.target.files && e.target.files[0];
             if (!file) return;
@@ -1680,13 +1783,15 @@
             }
 
             const stockRaw = $('p-stock').value.trim();
+            const imgs = productImages.filter(Boolean);
             const data = {
                 name: $('p-name').value,
                 category,
                 subcategory,
                 price: Number(($('p-price').value || '').replace(/,/g, '')) || 0,
                 stock: stockRaw === '' ? null : Math.max(0, parseInt(stockRaw, 10) || 0),
-                image: $('p-image').value,
+                image: imgs[0] || '',
+                images: imgs,
                 description,
             };
             if (!id) data.createdAt = Date.now();
@@ -1719,8 +1824,8 @@
             fillAdminSubSelect(p.subcategory || '');
             $('p-price').value = Number(p.price || 0).toLocaleString('en-US');
             $('p-stock').value = getStock(p) === null ? '' : getStock(p);
-            $('p-image').value = p.image;
-            showImagePreview(p.image);
+            productImages = padImages(getImages(p));
+            renderImageSlots();
             $('p-desc').value = p.description;
             $('cancel-edit-btn').classList.remove('hidden');
             $('product-form-title').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1744,8 +1849,8 @@
             fillAdminSubSelect('');
             $('edit-product-id').value = '';
             $('cancel-edit-btn').classList.add('hidden');
-            $('p-image').value = '';
-            resetImagePreview();
+            productImages = Array(MAX_IMAGES).fill('');
+            renderImageSlots();
         }
  
         function moveCategory(id, direction) {
@@ -2069,7 +2174,8 @@
                     const old = products.find(x => x.id === p.id);
                     return old && old.name === p.name && old.price === p.price && old.stock === p.stock &&
                         old.category === p.category && old.subcategory === p.subcategory &&
-                        old.description === p.description && old.image === p.image;
+                        old.description === p.description && old.image === p.image &&
+                        JSON.stringify(old.images || []) === JSON.stringify(p.images || []);
                 });
 
                 if (!same) {
@@ -2116,6 +2222,7 @@
 
         /* ================= التشغيل ================= */
         applyLogo();
+        renderImageSlots();
         renderCategories();
         renderProducts();
         updateCartUI();
